@@ -1,0 +1,54 @@
+# Cassandra storage config YAML 
+
+#NOTE !!!!!!!! NOTE 
+# See http://wiki.apache.org/cassandra/StorageConfiguration for
+# full explanations of configuration directives
+#NOTE !!!!!!!! NOTE 
+
+cluster_name: 'Test Cluster'
+initial_token:
+auto_bootstrap: false
+hinted_handoff_enabled: true
+authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
+authority: org.apache.cassandra.auth.AllowAllAuthority
+partitioner: org.apache.cassandra.dht.RandomPartitioner
+data_file_directories:
+    - /Users/m410/Projects/Brzy/brzy-sandbox/m410/target/cassandra.home.unit-tests/data
+commitlog_directory: /Users/m410/Projects/Brzy/brzy-sandbox/m410/target/cassandra.home.unit-tests/commitlog
+saved_caches_directory: /Users/m410/Projects/Brzy/brzy-sandbox/m410/target/cassandra.home.unit-tests/saved_caches
+commitlog_rotation_threshold_in_mb: 128
+commitlog_sync: periodic
+commitlog_sync_period_in_ms: 10000
+seeds:
+    - 127.0.0.1
+disk_access_mode: auto
+concurrent_reads: 8
+concurrent_writes: 32
+#memtable_flush_writers: 1
+sliced_buffer_size_in_kb: 64
+storage_port: 7000
+listen_address: localhost
+rpc_address: localhost
+rpc_port: 9160
+rpc_keepalive: true
+thrift_framed_transport_size_in_mb: 15
+thrift_max_message_length_in_mb: 16
+snapshot_before_compaction: false
+binary_memtable_throughput_in_mb: 256
+column_index_size_in_kb: 64
+in_memory_compaction_limit_in_mb: 64
+rpc_timeout_in_ms: 10000
+endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
+dynamic_snitch: true
+dynamic_snitch_update_interval_in_ms: 100 
+dynamic_snitch_reset_interval_in_ms: 600000
+dynamic_snitch_badness_threshold: 0.0
+request_scheduler: org.apache.cassandra.scheduler.NoScheduler
+index_interval: 128
+keyspaces:
+    - name: Test
+      replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
+      replication_factor: 1
+      column_families:
+        - {name: Standard, compare_with: LexicalUUIDType}
+        - {name: Super, column_type: Super, compare_with: TimeUUIDType, compare_subcolumns_with: UTF8Type}
