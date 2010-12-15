@@ -3,7 +3,7 @@ package org.brzy.calista
 import java.util.UUID
 import org.scalatest.junit.JUnitSuite
 import results.{SuperColumn, Column}
-import schema.Utf8Type
+import schema.{Utf8Type,UuidType}
 import server.EmbeddedTest
 import org.junit.Test
 import org.junit.Assert._
@@ -15,7 +15,7 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
   @Test def testSetAndGetStandardColumn = {
     import column.Conversions._
 
-    val key = "Standard" |   "testKey" // UUID.randomUUID //
+    val key = "Standard" |   "testKey" 
 
     sessionManager.doWith { session =>
       session.insert(key | ("column", "value"))
@@ -33,20 +33,21 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
   // create a single column, save it, and get it out
   @Test def testSetAndGetSuperColumn = {
     import column.Conversions._
-    val superColumn = "Super" |^ "shouldBeUUID"/*UUID.randomUUID*/ | "12345L"
-
+    val superColumn = "Super" |^ "superKey" | 12345L
+		val columnName = UUID.randomUUID
+		
     sessionManager.doWith { session =>
-      val column = superColumn | ("column", "value")
+      val column = superColumn | (columnName, "value")
       session.insert(column)
     }
 
     sessionManager.doWith { session =>
-			val getColumn = superColumn | ("column")
+			val getColumn = superColumn | (columnName)
       val result = session.get(getColumn)
       assertNotNull(result)
       assertTrue(result.isDefined)
       assertEquals("value", result.get.asInstanceOf[Column].valueAs(Utf8Type))
-      assertEquals("column", result.get.asInstanceOf[Column].nameAs(Utf8Type))
+      assertEquals(columnName.toString, result.get.asInstanceOf[Column].nameAs(UuidType).toString)
     }
   }
 }

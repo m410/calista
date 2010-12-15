@@ -51,4 +51,4 @@ keyspaces:
       replication_factor: 1
       column_families:
         - {name: Standard, compare_with: UTF8Type}
-        - {name: Super, column_type: Super, compare_with: UTF8Type, compare_subcolumns_with: UTF8Type} # TimeUUIDType
+        - {name: Super, column_type: Super, compare_with: LongType, compare_subcolumns_with: LexicalUUIDType} 
