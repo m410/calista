@@ -17,7 +17,7 @@ case class Column[K, V](name: K, value: V, timestamp: Date, parent: Key)(implici
 
   def columnPath = {
     val superCol = parent match {
-      case s: SuperColumn[_] => s.superKey.keyBytes
+      case s: SuperColumn[_] => s.keyBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)

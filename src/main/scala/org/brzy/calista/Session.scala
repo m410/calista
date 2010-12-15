@@ -8,6 +8,7 @@ import java.util.Date
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
 import collection.JavaConversions._
+
 import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel}
 import org.apache.cassandra.thrift.{Cassandra, Column => CassandraColumn}
 import org.apache.cassandra.thrift.{ColumnPath => CassandraColumnPath}
@@ -21,6 +22,7 @@ import org.apache.cassandra.thrift.{KeyRange => CassandraKeyRange}
 import java.nio.ByteBuffer
 import collection.mutable.HashMap
 import schema.{UuidType, Types, KeyspaceDefinition, Consistency}
+import org.slf4j.LoggerFactory
 
 /**
  * Document Me..
@@ -29,6 +31,7 @@ import schema.{UuidType, Types, KeyspaceDefinition, Consistency}
  * @author Michael Fortin
  */
 class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency: Consistency = Consistency.ONE) {
+	private[this] val log = LoggerFactory.getLogger(classOf[Session])
   private[this] var openSock = false
   private[this] lazy val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
 
@@ -105,6 +108,8 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     val key = findKey(column)
     try {
       val columnPath = toColumnPath(column.columnPath)
+			log.debug("key : %s".format(key))
+			log.debug("path: $s".format(columnPath))
       val columnOrSuperColumn = client.get(key, columnPath, level)
       Option(fromColumnOrSuperColumn(columnOrSuperColumn))
     }
@@ -149,15 +154,16 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    * Set the value on an single Column
    */
   def insert(column: Column[_, _], level: Consistency = defaultConsistency) = {
-
-//    val key = findKey(column)
-    val key = column.parent match {
-      case s: StandardKey[_] => UuidType.toBytes(s.key.asInstanceOf[java.util.UUID])
-      case s: SuperColumn[_] => UuidType.toBytes(s.superKey.key.asInstanceOf[java.util.UUID])
-    }
-    val array = key.array
+   val key = findKey(column)
+    // val key = column.parent match {
+    //   case s: StandardKey[_] => UuidType.toBytes(s.key.asInstanceOf[java.util.UUID])
+    //   case s: SuperColumn[_] => UuidType.toBytes(s.superKey.key.asInstanceOf[java.util.UUID])
+    // }
     val cColumn = toColumn(column)
     val columnParent = toColumnParent(column.columnParent)
+		log.debug("key   : %s".format(key))
+		log.debug("column: %s".format(cColumn))
+		log.debug("parent: %s".format(columnParent))
     client.insert(key, columnParent, cColumn, level)
   }
 

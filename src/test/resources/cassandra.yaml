@@ -13,9 +13,9 @@ authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
 authority: org.apache.cassandra.auth.AllowAllAuthority
 partitioner: org.apache.cassandra.dht.RandomPartitioner
 data_file_directories:
-    - /Users/m410/Projects/Brzy/brzy-sandbox/m410/target/cassandra.home.unit-tests/data
-commitlog_directory: /Users/m410/Projects/Brzy/brzy-sandbox/m410/target/cassandra.home.unit-tests/commitlog
-saved_caches_directory: /Users/m410/Projects/Brzy/brzy-sandbox/m410/target/cassandra.home.unit-tests/saved_caches
+    - /Users/m410/Projects/Brzy/calista/target/cassandra.home.unit-tests/data
+commitlog_directory: /Users/m410/Projects/Brzy/calista/target/cassandra.home.unit-tests/commitlog
+saved_caches_directory: /Users/m410/Projects/Brzy/calista/target/cassandra.home.unit-tests/saved_caches
 commitlog_rotation_threshold_in_mb: 128
 commitlog_sync: periodic
 commitlog_sync_period_in_ms: 10000
@@ -50,5 +50,5 @@ keyspaces:
       replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
       replication_factor: 1
       column_families:
-        - {name: Standard, compare_with: LexicalUUIDType}
-        - {name: Super, column_type: Super, compare_with: TimeUUIDType, compare_subcolumns_with: UTF8Type}
+        - {name: Standard, compare_with: UTF8Type}
+        - {name: Super, column_type: Super, compare_with: UTF8Type, compare_subcolumns_with: UTF8Type} # TimeUUIDType
