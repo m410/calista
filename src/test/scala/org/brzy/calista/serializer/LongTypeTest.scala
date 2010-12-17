@@ -11,13 +11,23 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.serializer
 
-/**
- * Document Me..
- * 
- * @version $Id: $
- */
-trait KeyedEntity[T] {
-	val key:T
+import org.scalatest.junit.JUnitSuite
+import org.junit.Test
+import org.junit.Assert._
+
+
+class LongTypeTest extends JUnitSuite {
+  @Test def testLongType = {
+    def buf = LongType.toBytes(500L)
+    assertEquals(8,buf.array.length)
+  }
+
+  @Test def testTypes = {
+    def buf = Types.toBytes(500L)
+    assertEquals(8,buf.array.length)
+    val lng = buf.getLong
+    assertEquals(500,lng)
+  }
 }

@@ -1,4 +1,4 @@
-package org.brzy.calista.column
+package org.brzy.calista.schema
 
 /**
  * Document Me..

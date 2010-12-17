@@ -11,13 +11,18 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.schema
 
 /**
  * Document Me..
- * 
- * @version $Id: $
+ *
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
+case class ColumnFamily(name: String) {
+  def |[T](key: T)(implicit t: Manifest[T]) = StandardKey(key, this)
+
+  def |^[T](key: T)(implicit t: Manifest[T]) = SuperKey(key, this)
+
+  def \[T,C](start: T, end: T, columns:List[C], count: Int = 100) =
+      KeyRange(start, end, SlicePredicate(columns, null), this, count)
 }

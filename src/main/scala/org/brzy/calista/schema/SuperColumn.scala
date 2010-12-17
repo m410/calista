@@ -11,13 +11,26 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.schema
+
+import java.nio.ByteBuffer
+import java.util.Date
+import org.brzy.calista.serializer.Types
 
 /**
  * Document Me..
- * 
- * @version $Id: $
+ *
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
+case class SuperColumn[T](key: T, superKey: SuperKey[_])(implicit m: Manifest[T])
+        extends Key with ColumnOrSuperColumn {
+
+  def |[N, V](sKey: N, value: V = null, timestamp: Date = new Date())(implicit n: Manifest[N], v: Manifest[V]) =
+    Column(sKey, value, timestamp, this)
+
+  def keyBytes = Types.toBytes(key)
+
+  def family = superKey.family
+
+  def columnPath = ColumnPath(superKey.family.name,keyBytes,null)
 }

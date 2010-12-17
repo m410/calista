@@ -11,13 +11,14 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.schema
 
 /**
  * Document Me..
  * 
+ * @author Michael Fortin
  * @version $Id: $
  */
-trait KeyedEntity[T] {
-	val key:T
+trait ColumnOrSuperColumn {
+
 }

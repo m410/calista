@@ -11,13 +11,21 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.schema
+
+import java.nio.ByteBuffer
+import org.brzy.calista.serializer.Types
 
 /**
  * Document Me..
- * 
- * @version $Id: $
+ *
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
+case class SlicePredicate[T](columns: List[T], key: Key) {
+  def toByteList = columns.map(c => Types.toBytes(c))
+
+  def columnParent: ColumnParent = key match {
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+  }
 }

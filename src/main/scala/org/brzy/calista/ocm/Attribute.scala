@@ -13,11 +13,12 @@
  */
 package org.brzy.calista.ocm
 
+import org.brzy.calista.serializer.Serializer
+import org.brzy.calista.serializer.Utf8Type
+
 /**
  * Document Me..
  * 
- * @version $Id: $
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
-}
+case class Attribute(name:String, serializer:Serializer[_] = Utf8Type)

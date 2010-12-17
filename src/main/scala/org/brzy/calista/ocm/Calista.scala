@@ -13,11 +13,12 @@
  */
 package org.brzy.calista.ocm
 
+import org.brzy.calista.Session
+import util.DynamicVariable
+
 /**
  * Document Me..
  * 
- * @version $Id: $
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
-}
+object Calista extends DynamicVariable(Option[Session](null))

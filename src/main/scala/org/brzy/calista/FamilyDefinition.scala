@@ -11,13 +11,18 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.schema
 
 /**
  * Document Me..
  * 
- * @version $Id: $
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
-}
+case class FamilyDefinition(
+    name:String,
+    columnType:String,
+    comparatorType:String,
+    subcomparatorType:String,
+    comment:String,
+    rowCacheSize:Double,
+    keyCacheSize:Double)

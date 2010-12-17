@@ -11,13 +11,19 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
+package org.brzy.calista.schema
 
 /**
  * Document Me..
- * 
- * @version $Id: $
+ *
+ * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
+object Consistency extends Enumeration {
+  type Consistency = Value
+  val ANY = Value("ANY")
+  val ONE = Value("ONE")
+  val QUORUM = Value("QUORUM")
+  val EACH_QUORUM = Value("EACH_QUORUM")
+  val LOCAL_QUORUM = Value("LOCAL_QUORUM") 
+  val All = Value("ALL")
 }
