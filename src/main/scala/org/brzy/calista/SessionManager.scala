@@ -11,9 +11,9 @@ import schema.{FamilyDefinition, KeyspaceDefinition}
  *
  * @author Michael Fortin
  */
-class SessionManager {
+class SessionManager(url:String = "localhost", port:Int = 9160) {
   val keyspace = "Test"
-  val host = Host("localhost", 9160, 250)
+  val host = Host(url, port, 250)
 
   // todo setup host from configuration
   

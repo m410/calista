@@ -4,7 +4,7 @@ import java.util.{UUID => JUUID}
 import com.eaio.uuid.{UUID => EaioUUID}
 import java.nio.charset.Charset
 import java.nio.{ByteOrder, ByteBuffer}
-
+import java.util.Date
 
 /**
  * Document Me..
@@ -140,6 +140,22 @@ case object LongType extends Serializer[Long] {
   def unapply(u: AnyRef) =
     if (u.isInstanceOf[Long])
       Some(u.asInstanceOf[Long])
+    else
+      None
+}
+
+case object DateType extends Serializer[Date] {
+	def toBytes(v:Date) = {
+		LongType.toBytes(v.getTime)
+	}
+	def fromBytes(v:ByteBuffer) = {
+		new Date(LongType.fromBytes(v))
+	}
+	def fromBytes(bytes: Array[Byte]) = new Date(LongType.fromBytes(bytes))
+
+  def unapply(u: AnyRef) =
+    if (u.isInstanceOf[Date])
+      Some(u.asInstanceOf[Date])
     else
       None
 }

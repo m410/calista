@@ -121,6 +121,12 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     }
   }
 
+	def get(key: StandardKey[_]): List[ColumnOrSuperColumn] = {
+    // get(predicate, defaultConsistency)
+		// TODO implement me
+		List.empty[ColumnOrSuperColumn]
+  }
+
   def get(predicate: SlicePredicate[_]): List[ColumnOrSuperColumn] = {
     get(predicate, defaultConsistency)
   }
@@ -171,6 +177,10 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     remove(findKey(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
+	def remove(key: StandardKey[_]): Unit = {
+    // remove(findKey(column), column.columnPath, new Date().getTime, defaultConsistency)
+		// TODO implement me
+  }
   def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency): Unit = {
     client.remove(k, path, timestamp, level)
   }

@@ -3,8 +3,8 @@ package org.brzy.calista.ocm
 /**
  * Document Me..
  * 
- * @version $Id: $
+ * @author Michael Fortin
  */
-trait KeyEntity[T] {
-  val key:T
+trait KeyedEntity[T] {
+	val key:T
 }
