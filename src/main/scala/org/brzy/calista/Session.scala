@@ -1,3 +1,16 @@
+/*
+ * Copyright 2010 Michael Fortin <mike@brzy.org>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");  you may not use this
+ * file except in compliance with the License. You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed 
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+ * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
+ * language governing permissions and limitations under the License.
+ */
 package org.brzy.calista
 
 import column._
@@ -25,7 +38,7 @@ import schema.{UuidType, Types, KeyspaceDefinition, Consistency}
 import org.slf4j.LoggerFactory
 
 /**
- * Document Me..
+ * A session connection to a cassandra instance.  
  *
  *
  * @author Michael Fortin
@@ -99,6 +112,17 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     case s: SuperColumn[_] => s.superKey.keyBytes
   }
 
+	/**
+	 * socket connections are lazily and implicitly opened, but must be explicitly closed.
+	 */
+  def close = {
+    if (openSock)
+      sock.close()
+  }
+
+	/**
+	 *
+   */
   def get(column: Column[_, _]): Option[ColumnOrSuperColumn] = get(column, defaultConsistency)
 
   /**
@@ -121,30 +145,54 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     }
   }
 
-	def get(key: StandardKey[_]): List[ColumnOrSuperColumn] = {
+	/**
+	 *
+   */
+		// TODO rename to list
+	def get(key: StandardKey[_]): List[Column[_,_]] = {
     // get(predicate, defaultConsistency)
 		// TODO implement me
 		List.empty[ColumnOrSuperColumn]
   }
 
+	/**
+	 *
+   */
+		// TODO rename to list
   def get(predicate: SlicePredicate[_]): List[ColumnOrSuperColumn] = {
     get(predicate, defaultConsistency)
   }
 
+	/**
+	 *
+   */
+		// TODO rename to list
   def get(predicate: SlicePredicate[_], level: Consistency): List[ColumnOrSuperColumn] = {
     val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
     results.map(sc => fromColumnOrSuperColumn(sc)).toList
   }
 
+	/**
+	 *
+   */
+		// TODO rename to list
   def get(range: SliceRange[_]): List[ColumnOrSuperColumn] = {
     get(range, defaultConsistency)
   }
 
+	/**
+	 *
+   */
+		// TODO rename to list
   def get(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
     val results = client.get_slice(range.key.keyBytes, range.columnParent, range, level)
     results.map(sc => fromColumnOrSuperColumn(sc)).toList
   }
 
+	/**
+	 *
+   */
+		// TODO rename to list
   def get[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): Map[T, List[ColumnOrSuperColumn]] = {
     val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
     val map = HashMap[T, List[ColumnOrSuperColumn]]()
@@ -173,28 +221,36 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     client.insert(key, columnParent, cColumn, level)
   }
 
+	/**
+	 *
+   */
   def remove(column: Column[_, _]): Unit = {
     remove(findKey(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
+	/**
+	 *
+   */
 	def remove(key: StandardKey[_]): Unit = {
     // remove(findKey(column), column.columnPath, new Date().getTime, defaultConsistency)
 		// TODO implement me
   }
+
+	/**
+	 *
+   */
   def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency): Unit = {
     client.remove(k, path, timestamp, level)
   }
 
+	/**
+	 *
+   */
   // i32 get_count(byteBuf key, ColumnParent column_parent, ConsistencyLevel consistency_level)
   def count(key: Key, max: Int = 100, level: Consistency = defaultConsistency): Long = {
     val columnParent = new CassandraColumnParent(key.family.name)
     val sliceRange = new CassandraSliceRange(ByteBuffer.wrap("".getBytes), ByteBuffer.wrap("".getBytes), false, max)
     val predicate = new CassandraSlicePredicate().setSlice_range(sliceRange)
     client.get_count(key.keyBytes, columnParent, predicate, level)
-  }
-
-  def close = {
-    if (openSock)
-      sock.close()
   }
 }
