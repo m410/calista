@@ -20,7 +20,12 @@ import org.brzy.calista.schema.Serializer
 /**
  * @author Michael Fortin
  */
-class ColumnMapping[T<:KeyedEntity[_]:Manifest](val family:String) {
+class ColumnMapping[T<:KeyedEntity[_]:Manifest](overrideFamily:String = null) {
+
+	val family = if(overrideFamily == null)
+				manifest[T].erasure.getSimpleName
+			else
+				overrideFamily
 	
 	def attributes(serializer:Serializer[_],columns:List[Attribute]):ColumnMapping[T] = {
 			this

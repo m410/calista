@@ -22,22 +22,25 @@ import org.brzy.calista.schema.{Utf8Type,IntType,DateType}
 import java.util.Date
 
 class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
+	val personKey  = "mappingKey"
+	val personDate = new Date
+	
   @Test def mapEntity = {
 	 	sessionManager.doWith { session =>
 			Calista.value = Option(session)
-			val person = new Person("abc","name",100,new Date)
+			val person = new Person(personKey,"name",100,personDate)
 			person.save
 			Calista.value = None
 		}
 		
 		sessionManager.doWith { session =>
 			Calista.value = Option(session)
-			val person = Person.get("abc")
+			val person = Person.get(personKey)
 			assertNotNull(person)
 			assertNotNull(person.key)
 			assertNotNull(person.name)
-			assertNotNull(person,count)
-			assertNotNull(person,date)
+			assertNotNull(person.count)
+			assertNotNull(person.created)
 			Calista.value = None
 		}
   }

@@ -152,7 +152,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	def get(key: StandardKey[_]): List[Column[_,_]] = {
     // get(predicate, defaultConsistency)
 		// TODO implement me
-		List.empty[ColumnOrSuperColumn]
+		List.empty[Column[_,_]]
   }
 
 	/**

@@ -24,7 +24,7 @@ import schema.{FamilyDefinition, KeyspaceDefinition}
  *
  * @author Michael Fortin
  */
-class SessionManager(keyspace = "Test", url:String = "localhost", port:Int = 9160) {
+class SessionManager(keyspace:String = "Test", url:String = "localhost", port:Int = 9160) {
   val host = Host(url, port, 250)
   // todo setup host from configuration
   // todo load or modify schema
@@ -94,3 +94,4 @@ class SessionManager(keyspace = "Test", url:String = "localhost", port:Int = 916
 }
 
 case class Host(address: String, port: Int, timeout: Int)
+
