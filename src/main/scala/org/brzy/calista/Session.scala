@@ -105,12 +105,8 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    * Read the value of a single column
    */
   def get(column: Column[_, _], level: Consistency): Option[ColumnOrSuperColumn] = {
-    val key = findKey(column)
     try {
-      val columnPath = toColumnPath(column.columnPath)
-			log.debug("key : %s".format(key))
-			log.debug("path: $s".format(columnPath))
-      val columnOrSuperColumn = client.get(key, columnPath, level)
+      val columnOrSuperColumn = client.get(findKey(column), column.columnPath, level)
       Option(fromColumnOrSuperColumn(columnOrSuperColumn))
     }
     catch {
@@ -154,17 +150,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    * Set the value on an single Column
    */
   def insert(column: Column[_, _], level: Consistency = defaultConsistency) = {
-   val key = findKey(column)
-    // val key = column.parent match {
-    //   case s: StandardKey[_] => UuidType.toBytes(s.key.asInstanceOf[java.util.UUID])
-    //   case s: SuperColumn[_] => UuidType.toBytes(s.superKey.key.asInstanceOf[java.util.UUID])
-    // }
-    val cColumn = toColumn(column)
-    val columnParent = toColumnParent(column.columnParent)
-		log.debug("key   : %s".format(key))
-		log.debug("column: %s".format(cColumn))
-		log.debug("parent: %s".format(columnParent))
-    client.insert(key, columnParent, cColumn, level)
+    client.insert(findKey(column), column.columnParent, column, level)
   }
 
   def remove(column: Column[_, _]): Unit = {
@@ -181,6 +167,10 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     val sliceRange = new CassandraSliceRange(ByteBuffer.wrap("".getBytes), ByteBuffer.wrap("".getBytes), false, max)
     val predicate = new CassandraSlicePredicate().setSlice_range(sliceRange)
     client.get_count(key.keyBytes, columnParent, predicate, level)
+  }
+
+  def mutate(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
+      
   }
 
   def close = {

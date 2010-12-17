@@ -5,10 +5,16 @@ package org.brzy.calista.ocm
  * 
  * @author Michael Fortin
  */
-trait Dao[T,K] {
-  def get(key:K):T
-  def insert(t:T)
-  def remove(t:T)
+trait Dao[K<:KeyedEntity] {
+  def get(key:String):K
 
-  def orm = Map.empty[String,String]
+  class CrudOps(t:K) {
+    def save = {}
+
+    def remove = {}
+  }
+
+  implicit def applyCrudOps(t:K) = new CrudOps(t)
+
+  val ocm:ColumnMapping
 }

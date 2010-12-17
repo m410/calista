@@ -5,6 +5,4 @@ package org.brzy.calista.ocm
  * 
  * @version $Id: $
  */
-trait KeyEntity[T] {
-  val key:T
-}
+class KeyedEntity(val family:String, val key:String) 
