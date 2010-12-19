@@ -46,7 +46,6 @@ class UsageTest extends JUnitSuite {
         {"Family"|"key"}\\List("column","column3","column3")
 //    val ssp2 = ColumnFamily("Family").key("key").predicate(List("column","column3","column3"))
 
-
     val superKey:SuperKey[String] =
         "Super" |^ "SuperKey"
 
@@ -55,7 +54,7 @@ class UsageTest extends JUnitSuite {
 
     val superColumnVal:Column[String,String] =
         "Super" |^ "SuperKey" | "SuperColumn" |("column", "value")
-//
+
 //    val superSlicePredicate = "Super" |^ "key" \\("column","column1")
 //    val superSlicePredicate2 = "Super" |^ "key" | "SuperColumn" \\("column","column1")
 //    val superSliceRange = "Super" |^ "key" \("start","finish",true,10)

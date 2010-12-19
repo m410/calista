@@ -32,7 +32,15 @@ class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
 			person.save
 			Calista.value = None
 		}
-		
+
+	 	sessionManager.doWith { session =>
+       import org.brzy.calista.schema.Conversions._
+       val key = "Person" | personKey
+       val columns = session.list(key)
+       assertNotNull(columns)
+       assertEquals(3,columns.size)
+		}
+
 		sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = Person.get(personKey)
@@ -50,8 +58,9 @@ case class Person(key:String,name:String,count:Int,created:Date)  extends KeyedE
 
 object Person extends Dao[String,Person] {
 	def columnMapping = new ColumnMapping[Person]("Person")
-			.attributes(Utf8Type, List(
+			.attributes(Utf8Type, Array(
+				Attribute("key",true),
 				Attribute("name"),
-				Attribute("count",IntType),
-				Attribute("created",DateType)))
+				Attribute("count",false,IntType),
+				Attribute("created",false,DateType)))
 }

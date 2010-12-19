@@ -35,7 +35,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
 
     sessionManager.doWith { session =>
       val standardKeyRange:KeyRange[String,String] = "Standard" \("key-range-4","key-range",List("column"))
-      val keys = session.get(standardKeyRange)
+      val keys = session.list(standardKeyRange)
       keys.keySet.foreach(k=>println("##k='%s'".format(k)))
       println(keys)
       assertNotNull(keys)

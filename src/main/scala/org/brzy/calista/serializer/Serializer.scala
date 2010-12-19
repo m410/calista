@@ -13,11 +13,10 @@
  */
 package org.brzy.calista.serializer
 
-import java.util.{UUID => JUUID}
 import com.eaio.uuid.{UUID => EaioUUID}
 import java.nio.charset.Charset
 import java.nio.{ByteOrder, ByteBuffer}
-import java.util.Date
+import java.util.{UUID, Date}
 
 /**
  * Document Me..
@@ -33,11 +32,18 @@ trait Serializer[T] {
 }
 
 object Types {
+  protected[serializer] val LongClass = classOf[Long]
+  protected[serializer] val IntClass = classOf[Int]
+  protected[serializer] val StringClass = classOf[String]
+  protected[serializer] val UUIDClass = classOf[UUID]
+  protected[serializer] val DateClass = classOf[Date]
+
   def toBytes[T](t: T) = t match {
     case Utf8Type(s) => Utf8Type.toBytes(s)
     case UuidType(s) => UuidType.toBytes(s)
     case LongType(s) => LongType.toBytes(s)
     case IntType(s) => IntType.toBytes(s)
+    case DateType(s) => DateType.toBytes(s)
     case _ => error("No Serializer or type: %s".format(t))
   }
 
@@ -46,6 +52,16 @@ object Types {
     case UuidType(s) => UuidType.fromBytes(b).asInstanceOf[T]
     case LongType(s) => LongType.fromBytes(b).asInstanceOf[T]
     case IntType(s) => IntType.fromBytes(b).asInstanceOf[T]
+    case DateType(s) => DateType.fromBytes(b).asInstanceOf[T]
+    case _ => error("No Serializer or type: %s".format(t))
+  }
+
+  def fromClassBytes[T](t:Class[T],b:Array[Byte]):T = t match {
+    case StringClass => Utf8Type.fromBytes(b).asInstanceOf[T]
+    case UUIDClass => UuidType.fromBytes(b).asInstanceOf[T]
+    case LongClass => LongType.fromBytes(b).asInstanceOf[T]
+    case IntClass => IntType.fromBytes(b).asInstanceOf[T]
+    case DateClass => DateType.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 }
@@ -83,8 +99,8 @@ case object Utf8Type extends Serializer[String] {
 }
 
 
-case object UuidType extends Serializer[JUUID] {
-  val serialType = classOf[JUUID]
+case object UuidType extends Serializer[UUID] {
+  val serialType = classOf[UUID]
 
   def fromBytes(bb: ByteBuffer) = {
     var msb = 0L
@@ -95,7 +111,7 @@ case object UuidType extends Serializer[JUUID] {
     (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
     (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
 
-    JUUID.fromString(new EaioUUID(msb, lsb).toString)
+    UUID.fromString(new EaioUUID(msb, lsb).toString)
   }
 
   def fromBytes(data: Array[Byte]) = {
@@ -106,10 +122,10 @@ case object UuidType extends Serializer[JUUID] {
     (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
     (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
 
-    JUUID.fromString(new EaioUUID(msb, lsb).toString)
+    UUID.fromString(new EaioUUID(msb, lsb).toString)
   }
 
-  def toBytes(uuid: JUUID) = {
+  def toBytes(uuid: UUID) = {
     val msb = uuid.getMostSignificantBits()
     val lsb = uuid.getLeastSignificantBits()
     val buffer = new Array[Byte](16)
@@ -120,8 +136,8 @@ case object UuidType extends Serializer[JUUID] {
   }
 
   def unapply(u: AnyRef) =
-    if (u.isInstanceOf[JUUID])
-      Some(u.asInstanceOf[JUUID])
+    if (u.isInstanceOf[UUID])
+      Some(u.asInstanceOf[UUID])
     else
       None
 }
@@ -186,8 +202,6 @@ case object IntType extends Serializer[Int] {
           .put(5, (v >>> 16).asInstanceOf[Byte])
           .put(6, (v >>> 8).asInstanceOf[Byte])
           .put(7, (v >>> 0).asInstanceOf[Byte])
-          .asReadOnlyBuffer
-
 
   def fromBytes(bytes: ByteBuffer) = bytes.getInt(0)
 

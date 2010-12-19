@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.schema.Column
+import org.brzy.calista.results.Column
 
 /**
  * Document Me..
@@ -25,8 +25,8 @@ trait Dao[K,T<:KeyedEntity[K]] {
 	
 	def get(key:K)(implicit t:Manifest[K]):T = {
 		import org.brzy.calista.schema.Conversions._
-		val columns = session.get(columnMapping.family | key)
-		columnMapping.newInstance(columns.asInstanceOf[List[Column[_,_]]])
+		val columns = session.list(columnMapping.family | key)
+		columnMapping.newInstance(key:K,columns.asInstanceOf[List[Column]])
 	}
 	
 	class CrudOps(p:T) {

@@ -18,7 +18,7 @@ import org.brzy.calista.serializer.Utf8Type
 
 /**
  * Document Me..
- * 
+ *
  * @author Michael Fortin
  */
-case class Attribute(name:String, serializer:Serializer[_] = Utf8Type)
+case class Attribute(name: String, key: Boolean = false, serializer: Serializer[_] = Utf8Type)

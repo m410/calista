@@ -107,7 +107,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       }).toList)
   }
 
-  private[this] def findKey(c: Column[_, _]) = c.parent match {
+  private[this] def keyFor(c: Column[_, _]) = c.parent match {
     case s: StandardKey[_] => s.keyBytes
     case s: SuperColumn[_] => s.superKey.keyBytes
   }
@@ -130,7 +130,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    */
   def get(column: Column[_, _], level: Consistency): Option[ColumnOrSuperColumn] = {
     try {
-      val columnOrSuperColumn = client.get(findKey(column), column.columnPath, level)
+      val columnOrSuperColumn = client.get(keyFor(column), column.columnPath, level)
       Option(fromColumnOrSuperColumn(columnOrSuperColumn))
     }
     catch {
@@ -144,26 +144,23 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 *
    */
-		// TODO rename to list
-	def get(key: StandardKey[_]): List[Column[_,_]] = {
-    // get(predicate, defaultConsistency)
-		// TODO implement me
-		List.empty[Column[_,_]]
+	def list(key: StandardKey[_]): List[ColumnOrSuperColumn] = {
+    import schema.Conversions._
+    val slice = key \("","")
+    list(slice,defaultConsistency)
   }
 
 	/**
 	 *
    */
-		// TODO rename to list
-  def get(predicate: SlicePredicate[_]): List[ColumnOrSuperColumn] = {
-    get(predicate, defaultConsistency)
+  def list(predicate: SlicePredicate[_]): List[ColumnOrSuperColumn] = {
+    list(predicate, defaultConsistency)
   }
 
 	/**
 	 *
    */
-		// TODO rename to list
-  def get(predicate: SlicePredicate[_], level: Consistency): List[ColumnOrSuperColumn] = {
+  def list(predicate: SlicePredicate[_], level: Consistency): List[ColumnOrSuperColumn] = {
     val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
     results.map(sc => fromColumnOrSuperColumn(sc)).toList
   }
@@ -171,16 +168,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 *
    */
-		// TODO rename to list
-  def get(range: SliceRange[_]): List[ColumnOrSuperColumn] = {
-    get(range, defaultConsistency)
+  def list(range: SliceRange[_]): List[ColumnOrSuperColumn] = {
+    list(range, defaultConsistency)
   }
 
 	/**
 	 *
    */
-		// TODO rename to list
-  def get(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
+  def list(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
     val results = client.get_slice(range.key.keyBytes, range.columnParent, range, level)
     results.map(sc => fromColumnOrSuperColumn(sc)).toList
   }
@@ -188,8 +183,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 *
    */
-		// TODO rename to list
-  def get[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): Map[T, List[ColumnOrSuperColumn]] = {
+  def list[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): Map[T, List[ColumnOrSuperColumn]] = {
     val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
     val map = HashMap[T, List[ColumnOrSuperColumn]]()
     results.foreach(keyslice => {
@@ -204,22 +198,21 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    * Set the value on an single Column
    */
   def insert(column: Column[_, _], level: Consistency = defaultConsistency) = {
-    client.insert(findKey(column), column.columnParent, column, level)
+    client.insert(keyFor(column), column.columnParent, column, level)
   }
 
 	/**
 	 *
    */
   def remove(column: Column[_, _]): Unit = {
-    remove(findKey(column), column.columnPath, new Date().getTime, defaultConsistency)
+    remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
 	/**
 	 *
    */
 	def remove(key: StandardKey[_]): Unit = {
-    // remove(findKey(column), column.columnPath, new Date().getTime, defaultConsistency)
-		// TODO implement me
+    remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 
 	/**
