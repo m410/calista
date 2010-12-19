@@ -17,7 +17,6 @@ import org.apache.thrift.transport.{TSocket, TFramedTransport}
 import org.apache.cassandra.thrift.Cassandra
 import org.apache.thrift.protocol.TBinaryProtocol
 import collection.JavaConversions._
-import schema.{FamilyDefinition, KeyspaceDefinition}
 
 /**
  * Document Me..
