@@ -20,12 +20,12 @@ import org.junit.Assert._
 
 class LongTypeTest extends JUnitSuite {
   @Test def testLongType = {
-    def buf = LongType.toBytes(500L)
+    def buf = LongSerializer.toBytes(500L)
     assertEquals(8,buf.array.length)
   }
 
   @Test def testTypes = {
-    def buf = Types.toBytes(500L)
+    def buf = Serializers.toBytes(500L)
     assertEquals(8,buf.array.length)
     val lng = buf.getLong
     assertEquals(500,lng)

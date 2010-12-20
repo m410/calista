@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.serializer.Types
+import org.brzy.calista.serializer.Serializers
 
 /**
  * Document Me..
@@ -28,12 +28,12 @@ case class KeyRange[T,C](
         count:Int = 100) {
   def startBytes =
     if(start != null)
-      Types.toBytes(start)
+      Serializers.toBytes(start)
     else
       null
   def finishBytes =
     if(finish != null)
-      Types.toBytes(finish)
+      Serializers.toBytes(finish)
     else
       null
   def columnParent = ColumnParent(columnFamily.name, null)

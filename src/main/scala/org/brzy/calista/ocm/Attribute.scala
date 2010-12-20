@@ -14,11 +14,11 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.serializer.Serializer
-import org.brzy.calista.serializer.Utf8Type
+import org.brzy.calista.serializer.UTF8Serializer
 
 /**
  * Document Me..
  *
  * @author Michael Fortin
  */
-case class Attribute(name: String, key: Boolean = false, serializer: Serializer[_] = Utf8Type)
+case class Attribute(name: String, key: Boolean = false, serializer: Serializer[_] = UTF8Serializer)

@@ -18,7 +18,7 @@ import org.junit.Test
 import org.junit.Assert._
 
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.serializer.{Utf8Type,IntType,DateType}
+import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
 
 class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
@@ -58,9 +58,9 @@ case class Person(key:String,name:String,count:Int,created:Date)  extends KeyedE
 
 object Person extends Dao[String,Person] {
 	def columnMapping = new ColumnMapping[Person]("Person")
-			.attributes(Utf8Type, Array(
+			.attributes(UTF8Serializer, Array(
 				Attribute("key",true),
 				Attribute("name"),
-				Attribute("count",false,IntType),
-				Attribute("created",false,DateType)))
+				Attribute("count",false,IntSerializer),
+				Attribute("created",false,DateSerializer)))
 }

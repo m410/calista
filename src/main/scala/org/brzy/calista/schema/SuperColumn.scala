@@ -15,7 +15,7 @@ package org.brzy.calista.schema
 
 import java.nio.ByteBuffer
 import java.util.Date
-import org.brzy.calista.serializer.Types
+import org.brzy.calista.serializer.Serializers
 
 /**
  * Document Me..
@@ -28,7 +28,7 @@ case class SuperColumn[T](key: T, superKey: SuperKey[_])(implicit m: Manifest[T]
   def |[N, V](sKey: N, value: V = null, timestamp: Date = new Date())(implicit n: Manifest[N], v: Manifest[V]) =
     Column(sKey, value, timestamp, this)
 
-  def keyBytes = Types.toBytes(key)
+  def keyBytes = Serializers.toBytes(key)
 
   def family = superKey.family
 

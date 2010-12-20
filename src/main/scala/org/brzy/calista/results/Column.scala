@@ -16,7 +16,7 @@ package org.brzy.calista.results
 import java.nio.ByteBuffer
 import java.util.Date
 import org.brzy.calista.schema.ColumnOrSuperColumn
-import org.brzy.calista.serializer.{Types, Utf8Type, Serializer}
+import org.brzy.calista.serializer.{Serializers, UTF8Serializer, Serializer}
 
 /**
  * Document Me..
@@ -26,5 +26,5 @@ import org.brzy.calista.serializer.{Types, Utf8Type, Serializer}
 case class Column(name: Array[Byte], value: Array[Byte], timestamp: Date) extends ColumnOrSuperColumn {
   def nameAs[T](s:Serializer[T]):T = s.fromBytes(name)
   def valueAs[T](s:Serializer[T]):T = s.fromBytes(value)
-  def valueAs[T](c:Class[T]):T = Types.fromClassBytes(c,value)
+  def valueAs[T](c:Class[T]):T = Serializers.fromClassBytes(c,value)
 }

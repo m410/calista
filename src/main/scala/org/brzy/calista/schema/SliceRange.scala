@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.serializer.Types
+import org.brzy.calista.serializer.Serializers
 
 /**
  * Document Me..
@@ -21,9 +21,9 @@ import org.brzy.calista.serializer.Types
  * @author Michael Fortin
  */
 case class SliceRange[T](start: T, finish: T, reverse: Boolean = false, count: Int = 100, key: Key) {
-  def startBytes = Types.toBytes(start)
+  def startBytes = Serializers.toBytes(start)
 
-  def finishBytes = Types.toBytes(finish)
+  def finishBytes = Serializers.toBytes(finish)
 
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)

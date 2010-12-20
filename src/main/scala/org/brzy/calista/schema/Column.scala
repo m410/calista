@@ -15,7 +15,7 @@ package org.brzy.calista.schema
 
 import java.nio.ByteBuffer
 import java.util.Date
-import org.brzy.calista.serializer.{Types, Utf8Type}
+import org.brzy.calista.serializer.{Serializers, UTF8Serializer}
 
 /**
  * Document Me..
@@ -24,9 +24,9 @@ import org.brzy.calista.serializer.{Types, Utf8Type}
  */
 case class Column[K, V](name: K, value: V, timestamp: Date, parent: Key)(implicit k: Manifest[K], v: Manifest[V])
         extends ColumnOrSuperColumn {
-  def nameBytes = Types.toBytes(name)
+  def nameBytes = Serializers.toBytes(name)
 
-  def valueBytes = Types.toBytes(value)
+  def valueBytes = Serializers.toBytes(value)
 
   def columnPath = {
     val superCol = parent match {

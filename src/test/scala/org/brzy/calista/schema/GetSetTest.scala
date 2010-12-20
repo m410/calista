@@ -18,7 +18,7 @@ import org.brzy.calista.server.EmbeddedTest
 import org.junit.Test
 import org.junit.Assert._
 import java.util.UUID
-import org.brzy.calista.serializer.{UuidType, Utf8Type}
+import org.brzy.calista.serializer.{UUIDSerializer, UTF8Serializer}
 import org.brzy.calista.results.{Column=>RColumn}
 
 class GetSetTest extends JUnitSuite with EmbeddedTest {
@@ -36,8 +36,8 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
       assertNotNull(result)
       assertTrue(result.isDefined)
       val column = result.get.asInstanceOf[RColumn]
-      assertEquals("value", column.valueAs(Utf8Type))
-      assertEquals("column", column.nameAs(Utf8Type))
+      assertEquals("value", column.valueAs(UTF8Serializer))
+      assertEquals("column", column.nameAs(UTF8Serializer))
     }
   }
 
@@ -58,8 +58,8 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
       assertNotNull(result)
       assertTrue(result.isDefined)
       val column = result.get.asInstanceOf[RColumn]
-      assertEquals("value", column.valueAs(Utf8Type))
-      assertEquals(columnName.toString, column.nameAs(UuidType).toString)
+      assertEquals("value", column.valueAs(UTF8Serializer))
+      assertEquals(columnName.toString, column.nameAs(UUIDSerializer).toString)
     }
   }
 }

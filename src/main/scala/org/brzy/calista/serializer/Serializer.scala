@@ -31,7 +31,10 @@ trait Serializer[T] {
   def fromBytes(b: Array[Byte]): T
 }
 
-object Types {
+/**
+ * Document Me..
+ */
+object Serializers {
   protected[serializer] val LongClass = classOf[Long]
   protected[serializer] val IntClass = classOf[Int]
   protected[serializer] val StringClass = classOf[String]
@@ -39,34 +42,37 @@ object Types {
   protected[serializer] val DateClass = classOf[Date]
 
   def toBytes[T](t: T) = t match {
-    case Utf8Type(s) => Utf8Type.toBytes(s)
-    case UuidType(s) => UuidType.toBytes(s)
-    case LongType(s) => LongType.toBytes(s)
-    case IntType(s) => IntType.toBytes(s)
-    case DateType(s) => DateType.toBytes(s)
+    case UTF8Serializer(s) => UTF8Serializer.toBytes(s)
+    case UUIDSerializer(s) => UUIDSerializer.toBytes(s)
+    case LongSerializer(s) => LongSerializer.toBytes(s)
+    case IntSerializer(s) => IntSerializer.toBytes(s)
+    case DateSerializer(s) => DateSerializer.toBytes(s)
     case _ => error("No Serializer or type: %s".format(t))
   }
 
   def fromBytes[T](t:T,b:ByteBuffer):T = t match {
-    case Utf8Type(s) => Utf8Type.fromBytes(b).asInstanceOf[T]
-    case UuidType(s) => UuidType.fromBytes(b).asInstanceOf[T]
-    case LongType(s) => LongType.fromBytes(b).asInstanceOf[T]
-    case IntType(s) => IntType.fromBytes(b).asInstanceOf[T]
-    case DateType(s) => DateType.fromBytes(b).asInstanceOf[T]
+    case UTF8Serializer(s) => UTF8Serializer.fromBytes(b).asInstanceOf[T]
+    case UUIDSerializer(s) => UUIDSerializer.fromBytes(b).asInstanceOf[T]
+    case LongSerializer(s) => LongSerializer.fromBytes(b).asInstanceOf[T]
+    case IntSerializer(s) => IntSerializer.fromBytes(b).asInstanceOf[T]
+    case DateSerializer(s) => DateSerializer.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 
   def fromClassBytes[T](t:Class[T],b:Array[Byte]):T = t match {
-    case StringClass => Utf8Type.fromBytes(b).asInstanceOf[T]
-    case UUIDClass => UuidType.fromBytes(b).asInstanceOf[T]
-    case LongClass => LongType.fromBytes(b).asInstanceOf[T]
-    case IntClass => IntType.fromBytes(b).asInstanceOf[T]
-    case DateClass => DateType.fromBytes(b).asInstanceOf[T]
+    case StringClass => UTF8Serializer.fromBytes(b).asInstanceOf[T]
+    case UUIDClass => UUIDSerializer.fromBytes(b).asInstanceOf[T]
+    case LongClass => LongSerializer.fromBytes(b).asInstanceOf[T]
+    case IntClass => IntSerializer.fromBytes(b).asInstanceOf[T]
+    case DateClass => DateSerializer.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 }
 
-case object AsciiType extends Serializer[String] {
+/**
+ * Document Me..
+ */
+case object ASCIISerializer extends Serializer[String] {
   val ascii = Charset.forName("US-ASCII")
 
   def toBytes(str: String) = ByteBuffer.wrap(str.getBytes(ascii))
@@ -82,7 +88,10 @@ case object AsciiType extends Serializer[String] {
       None
 }
 
-case object Utf8Type extends Serializer[String] {
+/**
+ * Document Me..
+ */
+case object UTF8Serializer extends Serializer[String] {
   val utf8 = Charset.forName("UTF-8")
 
   def toBytes(str: String) = ByteBuffer.wrap(str.getBytes(utf8))
@@ -99,7 +108,10 @@ case object Utf8Type extends Serializer[String] {
 }
 
 
-case object UuidType extends Serializer[UUID] {
+/**
+ * Document Me..
+ */
+case object UUIDSerializer extends Serializer[UUID] {
   val serialType = classOf[UUID]
 
   def fromBytes(bb: ByteBuffer) = {
@@ -142,7 +154,10 @@ case object UuidType extends Serializer[UUID] {
       None
 }
 
-case object LongType extends Serializer[Long] {
+/**
+ * Document Me..
+ */
+case object LongSerializer extends Serializer[Long] {
   val serialType = classOf[java.lang.Long]
   val size = 8
 
@@ -173,14 +188,17 @@ case object LongType extends Serializer[Long] {
       None
 }
 
-case object DateType extends Serializer[Date] {
+/**
+ * Document Me..
+ */
+case object DateSerializer extends Serializer[Date] {
 	def toBytes(v:Date) = {
-		LongType.toBytes(v.getTime)
+		LongSerializer.toBytes(v.getTime)
 	}
 	def fromBytes(v:ByteBuffer) = {
-		new Date(LongType.fromBytes(v))
+		new Date(LongSerializer.fromBytes(v))
 	}
-	def fromBytes(bytes: Array[Byte]) = new Date(LongType.fromBytes(bytes))
+	def fromBytes(bytes: Array[Byte]) = new Date(LongSerializer.fromBytes(bytes))
 
   def unapply(u: AnyRef) =
     if (u.isInstanceOf[Date])
@@ -189,8 +207,11 @@ case object DateType extends Serializer[Date] {
       None
 }
 
-case object IntType extends Serializer[Int] {
-  val serialType = classOf[java.lang.Integer]
+/**
+ * Document Me..
+ */
+case object IntSerializer extends Serializer[Int] {
+  val serialSerializer = classOf[java.lang.Integer]
   val bytesPerInt = java.lang.Integer.SIZE / java.lang.Byte.SIZE
 
   def toBytes(v: Int) = ByteBuffer.allocate(8)

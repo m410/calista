@@ -34,7 +34,7 @@ import org.apache.cassandra.thrift.{KeyRange => CassandraKeyRange}
 
 import java.nio.ByteBuffer
 import collection.mutable.HashMap
-import serializer.{UuidType, Types}
+import serializer.{UUIDSerializer, Serializers}
 import org.slf4j.LoggerFactory
 
 /**
@@ -187,7 +187,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
     val map = HashMap[T, List[ColumnOrSuperColumn]]()
     results.foreach(keyslice => {
-      val tKey = Types.fromBytes(range.start,ByteBuffer.wrap(keyslice.getKey))
+      val tKey = Serializers.fromBytes(range.start,ByteBuffer.wrap(keyslice.getKey))
       val columnList = keyslice.getColumns.map(c => fromColumnOrSuperColumn(c)).toList
       map += tKey -> columnList
     })

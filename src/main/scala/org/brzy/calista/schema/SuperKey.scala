@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.serializer.Types
+import org.brzy.calista.serializer.Serializers
 
 /**
  * Document Me..
@@ -23,7 +23,7 @@ import org.brzy.calista.serializer.Types
 case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) {
   def |[N](sKey:N)(implicit n:Manifest[N]) = SuperColumn(sKey,this)
   def keyBytes = {
-    val buf = Types.toBytes(key)
+    val buf = Serializers.toBytes(key)
     buf
   }
 }
