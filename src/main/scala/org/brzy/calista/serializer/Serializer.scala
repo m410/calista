@@ -40,8 +40,11 @@ object Serializers {
   protected[serializer] val StringClass = classOf[String]
   protected[serializer] val UUIDClass = classOf[UUID]
   protected[serializer] val DateClass = classOf[Date]
+  protected[serializer] val BooleanClass = classOf[Boolean]
+
 
   def toBytes[T](t: T) = t match {
+  	case BooleanSerializer(s) => BooleanSerializer.toBytes(s)
     case UTF8Serializer(s) => UTF8Serializer.toBytes(s)
     case UUIDSerializer(s) => UUIDSerializer.toBytes(s)
     case LongSerializer(s) => LongSerializer.toBytes(s)
@@ -56,6 +59,7 @@ object Serializers {
     case LongSerializer(s) => LongSerializer.fromBytes(b).asInstanceOf[T]
     case IntSerializer(s) => IntSerializer.fromBytes(b).asInstanceOf[T]
     case DateSerializer(s) => DateSerializer.fromBytes(b).asInstanceOf[T]
+    case BooleanSerializer(s) => BooleanSerializer.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 
@@ -65,6 +69,7 @@ object Serializers {
     case LongClass => LongSerializer.fromBytes(b).asInstanceOf[T]
     case IntClass => IntSerializer.fromBytes(b).asInstanceOf[T]
     case DateClass => DateSerializer.fromBytes(b).asInstanceOf[T]
+    case BooleanClass => BooleanSerializer.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 }
@@ -253,4 +258,11 @@ case object BooleanSerializer extends Serializer[Boolean] {
 	  def fromBytes(bytes:Array[Byte]):Boolean =  {
 	    	bytes(0) == 1.asInstanceOf[Byte]
 	  }
+	
+	  def unapply(u: Any) = 
+	    if (u.isInstanceOf[java.lang.Boolean]) 
+	      Some(u.asInstanceOf[Boolean])
+	    else
+	      None
+	
 }
