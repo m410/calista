@@ -35,5 +35,5 @@ case class StandardKey[T](key:T, family:ColumnFamily)(implicit m:Manifest[T]) ex
 
   def \\[A<:AnyRef](columns:List[A]) = SlicePredicate(columns,this)
   
-  def \[A<:AnyRef](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
+  def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
 }

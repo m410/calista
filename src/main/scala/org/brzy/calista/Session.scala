@@ -121,12 +121,13 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 *
+	 * get the value of the column.  This assumes the input column does not have a value, this will
+	 * return a results.Column with the name and value
    */
   def get(column: Column[_, _]): Option[ColumnOrSuperColumn] = get(column, defaultConsistency)
 
   /**
-   * Read the value of a single column
+   * Read the value of a single column, with the given consistency
    */
   def get(column: Column[_, _], level: Consistency): Option[ColumnOrSuperColumn] = {
     try {
@@ -142,7 +143,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 *
+	 * List all the columns under the given key.
    */
 	def list(key: StandardKey[_]): List[ColumnOrSuperColumn] = {
     import schema.Conversions._
@@ -151,14 +152,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 *
+	 * List the columns by slice predicate
    */
   def list(predicate: SlicePredicate[_]): List[ColumnOrSuperColumn] = {
     list(predicate, defaultConsistency)
   }
 
 	/**
-	 *
+	 * List all the columns by slice predicate and consistency level.
    */
   def list(predicate: SlicePredicate[_], level: Consistency): List[ColumnOrSuperColumn] = {
     val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
@@ -166,14 +167,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 *
+	 * List all the columns by slice range.
    */
   def list(range: SliceRange[_]): List[ColumnOrSuperColumn] = {
     list(range, defaultConsistency)
   }
 
 	/**
-	 *
+	 * List all the columns by slice range and Consistency Level.
    */
   def list(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
     val results = client.get_slice(range.key.keyBytes, range.columnParent, range, level)
@@ -181,7 +182,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 *
+	 * List all the columns by Key range.
    */
   def list[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): Map[T, List[ColumnOrSuperColumn]] = {
     val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
@@ -202,14 +203,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 *
+	 * Remove a column and it's value.
    */
   def remove(column: Column[_, _]): Unit = {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
 	/**
-	 *
+	 * Remove a key and all it's child columns.
    */
 	def remove(key: StandardKey[_]): Unit = {
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
@@ -221,11 +222,10 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency): Unit = {
     client.remove(k, path, timestamp, level)
   }
-
+	
 	/**
-	 *
+	 * get the count of the number of columns for a key
    */
-  // i32 get_count(byteBuf key, ColumnParent column_parent, ConsistencyLevel consistency_level)
   def count(key: Key, max: Int = 100, level: Consistency = defaultConsistency): Long = {
     val columnParent = new CassandraColumnParent(key.family.name)
     val sliceRange = new CassandraSliceRange(ByteBuffer.wrap("".getBytes), ByteBuffer.wrap("".getBytes), false, max)
@@ -233,7 +233,10 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     client.get_count(key.keyBytes, columnParent, predicate, level)
   }
 
-  def mutate(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
+	/**
+	 * Batch insert
+	 */
+  def batch(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
       
   }
 }

@@ -13,9 +13,12 @@
  */
 package org.brzy.calista
 
-import org.apache.thrift.transport.{TSocket, TFramedTransport}
 import org.apache.cassandra.thrift.Cassandra
+import org.apache.cassandra.config.{KSMetaData, CFMetaData, DatabaseDescriptor}
+
+import org.apache.thrift.transport.{TSocket, TFramedTransport}
 import org.apache.thrift.protocol.TBinaryProtocol
+
 import collection.JavaConversions._
 
 /**
@@ -83,6 +86,16 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     }
   }
   
+	def loadSchemaFromConfig = {
+    import collection.JavaConversions._
+
+    for (ksm: KSMetaData <- DatabaseDescriptor.readTablesFromYaml()) {
+      for (cfm: CFMetaData <- ksm.cfMetaData().values())
+        CFMetaData.map(cfm)
+      DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion())
+    }
+  }
+
   def createSession = new Session(host,keyspaceDefinition)
 
   def doWith(f: (Session) => Unit) = {

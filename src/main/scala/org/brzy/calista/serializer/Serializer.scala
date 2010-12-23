@@ -234,3 +234,23 @@ case object IntSerializer extends Serializer[Int] {
     else
       None
 }
+
+
+case object BooleanSerializer extends Serializer[Boolean] {
+	def  toBytes(obj:Boolean):ByteBuffer = {
+		    val b:Array[Byte] = Array(1)
+		    b(0) =  if(obj == true) 1.asInstanceOf[Byte] else 0.asInstanceOf[Byte]
+		    ByteBuffer.wrap(b);
+	  }
+
+	  def fromBytes(bytes:ByteBuffer):Boolean =  {
+	    if (bytes == null || !bytes.hasArray()) 
+	      null.asInstanceOf[Boolean]
+			else
+	    	bytes.array()(0) == 1.asInstanceOf[Byte]
+	  }
+
+	  def fromBytes(bytes:Array[Byte]):Boolean =  {
+	    	bytes(0) == 1.asInstanceOf[Byte]
+	  }
+}
