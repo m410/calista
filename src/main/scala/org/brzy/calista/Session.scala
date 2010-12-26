@@ -199,6 +199,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    * Set the value on an single Column
    */
   def insert(column: Column[_, _], level: Consistency = defaultConsistency) = {
+    log.debug("insert: {}",column)
     client.insert(keyFor(column), column.columnParent, column, level)
   }
 
