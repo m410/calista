@@ -29,7 +29,7 @@ class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
 	 	sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = new Person(personKey,"name",100,personDate)
-			person.save
+			person.insert
 			Calista.value = None
 		}
 
@@ -43,12 +43,17 @@ class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
 
 		sessionManager.doWith { session =>
 			Calista.value = Option(session)
-			val person = Person.get(personKey)
-			assertNotNull(person)
-			assertNotNull(person.key)
-			assertNotNull(person.name)
-			assertNotNull(person.count)
-			assertNotNull(person.created)
+			val person = Person.get(personKey) match {
+        case Some(person) =>
+          assertNotNull(person)
+          assertNotNull(person.key)
+          assertNotNull(person.name)
+          assertNotNull(person.count)
+          assertNotNull(person.created)
+        case _ =>
+          fail("No person by key")
+      }
+
 			Calista.value = None
 		}
   }

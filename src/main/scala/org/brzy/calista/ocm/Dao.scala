@@ -23,14 +23,18 @@ import org.brzy.calista.results.Column
 trait Dao[K,T<:KeyedEntity[K]] {
 	def session = Calista.value.get
 	
-	def get(key:K)(implicit t:Manifest[K]):T = {
+	def get(key:K)(implicit t:Manifest[K]):Option[T] = {
 		import org.brzy.calista.schema.Conversions._
 		val columns = session.list(columnMapping.family | key)
-		columnMapping.newInstance(key:K,columns.asInstanceOf[List[Column]])
+
+    if(columns.size > 0)
+		  Option(columnMapping.newInstance(key:K,columns.asInstanceOf[List[Column]]))
+    else
+      None
 	}
 	
 	class CrudOps(p:T) {
-		def save = {
+		def insert = {
 			val columns = columnMapping.toColumns(p)
 			columns.foreach(c=>session.insert(c))
 		}
