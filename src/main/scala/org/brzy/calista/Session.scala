@@ -13,29 +13,19 @@
  */
 package org.brzy.calista
 
+import results.{KeySlice, Column => RColumn, SuperColumn => RSuperColumn}
 import schema._
 import schema.Consistency._
-import results.{Column => RColumn, SuperColumn => RSuperColumn}
-
 import java.util.Date
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
 import collection.JavaConversions._
 
-import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel}
-import org.apache.cassandra.thrift.{Cassandra, Column => CassandraColumn}
-import org.apache.cassandra.thrift.{ColumnPath => CassandraColumnPath}
-import org.apache.cassandra.thrift.{ColumnParent => CassandraColumnParent}
-import org.apache.cassandra.thrift.{SliceRange => CassandraSliceRange}
-import org.apache.cassandra.thrift.{SlicePredicate => CassandraSlicePredicate}
-import org.apache.cassandra.thrift.{ColumnOrSuperColumn => CassandraColumnOrSuperColumn}
-import org.apache.cassandra.thrift.{KeyRange => CassandraKeyRange}
-
-
 import java.nio.ByteBuffer
 import collection.mutable.HashMap
-import serializer.{UUIDSerializer, Serializers}
+import serializer.Serializers
 import org.slf4j.LoggerFactory
+import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange}
 
 /**
  * A session connection to a cassandra instance.  
@@ -239,5 +229,12 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 */
   def batch(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
       
+  }
+
+  def list(range: KeyRange[_,_], level: Consistency = defaultConsistency):List[KeySlice] = {
+    val columnParent = range.columnParent
+    val predicate = range.predicate
+    val slice = client.get_range_slices(columnParent,predicate,range,level)
+    slice.map(k=>KeySlice(k.getKey,k.getColumns.map(c=>fromColumnOrSuperColumn(c)).toList)).toList
   }
 }

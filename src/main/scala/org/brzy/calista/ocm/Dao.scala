@@ -13,39 +13,49 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.results.Column
+import org.brzy.calista.results.{KeySlice, Column}
 
 /**
  * Document Me..
- * 
+ *
  * @author Michael Fortin
  */
-trait Dao[K,T<:KeyedEntity[K]] {
-	def session = Calista.value.get
-	
-	def get(key:K)(implicit t:Manifest[K]):Option[T] = {
-		import org.brzy.calista.schema.Conversions._
-		val columns = session.list(columnMapping.family | key)
+trait Dao[K, T <: KeyedEntity[K]] {
+  def session = Calista.value.get
 
-    if(columns.size > 0)
-		  Option(columnMapping.newInstance(key:K,columns.asInstanceOf[List[Column]]))
+  def get(key: K)(implicit t: Manifest[K]): Option[T] = {
+    import org.brzy.calista.schema.Conversions._
+    val columns = session.list(columnMapping.family | key)
+
+    if (columns.size > 0)
+      Option(columnMapping.newInstance(key: K, columns.asInstanceOf[List[Column]]))
     else
       None
-	}
-	
-	class CrudOps(p:T) {
-		def insert = {
-			val columns = columnMapping.toColumns(p)
-			columns.foreach(c=>session.insert(c))
-		}
-		def remove = {
-			val key = columnMapping.toKey(p)
-			session.remove(key)
-		}
-	}
-	
-	implicit def applyCrudOps(p:T):CrudOps = new CrudOps(p)
+  }
 
-  def columnMapping:ColumnMapping[T]
+  def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
+    import org.brzy.calista.schema.Conversions._
+    val names = columnMapping.attributes.map(_.name).toList
+    session.list(columnMapping.family \ (start, end, names, count)).map(ks => {
+      columnMapping.newInstance(ks.key, ks.columns.asInstanceOf[List[Column]])
+    })
+  }
+
+  class CrudOps(p: T) {
+    def insert = {
+      val columns = columnMapping.toColumns(p)
+      columns.foreach(c => session.insert(c))
+    }
+
+    def remove = {
+      val key = columnMapping.toKey(p)
+      session.remove(key)
+    }
+  }
+
+
+  implicit def applyCrudOps(p: T): CrudOps = new CrudOps(p)
+
+  def columnMapping: ColumnMapping[T]
 
 }

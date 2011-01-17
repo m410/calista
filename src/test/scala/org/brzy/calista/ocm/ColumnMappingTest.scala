@@ -62,7 +62,7 @@ class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
 case class Person(key:String,name:String,count:Int,created:Date)  extends KeyedEntity[String]
 
 object Person extends Dao[String,Person] {
-	def columnMapping = new ColumnMapping[Person]("Person")
+  def columnMapping = new ColumnMapping[Person]("Person")
 			.attributes(UTF8Serializer, Array(
 				Attribute("key",true),
 				Attribute("name"),

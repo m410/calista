@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 /**
  * @author Michael Fortin
  */
-class ColumnMapping[T <: KeyedEntity[_] : Manifest](
+case class ColumnMapping[T <: KeyedEntity[_] : Manifest](
         overrideFamily: String = null,
         columnSerializer: Serializer[_] = null,
         attributes: Array[Attribute] = Array.empty[Attribute]) {
@@ -39,7 +39,7 @@ class ColumnMapping[T <: KeyedEntity[_] : Manifest](
   }
 
   def newInstance[K](key:K, columns: List[RColumn]): T = {
-    log.debug("columns: %s".format(columns))
+    log.debug("key: {}, columns: {}",key,columns)
     val constructor = manifest[T].erasure.getConstructors()(0)
     val paramTypes = constructor.getParameterTypes
 
@@ -54,6 +54,7 @@ class ColumnMapping[T <: KeyedEntity[_] : Manifest](
       }
     }
     val toArray = args.toArray.asInstanceOf[Array[java.lang.Object]]
+    log.debug("args: {}",toArray.mkString("[",",","]"))
     constructor.newInstance(toArray:_*).asInstanceOf[T]
   }
 
