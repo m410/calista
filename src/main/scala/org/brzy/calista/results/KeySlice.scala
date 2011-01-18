@@ -1,6 +1,5 @@
 package org.brzy.calista.results
 
-import java.nio.ByteBuffer
 import org.brzy.calista.schema.ColumnOrSuperColumn
 import org.brzy.calista.serializer.Serializer
 

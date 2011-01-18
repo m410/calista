@@ -37,7 +37,8 @@ trait Dao[K, T <: KeyedEntity[K]] {
     import org.brzy.calista.schema.Conversions._
     val names = columnMapping.attributes.map(_.name).toList
     session.list(columnMapping.family \ (start, end, names, count)).map(ks => {
-      columnMapping.newInstance(ks.key, ks.columns.asInstanceOf[List[Column]])
+      val keySerializer = columnMapping.attributes.find(_.key).get.serializer
+      columnMapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[Column]])
     })
   }
 

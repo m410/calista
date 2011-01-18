@@ -39,7 +39,6 @@ case class ColumnMapping[T <: KeyedEntity[_] : Manifest](
   }
 
   def newInstance[K](key:K, columns: List[RColumn]): T = {
-    log.debug("key: {}, columns: {}",key,columns)
     val constructor = manifest[T].erasure.getConstructors()(0)
     val paramTypes = constructor.getParameterTypes
 
