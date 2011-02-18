@@ -16,7 +16,7 @@ package org.brzy.calista.schema
 import java.nio.ByteBuffer
 
 /**
- * Document Me..
+ * Common traits to keys and super columns.  
  * 
  * @author Michael Fortin
  */

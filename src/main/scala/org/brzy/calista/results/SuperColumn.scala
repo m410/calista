@@ -18,7 +18,7 @@ import org.brzy.calista.serializer.Serializer
 import org.brzy.calista.schema.ColumnOrSuperColumn
 
 /**
- * Document Me..
+ * Represents the return value of a query that returns a super column
  *
  * @author Michael Fortin
  */

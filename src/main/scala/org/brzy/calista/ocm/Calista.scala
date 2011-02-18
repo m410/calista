@@ -17,7 +17,7 @@ import org.brzy.calista.Session
 import util.DynamicVariable
 
 /**
- * Document Me..
+ * A Thread Local variable used to access the Session instance.  
  * 
  * @author Michael Fortin
  */

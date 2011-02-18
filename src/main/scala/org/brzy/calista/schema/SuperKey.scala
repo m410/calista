@@ -16,14 +16,16 @@ package org.brzy.calista.schema
 import org.brzy.calista.serializer.Serializers
 
 /**
- * Document Me..
+ * A super key has a Column family as a parent.
  * 
  * @author Michael Fortin
  */
 case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) {
+
+	/**
+	 * Used by the DSL to create a Super column from this super key, using this key as the parent.
+	 */
   def |[N](sKey:N)(implicit n:Manifest[N]) = SuperColumn(sKey,this)
-  def keyBytes = {
-    val buf = Serializers.toBytes(key)
-    buf
-  }
+
+  def keyBytes = Serializers.toBytes(key)
 }

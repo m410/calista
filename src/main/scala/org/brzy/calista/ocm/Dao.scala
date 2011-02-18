@@ -16,13 +16,36 @@ package org.brzy.calista.ocm
 import org.brzy.calista.results.{KeySlice, Column}
 
 /**
- * Document Me..
+ * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
+ * the basic functionality need to access the data store.
+ *
+ * {{{
+ * case class Entity(id:Long, name:String) extends KeyedEntity[Long]
+ * object Entity extends Dao[Entity] { ...}
+ * 
+ * SessionManager.doWith {session =>
+ *   val entity = Entity(1,"bob")
+ *	 entity.insert
+ *	}
+ * }}}
  *
  * @author Michael Fortin
  */
 trait Dao[K, T <: KeyedEntity[K]] {
-  def session = Calista.value.get
+  protected[this] def session = Calista.value.get
 
+	/**
+	 * Get an instance of the mapped class by it's key.
+	 */
+	def apply(key: K)(implicit t: Manifest[K]): T = {
+    import org.brzy.calista.schema.Conversions._
+    val columns = session.list(columnMapping.family | key)
+    columnMapping.newInstance(key: K, columns.asInstanceOf[List[Column]])
+	}
+
+	/**
+	 * Optionally get an instance of the mapped class by it's key.
+	 */
   def get(key: K)(implicit t: Manifest[K]): Option[T] = {
     import org.brzy.calista.schema.Conversions._
     val columns = session.list(columnMapping.family | key)
@@ -33,6 +56,14 @@ trait Dao[K, T <: KeyedEntity[K]] {
       None
   }
 
+	/**
+	 * List instances of this type by providing a start key and an end key. Note that this may not return
+	 * the order that you would expect, depending on the partitioner you are using.
+	 *
+	 * @param start The first key to return.
+	 * @param end The last key to return
+	 * @param count The maximum number of results to return.
+	 */
   def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
     import org.brzy.calista.schema.Conversions._
     val names = columnMapping.attributes.map(_.name).toList
@@ -42,21 +73,37 @@ trait Dao[K, T <: KeyedEntity[K]] {
     })
   }
 
+	/**
+	 *	This holds implicit function on the entity.  The functions can be called directly on the entity
+	 *  eg `entity.insert` etc.
+	 */
   class CrudOps(p: T) {
+ 
+		/**
+		 * insert the entity
+		 */
     def insert = {
       val columns = columnMapping.toColumns(p)
       columns.foreach(c => session.insert(c))
     }
 
+		/**
+		 * remove the entity
+		 */
     def remove = {
       val key = columnMapping.toKey(p)
       session.remove(key)
     }
   }
 
-
+	/**
+	 * Apply the operations to the entity.
+	 */
   implicit def applyCrudOps(p: T): CrudOps = new CrudOps(p)
 
+	/**
+	 * This needs to be implemented for each instance to define the mapping to the cassandra datastore.
+	 */
   def columnMapping: ColumnMapping[T]
 
 }

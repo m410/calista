@@ -4,7 +4,8 @@ import org.brzy.calista.schema.ColumnOrSuperColumn
 import org.brzy.calista.serializer.Serializer
 
 /**
- * Document Me..
+ * Represents the result of a query that returns a slice.  This contains the key and
+ * the columns of the slice.
  * 
  * @author Michael Fortin
  */

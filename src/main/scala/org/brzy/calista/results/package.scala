@@ -14,7 +14,8 @@
 package org.brzy.calsta
 
 /**
- * Query return types
+ * Query return types.  They may have the same names and similar functionality as the classes 
+ * in the schema package, but they differ in how serialization is handled.
  * 
  * @author Michael Fortin
  */

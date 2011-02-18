@@ -1,5 +1,3 @@
-package org.brzy.calista.schema
-
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
  *
@@ -13,8 +11,13 @@ package org.brzy.calista.schema
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
+package org.brzy.calista.schema
+
+
 /**
- * Document Me..
+ * The consistency Level to use when querying the datastore.  On the session class the
+ * consistency defaults to ONE.  See the cassandra api for an explanation of what the
+ * different consistency levels do and mean.
  *
  * @author Michael Fortin
  */

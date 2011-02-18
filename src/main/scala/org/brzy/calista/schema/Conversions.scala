@@ -14,7 +14,11 @@
 package org.brzy.calista.schema
 
 /**
- * Document Me..
+ * This needs to be imported so that DSL to create columns can be used.
+ * {{{
+ * import Conversions._
+ * val column = "family" | "key" | ("name","value")
+ *}}}
  * 
  * @author Michael Fortin
  */

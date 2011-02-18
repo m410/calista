@@ -14,7 +14,7 @@
 package org.brzy.calista.schema
 
 /**
- * Document Me..
+ * Marker trait.
  * 
  * @author Michael Fortin
  * @version $Id: $

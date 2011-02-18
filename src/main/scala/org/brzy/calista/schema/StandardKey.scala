@@ -17,7 +17,8 @@ import java.util.Date
 import org.brzy.calista.serializer.Serializers._
 
 /**
- * Document Me..
+ * A key can have one of two parents, a super column or a column family.  This is a standard
+ * key which has a column family as a parent.
  * 
  * @author Michael Fortin
  */
@@ -30,10 +31,19 @@ case class StandardKey[T](key:T, family:ColumnFamily)(implicit m:Manifest[T]) ex
 
   def columnPath = ColumnPath(family.name,null,null)
 
+	/**
+	 * Used by the DSL to create a column from this key, and setting this key as the columns parent.
+	 */
   def |[N,V](key:N,value:V = null,timestamp:Date = new Date())(implicit n:Manifest[N],v:Manifest[V]) =
     Column(key,value,timestamp,this)
 
+	/**
+	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+	 */
   def \\[A<:AnyRef](columns:List[A]) = SlicePredicate(columns,this)
   
+	/**
+	 * Used by the DSL to create a SliceRange from this key, using this key as the parent.
+	 */
   def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
 }

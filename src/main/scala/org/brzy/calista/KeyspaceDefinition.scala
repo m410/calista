@@ -14,8 +14,9 @@
 package org.brzy.calista
 
 /**
- * Document Me..
+ * A description of the Keyspace and all it's attributes and elements.  
  * 
+ * @see SessionManager.keyspaceDefinition
  * @author Michael Fortin
  */
 case class KeyspaceDefinition(

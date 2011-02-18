@@ -1,7 +1,7 @@
 package org.brzy.calista.schema
 
 /**
- * Document Me..
+ * Not Implemented, used for batch update operations.
  * 
  * @author Michael Fortin
  */

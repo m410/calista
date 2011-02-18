@@ -16,7 +16,8 @@ package org.brzy.calista.schema
 import java.nio.ByteBuffer
 
 /**
- * Document Me..
+ * Used to query the datastore, directly maps to the thrift column parent. Users should not 
+ * need to manipulate this class directly.
  * 
  * @author Michael Fortin
  */

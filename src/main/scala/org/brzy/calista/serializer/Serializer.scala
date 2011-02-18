@@ -19,7 +19,7 @@ import java.nio.{ByteOrder, ByteBuffer}
 import java.util.{UUID, Date}
 
 /**
- * Document Me..
+ * Basic Serializer interface.
  *
  * @author Michael Fortin
  */
@@ -32,7 +32,7 @@ trait Serializer[T] {
 }
 
 /**
- * Document Me..
+ * Object factory for serializers.  Provides convenient access and referencing.
  */
 object Serializers {
   protected[serializer] val LongClass = classOf[Long]
@@ -75,7 +75,7 @@ object Serializers {
 }
 
 /**
- * Document Me..
+ * ASCII string serializer.
  */
 case object ASCIISerializer extends Serializer[String] {
   val ascii = Charset.forName("US-ASCII")
@@ -94,7 +94,7 @@ case object ASCIISerializer extends Serializer[String] {
 }
 
 /**
- * Document Me..
+ * UTF8 String serializer
  */
 case object UTF8Serializer extends Serializer[String] {
   val utf8 = Charset.forName("UTF-8")
@@ -114,7 +114,7 @@ case object UTF8Serializer extends Serializer[String] {
 
 
 /**
- * Document Me..
+ * UUID String serializer.  UUID's get special treatment in cassandra.
  */
 case object UUIDSerializer extends Serializer[UUID] {
   val serialType = classOf[UUID]
@@ -160,7 +160,7 @@ case object UUIDSerializer extends Serializer[UUID] {
 }
 
 /**
- * Document Me..
+ * Long serializer
  */
 case object LongSerializer extends Serializer[Long] {
   val serialType = classOf[java.lang.Long]
@@ -194,7 +194,7 @@ case object LongSerializer extends Serializer[Long] {
 }
 
 /**
- * Document Me..
+ * Date Serializer
  */
 case object DateSerializer extends Serializer[Date] {
 	def toBytes(v:Date) = {
@@ -213,7 +213,7 @@ case object DateSerializer extends Serializer[Date] {
 }
 
 /**
- * Document Me..
+ * Integer serializer
  */
 case object IntSerializer extends Serializer[Int] {
   val serialSerializer = classOf[java.lang.Integer]
@@ -240,7 +240,9 @@ case object IntSerializer extends Serializer[Int] {
       None
 }
 
-
+/**
+ * Boolean Serializer
+ */
 case object BooleanSerializer extends Serializer[Boolean] {
 	def  toBytes(obj:Boolean):ByteBuffer = {
 		    val b:Array[Byte] = Array(1)

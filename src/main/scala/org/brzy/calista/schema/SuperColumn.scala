@@ -18,13 +18,16 @@ import java.util.Date
 import org.brzy.calista.serializer.Serializers
 
 /**
- * Document Me..
+ * A super column in a cassandra datastore.
  *
  * @author Michael Fortin
  */
 case class SuperColumn[T](key: T, superKey: SuperKey[_])(implicit m: Manifest[T])
         extends Key with ColumnOrSuperColumn {
 
+	/**
+	 * Used by the DSL to create a Column from this key, using this super column as the parent.
+	*/
   def |[N, V](sKey: N, value: V = null, timestamp: Date = new Date())(implicit n: Manifest[N], v: Manifest[V]) =
     Column(sKey, value, timestamp, this)
 

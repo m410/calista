@@ -28,8 +28,16 @@ import org.slf4j.LoggerFactory
 import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange}
 
 /**
- * A session connection to a cassandra instance.  
+ * A session connection to a cassandra instance.  This is really the heart of the api. It
+ * uses the Cassandra Thrift api to access the database directly.  In most cases it maps
+ * the classes in the schema package to classes in the thrift api.  Instances are created
+ * by the SessionManager class, and Initialized with default values.  Socket connections
+ * to the datastore are lazily initialized and are keep open until session.close is called.
  *
+ * @param host the host to connect too.
+ * @param ksDef The KeySpace Defininition used as a reference to map requests to the datastore.
+ * @param defaultConsistency The Default consistency to use when connecting to the datastore.  It
+ * 				defaults to Consistency.ONE.
  *
  * @author Michael Fortin
  */
@@ -225,7 +233,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 * Batch insert
+	 * Batch insert, <b>This is not Implemented</b>
 	 */
   def batch(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
       

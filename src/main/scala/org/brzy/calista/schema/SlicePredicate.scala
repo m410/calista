@@ -17,11 +17,16 @@ import java.nio.ByteBuffer
 import org.brzy.calista.serializer.Serializers
 
 /**
- * Document Me..
+ * Used to query the datastore, and only return columns within the provided list.
+ *
+ * @tparam T The type of the colums
+ * @param columns The column names that are to be returned.
+ * @param key The parent key to the columns that are to be return.
  *
  * @author Michael Fortin
  */
 case class SlicePredicate[T](columns: List[T], key: Key) {
+
   def toByteList = columns.map(c => Serializers.toBytes(c))
 
   def columnParent: ColumnParent = key match {

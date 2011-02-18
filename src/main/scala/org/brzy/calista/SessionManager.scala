@@ -22,15 +22,26 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import collection.JavaConversions._
 
 /**
- * Document Me..
+ * Session Manager works in a similar fashion as the Entity Manager Factory  in JPA.  It's 
+ * partially responsible for the session life cycle.  It it also can provide basic information
+ * about the datastore it's configured to connect too.
+ *
+ * @todo Authentication is not used or implemented.
+ * @todo Only connects to a single host, multiple host connections is not implemented.
+ * @todo Can not modifiy the schema.
  *
  * @author Michael Fortin
  */
 class SessionManager(keyspace:String = "Test", url:String = "localhost", port:Int = 9160) {
-  val host = Host(url, port, 250)
-  // todo setup host from configuration
-  // todo load or modify schema
 
+	/**
+	 * the host and port for where this session manager connects.
+	 */
+  val host = Host(url, port, 250)
+
+	/**
+	 * Outputs the keyspace definition.  This will output the keyspace, families and their attributes.
+	 */
   lazy val keyspaceDefinition = {
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
@@ -58,6 +69,9 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     }
   }
 
+	/**
+	 * Ouputs the cluster named provided by the datastore.
+	 */
   lazy val clusterName = {
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
@@ -72,6 +86,9 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     }
   }
 
+	/**
+	 * Outputs the version of the cassandra server
+	 */
   lazy val version = {
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
@@ -86,6 +103,11 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     }
   }
   
+	/**
+	 * Tells the cassandra server to load a configuration from it's own configuration file.  As of version
+	 * 7 of cassandra, the configurations are not automatically loaded, you have to do it via
+	 * cassandera-cli tool or via this api.
+	 */
 	def loadSchemaFromConfig = {
     import collection.JavaConversions._
 
@@ -96,8 +118,18 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     }
   }
 
+	/**
+	 * This creates a new session to interact with cassandra using the configured keyspaceDefinition and
+	 * host.  Using this factory method required you to manage the life cycle your self. I will lazyly
+	 * open a connect to cassandra but it will not close it.
+	 * 
+	 * @see Session
+	 */
   def createSession = new Session(host,keyspaceDefinition)
 
+	/**
+	 * Manaages the life cycle of a session automatically.
+	 */
   def doWith(f: (Session) => Unit) = {
     val session = createSession
     f(session)
@@ -105,5 +137,8 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
   }
 }
 
+/**
+ * A Host instance for cassandera to connect too.
+ */
 case class Host(address: String, port: Int, timeout: Int)
 

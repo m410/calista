@@ -16,7 +16,13 @@ package org.brzy.calista.schema
 import org.brzy.calista.serializer.Serializers
 
 /**
- * Document Me..
+ * Used to query the datastore for multiple keys.
+ * 
+ * @param start The first key to return.
+ * @param finish The last key to return.
+ * @param predicate Predicate to refine the query.
+ * @param columnFamily The parent column family.
+ * @param count The max number of result, defaults to 100.
  * 
  * @author Michael Fortin
  */
@@ -26,15 +32,18 @@ case class KeyRange[T,C](
         predicate:SlicePredicate[C],
         columnFamily:ColumnFamily,
         count:Int = 100) {
+
   def startBytes =
     if(start != null)
       Serializers.toBytes(start)
     else
       null
+
   def finishBytes =
     if(finish != null)
       Serializers.toBytes(finish)
     else
       null
+
   def columnParent = ColumnParent(columnFamily.name, null)
 }

@@ -14,8 +14,16 @@
 package org.brzy.calsta
 
 /**
- * Object Column Mapping
- * 
+ * Object Column Mapping. Classes in this package are for treating objects as a set of columns.
+ * An example of a mapped class would look like:
+ * {{{
+ * case class Entity(id:Long, name:String) extends KeyedEntity[Long]
+ * object Entity extends Dao[Entity] {
+ *   def mapping = ColumnMapping[Entity]...
+ * }
+ *
+ *}}}
+ *
  * @author Michael Fortin
  */
 package object ocm

@@ -21,23 +21,39 @@ import collection.JavaConversions._
 import org.slf4j.LoggerFactory
 
 /**
+ * Defines the object to column mapping.
+ *
+ * @tparam T The type of the object to map to the datastore.
+ * @param overrideFamily Sets the family name is its something other than the name of the class.
+ * @param columnSerializer What serializer to use to read and write the column names.
+ * @param attributes The fields of the object, mapped to column values.
+ *
  * @author Michael Fortin
  */
 case class ColumnMapping[T <: KeyedEntity[_] : Manifest](
         overrideFamily: String = null,
         columnSerializer: Serializer[_] = null,
         attributes: Array[Attribute] = Array.empty[Attribute]) {
-  val log = LoggerFactory.getLogger(classOf[ColumnMapping[_]])
+  protected[this] val log = LoggerFactory.getLogger(classOf[ColumnMapping[_]])
 
+	/**
+	 *	The name of the column family that the object maps too.
+	 */
   val family = if (overrideFamily == null)
     manifest[T].erasure.getSimpleName
   else
     overrideFamily
 
+	/**
+	 *
+	 */
   def attributes(serializer: Serializer[_], columns: Array[Attribute]): ColumnMapping[T] = {
     new ColumnMapping(overrideFamily = family, columnSerializer = serializer, attributes = columns)
   }
 
+	/**
+	 * Creates a new instance from the key and list of columns.
+	 */
   def newInstance[K](key:K, columns: List[RColumn]): T = {
     val constructor = manifest[T].erasure.getConstructors()(0)
     val paramTypes = constructor.getParameterTypes
@@ -57,6 +73,9 @@ case class ColumnMapping[T <: KeyedEntity[_] : Manifest](
     constructor.newInstance(toArray:_*).asInstanceOf[T]
   }
 
+	/**
+	 * Creates a list of columns from the persistable object.
+	 */
   def toColumns(t: T): List[Column[_, _]] = {
     import org.brzy.calista.schema.Conversions._
     val key = attributes.find(_.key).get
@@ -66,6 +85,9 @@ case class ColumnMapping[T <: KeyedEntity[_] : Manifest](
     }).toList
   }
 
+	/**
+	 *
+	 */
   def toKey(t: T): StandardKey[_] = {
     import org.brzy.calista.schema.Conversions._
     family | t.key

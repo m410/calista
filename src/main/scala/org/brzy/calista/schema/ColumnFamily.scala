@@ -14,15 +14,26 @@
 package org.brzy.calista.schema
 
 /**
- * Document Me..
+ * Represents a column family to query in the database.
  *
+ * @param name the name of the column family.
  * @author Michael Fortin
  */
 case class ColumnFamily(name: String) {
+	
+	/**
+	 * Add a child key to the column family, return that key.  
+	 */
   def |[T](key: T)(implicit t: Manifest[T]) = StandardKey(key, this)
 
+	/**
+	 * Add a child super column to the column family, return that super column.  
+	 */
   def |^[T](key: T)(implicit t: Manifest[T]) = SuperKey(key, this)
 
-  def \[T,C](start: T, end: T, columns:List[C], count: Int = 100) =
-      KeyRange(start, end, SlicePredicate(columns, null), this, count)
+	/**
+	 * Create a key range from this key family used to query the datastore.
+	 */
+  def \[T,C](start: T, end: T, columns:List[C], count: Int = 100) = 
+			KeyRange(start, end, SlicePredicate(columns, null), this, count)
 }

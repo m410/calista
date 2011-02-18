@@ -14,9 +14,10 @@
 package org.brzy.calista.ocm
 
 /**
- * Document Me..
+ * This needs to be applied to the persisted entity, so that the key column is defined.  This 
+ * is necessary for the Dao.get(key:PK) and a few other functions.
  * 
- * @version $Id: $
+ * @author Michael Fortin
  */
 trait KeyedEntity[T] {
 	val key:T

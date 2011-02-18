@@ -17,8 +17,12 @@ import org.brzy.calista.serializer.Serializer
 import org.brzy.calista.serializer.UTF8Serializer
 
 /**
- * Document Me..
+ * An attribute of a scala object that is mapped to a cassandra column.
  *
+ * @param name The name of the object attribute to map to a cassandra column.
+ * @param key Is this object property a key column in cassandra.
+ * @param serializer How to read and write the datatype to the database.
+ * 
  * @author Michael Fortin
  */
 case class Attribute(name: String, key: Boolean = false, serializer: Serializer[_] = UTF8Serializer)

@@ -14,8 +14,9 @@
 package org.brzy.calista
 
 /**
- * Document Me..
- * 
+ * A description of the Family, including all it's attributes.
+ *
+ * @see SessionManager.keyspaceDefinition
  * @author Michael Fortin
  */
 case class FamilyDefinition(

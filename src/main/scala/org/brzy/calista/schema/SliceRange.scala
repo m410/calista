@@ -16,7 +16,14 @@ package org.brzy.calista.schema
 import org.brzy.calista.serializer.Serializers
 
 /**
- * Document Me..
+ * Slice of columns under a key.
+ *
+ * @tparam T they type of the column name.
+ * @param start The first entry to return.
+ * @param finish The last entry to return.
+ * @param reverse Reverse the order, default to false.
+ * @param count The max number of results, defaults to 100.
+ * @param key The key parent to the columns that are being sliced.
  *
  * @author Michael Fortin
  */

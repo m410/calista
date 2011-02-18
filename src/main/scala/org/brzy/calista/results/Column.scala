@@ -19,12 +19,24 @@ import org.brzy.calista.schema.ColumnOrSuperColumn
 import org.brzy.calista.serializer.{Serializers, UTF8Serializer, Serializer}
 
 /**
- * Document Me..
+ * A column returned by cassandra.
  *
  * @author Michael Fortin
  */
 case class Column(name: Array[Byte], value: Array[Byte], timestamp: Date) extends ColumnOrSuperColumn {
+	
+	/**
+	 * Converts the name column byte array to a scala data type.
+	 */
   def nameAs[T](s:Serializer[T]):T = s.fromBytes(name)
+
+	/**
+	 * Converts the value byte array of the column to a scala data type.
+	 */
   def valueAs[T](s:Serializer[T]):T = s.fromBytes(value)
+
+	/**
+	 * Converts the value byte array of the column to a scala data type.
+	 */
   def valueAs[T](c:Class[T]):T = Serializers.fromClassBytes(c,value)
 }
