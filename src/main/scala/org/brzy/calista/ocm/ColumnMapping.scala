@@ -64,8 +64,10 @@ case class ColumnMapping[T <: KeyedEntity[_] : Manifest](
       if(attr.key)
         key
       else {
-        val iCol = columns.find(_.nameAs(columnSerializer) == attr.name).get
-        iCol.valueAs(paramTypes(i))
+        columns.find(_.nameAs(columnSerializer) == attr.name) match {
+          case Some(c) => c.valueAs(paramTypes(i))
+          case _ => null // todo set a default value
+        }
       }
     }
     val toArray = args.toArray.asInstanceOf[Array[java.lang.Object]]

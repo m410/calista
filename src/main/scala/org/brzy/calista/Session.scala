@@ -225,7 +225,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 * get the count of the number of columns for a key
    */
-  def count(key: Key, max: Int = 100, level: Consistency = defaultConsistency): Long = {
+  def count(key: Key, level: Consistency = defaultConsistency): Long = {
     val columnParent = new CassandraColumnParent(key.family.name)
     val sliceRange = new CassandraSliceRange(ByteBuffer.wrap("".getBytes), ByteBuffer.wrap("".getBytes), false, max)
     val predicate = new CassandraSlicePredicate().setSlice_range(sliceRange)
@@ -236,7 +236,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * Batch insert, <b>This is not Implemented</b>
 	 */
   def batch(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
-      
+    error("Not Implemented yet")
   }
 
   def list(range: KeyRange[_,_], level: Consistency = defaultConsistency):List[KeySlice] = {
