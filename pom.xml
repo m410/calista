@@ -106,11 +106,6 @@
 			<artifactId>logback-classic</artifactId>
 			<version>0.9.26</version>
 		</dependency>
-		<dependency>
-			<groupId>com.eaio.uuid</groupId>
-			<artifactId>uuid</artifactId>
-			<version>3.1</version>
-		</dependency>
 
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>

@@ -20,7 +20,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) {
+case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) extends Key {
 
 	/**
 	 * Used by the DSL to create a Super column from this super key, using this key as the parent.
@@ -28,4 +28,6 @@ case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) {
   def |[N](sKey:N)(implicit n:Manifest[N]) = SuperColumn(sKey,this)
 
   def keyBytes = Serializers.toBytes(key)
+
+  def columnPath = ColumnPath(family.name,keyBytes,null)
 }

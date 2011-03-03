@@ -14,11 +14,17 @@
 package org.brzy.calista.schema
 
 /**
- * Marker trait.
+ * Marker trait for Columns and Super Columns.  The only thing that columns and super columns
+ * have in common is that they both have parent keys.
  * 
  * @author Michael Fortin
  * @version $Id: $
  */
 trait ColumnOrSuperColumn {
 
+  /**
+   * The parent can be a Standard key, a Super Key or a Super Column.
+   */
+  // doesn't compile because results.Column & superColumn also exntend this.
+//  def parent:Key
 }

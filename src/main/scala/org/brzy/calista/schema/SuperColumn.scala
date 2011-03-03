@@ -22,7 +22,7 @@ import org.brzy.calista.serializer.Serializers
  *
  * @author Michael Fortin
  */
-case class SuperColumn[T](key: T, superKey: SuperKey[_])(implicit m: Manifest[T])
+case class SuperColumn[T](key: T, parent: SuperKey[_])(implicit m: Manifest[T])
         extends Key with ColumnOrSuperColumn {
 
 	/**
@@ -33,7 +33,7 @@ case class SuperColumn[T](key: T, superKey: SuperKey[_])(implicit m: Manifest[T]
 
   def keyBytes = Serializers.toBytes(key)
 
-  def family = superKey.family
+  def family = parent.family
 
-  def columnPath = ColumnPath(superKey.family.name,keyBytes,null)
+  def columnPath = ColumnPath(parent.family.name,keyBytes,null)
 }

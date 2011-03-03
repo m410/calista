@@ -36,6 +36,9 @@ class UsageTest extends JUnitSuite {
         "Family" | "key" |("column", "value")
 //    val standardColumn = ColumnFamily("Family").key("key").column("column", "value")
 
+//    val resultOfGet <= {"Family"|"key"|("column")} // get the value
+//    "Family"|"key"|("column") <= "someValue" // set the value on the column
+
     val standardKeyRange:KeyRange[String,String] =
         "Family" \("start","end",List.empty[String],20)
 

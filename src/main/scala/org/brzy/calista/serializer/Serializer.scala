@@ -13,7 +13,6 @@
  */
 package org.brzy.calista.serializer
 
-import com.eaio.uuid.{UUID => EaioUUID}
 import java.nio.charset.Charset
 import java.nio.{ByteOrder, ByteBuffer}
 import java.util.{UUID, Date}
@@ -128,7 +127,7 @@ case object UUIDSerializer extends Serializer[UUID] {
     (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
     (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
 
-    UUID.fromString(new EaioUUID(msb, lsb).toString)
+    new UUID(msb, lsb)
   }
 
   def fromBytes(data: Array[Byte]) = {
@@ -139,7 +138,7 @@ case object UUIDSerializer extends Serializer[UUID] {
     (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
     (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
 
-    UUID.fromString(new EaioUUID(msb, lsb).toString)
+    new UUID(msb, lsb)
   }
 
   def toBytes(uuid: UUID) = {

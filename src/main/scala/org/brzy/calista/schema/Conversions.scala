@@ -13,6 +13,8 @@
  */
 package org.brzy.calista.schema
 
+import org.brzy.calista.ocm.Calista
+
 /**
  * This needs to be imported so that DSL to create columns can be used.
  * {{{
@@ -24,4 +26,20 @@ package org.brzy.calista.schema
  */
 object Conversions {
   implicit def toKeyFamily(str:String) = ColumnFamily(str)
+
+  class ColumnOps[K,V](column:Column[K,V])(implicit mk:Manifest[K], mv:Manifest[V]) {
+    def <=[T](t:T)(implicit m:Manifest[T]) = {
+      val session = Calista.value.get
+      session.insert(column.copy(value=t))
+    }
+  }
+
+  implicit def <=[K,V](column:Column[K,V])(implicit mk:Manifest[K], mv:Manifest[V]) = {
+    val session = Calista.value.get
+      session.get(column)
+  }
+
+  implicit def columnOps[K,V](column:Column[K,V])(implicit mk:Manifest[K], mv:Manifest[V]) = {
+    new ColumnOps(column)
+  }
 }

@@ -14,6 +14,7 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.results.{KeySlice, Column}
+import org.brzy.calista.schema.{ColumnFamily}
 
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
@@ -65,9 +66,8 @@ trait Dao[K, T <: KeyedEntity[K]] {
 	 * @param count The maximum number of results to return.
 	 */
   def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
-    import org.brzy.calista.schema.Conversions._
     val names = columnMapping.attributes.map(_.name).toList
-    session.list(columnMapping.family \ (start, end, names, count)).map(ks => {
+    session.keyRange(ColumnFamily(columnMapping.family).\(start, end, names, count)).map(ks => {
       val keySerializer = columnMapping.attributes.find(_.key).get.serializer
       columnMapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[Column]])
     })

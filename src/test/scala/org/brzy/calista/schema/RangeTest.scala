@@ -26,16 +26,16 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     import Conversions._
 
     sessionManager.doWith { session =>
-      session.insert("Standard"|"key-range-0" | ("column", "value0"))
-      session.insert("Standard"|"key-range-1" | ("column", "value1"))
-      session.insert("Standard"|"key-range-2" | ("column", "value2"))
-      session.insert("Standard"|"key-range-3" | ("column", "value3"))
-      session.insert("Standard"|"key-range-4" | ("column", "value4"))
+      session.insert("Standard"|"key-range-0"|("column", "value0"))
+      session.insert("Standard"|"key-range-1"|("column", "value1"))
+      session.insert("Standard"|"key-range-2"|("column", "value2"))
+      session.insert("Standard"|"key-range-3"|("column", "value3"))
+      session.insert("Standard"|"key-range-4"|("column", "value4"))
     }
 
     sessionManager.doWith { session =>
       val standardKeyRange:KeyRange[String,String] = "Standard" \("key-range-4","key-range",List("column"))
-      val keys = session.list(standardKeyRange)
+      val keys = session.keyRange(standardKeyRange)
       keys.keySet.foreach(k=>println("##k='%s'".format(k)))
       println(keys)
       assertNotNull(keys)

@@ -36,7 +36,7 @@ class PredicateTest extends JUnitSuite with EmbeddedTest  {
 
     sessionManager.doWith { session =>
       val standardSlicePredicate = key\\ List("column1","column2","column3")
-      val columns = session.list(standardSlicePredicate)
+      val columns = session.slice(standardSlicePredicate)
       assertNotNull(columns)
       assertEquals(3,columns.size)
     }
