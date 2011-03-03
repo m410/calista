@@ -227,7 +227,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    */
   def count(key: Key, level: Consistency = defaultConsistency): Long = {
     val columnParent = new CassandraColumnParent(key.family.name)
-    val sliceRange = new CassandraSliceRange(ByteBuffer.wrap("".getBytes), ByteBuffer.wrap("".getBytes), false, max)
+    val sliceRange = new CassandraSliceRange(ByteBuffer.wrap("".getBytes), ByteBuffer.wrap("".getBytes), false, 32) // TODO fix max 32
     val predicate = new CassandraSlicePredicate().setSlice_range(sliceRange)
     client.get_count(key.keyBytes, columnParent, predicate, level)
   }
