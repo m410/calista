@@ -225,7 +225,8 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   /**
-   *
+   *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
+   *  iterate over all elements including the start and end columns.
    */
   def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[RColumn] = {
     new Iterator[RColumn] {
@@ -258,7 +259,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 
 
   /**
-   * 
+   * Queries the datastore by returning the key range inclusively.
    */
   def keyRange(range: KeyRange[_,_], level: Consistency = defaultConsistency):List[KeySlice] = {
     val columnParent = range.columnParent
@@ -268,7 +269,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 * List all the columns by Key range using the default constency
+	 * List all the columns by Key range using the default consistency.
    */
   def keyRange[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): Map[T, List[ColumnOrSuperColumn]] = {
     val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
