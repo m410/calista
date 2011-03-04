@@ -234,13 +234,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 
       def hasNext:Boolean = {
         if(index == partial.size) {
-          val partialLast = Serializers.fromClassBytes(m.erasure,partial(index).name)
+          val partialLast = Serializers.fromClassBytes(m.erasure,partial.last.name)
           val sliceLast = slice.finish
-          if(!partialLast.equals(sliceLast))
-          partial = sliceRange(slice.copy(start=partialLast,finish=sliceLast)).asInstanceOf[List[RColumn]]
-          index = 0
-        }
 
+          if(!partialLast.equals(sliceLast)) {
+            partial = sliceRange(slice.copy(start=partialLast,finish=sliceLast)).asInstanceOf[List[RColumn]]
+            index = 1 // skip the first, because the slice is inclusive
+          }
+        }
         index < partial.size 
       }
 
