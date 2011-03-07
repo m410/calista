@@ -234,7 +234,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       private[this] var index = 0
 
       def hasNext:Boolean = {
-        if(index == partial.size) {
+        if(partial.size > 0 && index == partial.size) {
           val partialLast = Serializers.fromClassBytes(m.erasure,partial.last.name)
           val sliceLast = slice.finish
 
@@ -243,14 +243,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
             index = 1 // skip the first, because the slice is inclusive
           }
         }
-        index < partial.size 
+        index < partial.size
       }
 
       def next:RColumn = {
         index = index + 1
         partial(index -1)
       }
-      
+
       def remove = {}
     }
   }
