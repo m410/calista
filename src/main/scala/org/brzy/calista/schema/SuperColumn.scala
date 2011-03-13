@@ -31,7 +31,17 @@ case class SuperColumn[T](key: T, parent: SuperKey[_])(implicit m: Manifest[T])
   def |[N, V](sKey: N, value: V = null, timestamp: Date = new Date())(implicit n: Manifest[N], v: Manifest[V]) =
     Column(sKey, value, timestamp, this)
 
-  def keyBytes = Serializers.toBytes(key)
+  /**
+	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+	 */
+  def \\[A<:AnyRef](columns:List[A]) = SlicePredicate(columns,this)
+
+	/**
+	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
+	 */
+  def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
+
+  def keyBytes = Serializers.toBytes(parent.key)
 
   def family = parent.family
 

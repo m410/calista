@@ -21,7 +21,7 @@ import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
 
-class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
+class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"
 	val personDate = new Date
 	
@@ -30,7 +30,6 @@ class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
 			Calista.value = Option(session)
 			val person = new Person(personKey,"name",100,personDate)
 			person.insert
-			Calista.value = None
 		}
 
 	 	sessionManager.doWith { session =>
@@ -59,13 +58,14 @@ class ColumnMappingTest extends JUnitSuite  with EmbeddedTest {
   }
 }
 
-case class Person(key:String,name:String,count:Int,created:Date)  extends KeyedEntity[String]
+case class Person(key:String,name:String,count:Int,created:Date)  extends StandardEntity[String]
 
-object Person extends Dao[String,Person] {
-  def columnMapping = new ColumnMapping[Person]("Person")
-			.attributes(UTF8Serializer, Array(
-				Attribute("key",true),
-				Attribute("name"),
-				Attribute("count",false,IntSerializer),
-				Attribute("created",false,DateSerializer)))
+object Person extends StandardDao[String,Person] {
+  def mapping = Mapping[Person](
+      "Person",
+      UTF8Serializer,
+			Key(),
+      Column("name"),
+      Column("count",IntSerializer),
+      Column("created",DateSerializer))
 }

@@ -13,8 +13,8 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.results.{KeySlice, Column}
-import org.brzy.calista.schema.{ColumnFamily}
+import org.brzy.calista.results.{Column=>RColumn}
+import org.brzy.calista.schema.ColumnFamily
 
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
@@ -32,7 +32,7 @@ import org.brzy.calista.schema.{ColumnFamily}
  *
  * @author Michael Fortin
  */
-trait Dao[K, T <: KeyedEntity[K]] {
+trait SuperDao[K, S, T <: SuperEntity[K,S]] {
   protected[this] def session = Calista.value.get
 
 	/**
@@ -40,19 +40,19 @@ trait Dao[K, T <: KeyedEntity[K]] {
 	 */
 	def apply(key: K)(implicit t: Manifest[K]): T = {
     import org.brzy.calista.schema.Conversions._
-    val columns = session.list(columnMapping.family | key)
-    columnMapping.newInstance(key: K, columns.asInstanceOf[List[Column]])
+    val columns = session.list(mapping.family | key)
+    mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]])
 	}
 
 	/**
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
-  def get(key: K)(implicit t: Manifest[K]): Option[T] = {
+  def get(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): Option[T] = {
     import org.brzy.calista.schema.Conversions._
-    val columns = session.list(columnMapping.family | key)
+    val columns = session.list(mapping.family |^ key | superColumn)
 
     if (columns.size > 0)
-      Option(columnMapping.newInstance(key: K, columns.asInstanceOf[List[Column]]))
+      Option(mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]]))
     else
       None
   }
@@ -66,10 +66,10 @@ trait Dao[K, T <: KeyedEntity[K]] {
 	 * @param count The maximum number of results to return.
 	 */
   def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
-    val names = columnMapping.attributes.map(_.name).toList
-    session.keyRange(ColumnFamily(columnMapping.family).\(start, end, names, count)).map(ks => {
-      val keySerializer = columnMapping.attributes.find(_.key).get.serializer
-      columnMapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[Column]])
+    val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
+    session.keyRange(ColumnFamily(mapping.family).\(start, end, names, count)).map(ks => {
+      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.asInstanceOf[Key].serializer
+      mapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[RColumn]])
     })
   }
 
@@ -83,7 +83,7 @@ trait Dao[K, T <: KeyedEntity[K]] {
 		 * insert the entity
 		 */
     def insert = {
-      val columns = columnMapping.toColumns(p)
+      val columns = mapping.toColumns(p)
       columns.foreach(c => session.insert(c))
     }
 
@@ -91,7 +91,7 @@ trait Dao[K, T <: KeyedEntity[K]] {
 		 * remove the entity
 		 */
     def remove = {
-      val key = columnMapping.toKey(p)
+      val key = mapping.toKey(p)
       session.remove(key)
     }
   }
@@ -104,6 +104,6 @@ trait Dao[K, T <: KeyedEntity[K]] {
 	/**
 	 * This needs to be implemented for each instance to define the mapping to the cassandra datastore.
 	 */
-  def columnMapping: ColumnMapping[T]
+  def mapping: Mapping[T]
 
 }

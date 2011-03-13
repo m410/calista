@@ -19,6 +19,13 @@ package org.brzy.calista.ocm
  * 
  * @author Michael Fortin
  */
-trait KeyedEntity[T] {
-	val key:T
+trait StandardEntity[T] {
+	def key:T
+}
+
+/**
+ * 
+ */
+trait SuperEntity[T,S] extends StandardEntity[T] {
+  def superColumn:S
 }
