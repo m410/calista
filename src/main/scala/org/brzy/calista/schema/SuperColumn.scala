@@ -41,7 +41,7 @@ case class SuperColumn[T](key: T, parent: SuperKey[_])(implicit m: Manifest[T])
 	 */
   def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
 
-  def keyBytes = Serializers.toBytes(parent.key)
+  def keyBytes = Serializers.toBytes(key)
 
   def family = parent.family
 

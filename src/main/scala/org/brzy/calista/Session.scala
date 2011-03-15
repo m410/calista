@@ -228,7 +228,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * List all the columns by slice range and Consistency Level. This uses the default consistencey.
    */
   def sliceRange(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
-    val results = client.get_slice(range.key.keyBytes, range.columnParent, range, level)
+    val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     results.map(sc => fromColumnOrSuperColumn(sc)).toList
   }
 

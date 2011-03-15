@@ -32,6 +32,11 @@ case class SliceRange[T](start: T, finish: T, reverse: Boolean = false, count: I
 
   def finishBytes = Serializers.toBytes(finish)
 
+	def keyBytes = key match {
+    case s: StandardKey[_] => s.keyBytes
+    case s: SuperColumn[_] => s.parent.keyBytes
+  }
+
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
