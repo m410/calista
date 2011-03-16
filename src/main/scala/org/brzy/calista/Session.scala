@@ -236,25 +236,33 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
    *  iterate over all elements including the start and end columns.
    */
-  def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[RColumn] = {
-    new Iterator[RColumn] {
-      private[this] var partial = sliceRange(slice).asInstanceOf[List[RColumn]]
+  def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[ColumnOrSuperColumn] = {
+    new Iterator[ColumnOrSuperColumn] {
+      private[this] var partial = sliceRange(slice).asInstanceOf[List[ColumnOrSuperColumn]]
       private[this] var index = 0
 
       def hasNext:Boolean = {
         if(partial.size > 0 && index == partial.size) {
-          val partialLast = Serializers.fromClassBytes(m.erasure,partial.last.name)
-          val sliceLast = slice.finish
+          val partialLast:Array[Byte] = partial.last match {
+            case c:RColumn =>c.name
+            case s:RSuperColumn[_]=>s.bytes.array
+          }
+          val sliceLast = slice.finishBytes.array
 
-          if(!partialLast.equals(sliceLast)) {
-            partial = sliceRange(slice.copy(start=partialLast,finish=sliceLast)).asInstanceOf[List[RColumn]]
+          if(!java.util.Arrays.equals(partialLast,sliceLast)) {
+            partial = {
+              val pStart = Serializers.fromClassBytes(m.erasure,partialLast)
+              val pFin = Serializers.fromClassBytes(m.erasure,sliceLast)
+              val sliceCopy = slice.copy(start = pStart, finish = pFin)
+              sliceRange(sliceCopy).asInstanceOf[List[ColumnOrSuperColumn]]
+            }
             index = 1 // skip the first, because the slice is inclusive
           }
         }
         index < partial.size
       }
 
-      def next:RColumn = {
+      def next:ColumnOrSuperColumn = {
         index = index + 1
         partial(index -1)
       }
