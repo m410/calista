@@ -98,6 +98,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] def fromColumnOrSuperColumn(cos: CassandraColumnOrSuperColumn) = {
+    log.debug("cos: {}",cos)
     if (cos == null)
       null
     if (cos.column != null)

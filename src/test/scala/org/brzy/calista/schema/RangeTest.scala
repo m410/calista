@@ -18,6 +18,8 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
+import org.brzy.calista.results.{SuperColumn=>RSuperColumn}
+import org.brzy.calista.serializer.UTF8Serializer
 
 
 class RangeTest extends JUnitSuite with EmbeddedTest {
@@ -40,6 +42,44 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       println(keys)
       assertNotNull(keys)
       assertEquals(1,keys.size)
+    }
+  }
+
+  @Test def testSuperSlice = {
+    import Conversions._
+    
+    sessionManager.doWith { session =>
+      session.insert("Super2"|^"key"|"super-col-0"|("column", "value0"))
+      session.insert("Super2"|^"key"|"super-col-0"|("column1", "value0"))
+      session.insert("Super2"|^"key"|"super-col-1"|("column", "value1"))
+      session.insert("Super2"|^"key"|"super-col-1"|("column1", "value1"))
+      session.insert("Super2"|^"key"|"super-col-2"|("column", "value2"))
+      session.insert("Super2"|^"key"|"super-col-2"|("column1", "value2"))
+      session.insert("Super2"|^"key"|"super-col-3"|("column", "value3"))
+      session.insert("Super2"|^"key"|"super-col-3"|("column1", "value3"))
+      session.insert("Super2"|^"key2"|"super-col-4"|("column", "value4"))
+      session.insert("Super2"|^"key2"|"super-col-4"|("column1", "value4"))
+    }
+
+    sessionManager.doWith { session =>
+      val slice = {"Super2" |^ "key"} \("super-col-0","super-col-3")
+      val rows = session.sliceRange(slice)
+      rows.foreach(k=>{
+        val sCol = k.asInstanceOf[RSuperColumn[_]]
+        val fromBytes = UTF8Serializer.fromBytes(sCol.bytes)
+        println("######")
+        println(fromBytes)
+        println("######")
+        sCol.columns.foreach(c=>{
+          val name = c.nameAs(UTF8Serializer)
+          val value = c.valueAs(UTF8Serializer)
+          println("column: "+name+"="+value)
+        })
+      })
+      println(rows)
+      assertNotNull(rows)
+      assertEquals(4,rows.size)
+
     }
   }
 }

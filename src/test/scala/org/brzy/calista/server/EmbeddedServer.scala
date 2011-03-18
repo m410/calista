@@ -43,7 +43,7 @@ object EmbeddedServer {
   val storageSource = new JFile(this.getClass.getResource("/cassandra.yaml").getPath)
   storageSource copyTo homeDirectory
 
-  val logSource = new JFile(this.getClass.getResource("/log4j.properties").getPath)
+  val logSource = new JFile(this.getClass.getResource("/log4j-server.properties").getPath)
   logSource copyTo homeDirectory
 
   loadSchemaFromYaml

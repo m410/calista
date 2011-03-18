@@ -34,11 +34,13 @@ case class SliceRange[T](start: T, finish: T, reverse: Boolean = false, count: I
 
 	def keyBytes = key match {
     case s: StandardKey[_] => s.keyBytes
+    case s: SuperKey[_] => s.keyBytes
     case s: SuperColumn[_] => s.parent.keyBytes
   }
 
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
 }
