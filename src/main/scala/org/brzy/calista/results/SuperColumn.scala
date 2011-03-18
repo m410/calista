@@ -22,7 +22,7 @@ import org.brzy.calista.schema.ColumnOrSuperColumn
  *
  * @author Michael Fortin
  */
-case class SuperColumn[T](bytes: ByteBuffer, serializer: Serializer[T], columns: List[Column])
+case class SuperColumn[T](bytes: Array[Byte], serializer: Serializer[T], columns: List[Column])
         extends ColumnOrSuperColumn {
   def key: T = serializer.fromBytes(bytes)
 }

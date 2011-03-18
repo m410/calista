@@ -103,10 +103,12 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       null
     if (cos.column != null)
       RColumn(cos.column.getName, cos.column.getValue, new Date(cos.column.getTimestamp))
-    else
-      RSuperColumn(cos.super_column.name, null, cos.super_column.columns.map(c => {
-        RColumn(c.getName, c.getValue, new Date(c.getTimestamp))
-      }).toList)
+    else {
+			val sCol = cos.getSuper_column()
+			val cols = sCol.getColumns().map(c=>RColumn(c.getName(), c.getValue(), new Date(c.getTimestamp()))).toList
+			RSuperColumn(sCol.getName(), null, cols)
+		}
+      
   }
 
   private[this] def keyFor(c: Column[_, _]) = c.parent match {
