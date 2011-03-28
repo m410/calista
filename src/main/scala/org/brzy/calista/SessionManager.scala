@@ -29,6 +29,7 @@ import collection.JavaConversions._
  * @todo Authentication is not used or implemented.
  * @todo Only connects to a single host, multiple host connections is not implemented.
  * @todo Can not modifiy the schema.
+ * @todo The timeout needs to be configurable.
  *
  * @author Michael Fortin
  */
@@ -37,7 +38,7 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
 	/**
 	 * the host and port for where this session manager connects.
 	 */
-  val host = Host(url, port, 250)
+  val host = Host(url, port, 2500)
 
 	/**
 	 * Outputs the keyspace definition.  This will output the keyspace, families and their attributes.
