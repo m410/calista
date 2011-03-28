@@ -98,7 +98,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] def fromColumnOrSuperColumn(cos: CassandraColumnOrSuperColumn) = {
-    log.debug("cos: {}",cos)
     if (cos == null)
       null
     if (cos.column != null)
@@ -108,7 +107,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 			val cols = sCol.getColumns().map(c=>RColumn(c.getName(), c.getValue(), new Date(c.getTimestamp()))).toList
 			RSuperColumn(sCol.getName(), null, cols)
 		}
-      
   }
 
   private[this] def keyFor(c: Column[_, _]) = c.parent match {

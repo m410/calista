@@ -67,13 +67,13 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       rows.foreach(k=>{
         val sCol = k.asInstanceOf[RSuperColumn[_]]
         val fromBytes = UTF8Serializer.fromBytes(sCol.bytes.array)
-        // println("######")
-        // println(fromBytes)
+        println("######")
+        println("  name: "+fromBytes)
         // println("######")
         sCol.columns.foreach(c=>{
           val name = c.nameAs(UTF8Serializer)
           val value = c.valueAs(UTF8Serializer)
-          // println("column: "+name+"="+value)
+          println("  column: "+name+"="+value)
         })
       })
       // println(rows)
