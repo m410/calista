@@ -13,7 +13,6 @@
  */
 package org.brzy.calsta
 
-import java.util.{UUID,Date}
 
 /**
  * Convert byte arrays used by cassandra to and from their data types.

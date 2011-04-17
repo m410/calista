@@ -38,9 +38,9 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 	/**
 	 * Get an instance of the mapped class by it's key.
 	 */
-	def apply(key: K)(implicit t: Manifest[K]): T = {
+	def apply(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): T = {
     import org.brzy.calista.schema.Conversions._
-    val columns = session.list(mapping.family | key)
+    val columns = session.list(mapping.family |^ key | superColumn)
     mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]])
 	}
 

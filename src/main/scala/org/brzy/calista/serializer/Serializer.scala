@@ -20,6 +20,7 @@ import java.util.{UUID, Date}
 /**
  * Basic Serializer interface.
  *
+ * @todo Need to add Object, Array, List, Map and Enum serializer.
  * @author Michael Fortin
  */
 trait Serializer[T] {
