@@ -41,7 +41,7 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 	def apply(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): T = {
     import org.brzy.calista.schema.Conversions._
     val columns = session.list(mapping.family |^ key | superColumn)
-    mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]])
+    mapping.newInstance(key, superColumn, columns.asInstanceOf[List[RColumn]])
 	}
 
 	/**
@@ -52,7 +52,7 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
     val columns = session.list(mapping.family |^ key | superColumn)
 
     if (columns.size > 0)
-      Option(mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]]))
+      Option(mapping.newInstance(key,superColumn, columns.asInstanceOf[List[RColumn]]))
     else
       None
   }
@@ -82,7 +82,7 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 		/**
 		 * insert the entity
 		 */
-    def insert = {
+    def insert() {
       val columns = mapping.toColumns(p)
       columns.foreach(c => session.insert(c))
     }

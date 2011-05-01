@@ -27,7 +27,7 @@ case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) extend
 	 */
   def |[N](sKey:N)(implicit n:Manifest[N]) = SuperColumn(sKey,this)
 
-  	/**
+  /**
 	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
 	 */
   def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)

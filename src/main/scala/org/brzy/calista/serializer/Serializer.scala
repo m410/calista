@@ -24,6 +24,9 @@ import java.util.{UUID, Date}
  * @author Michael Fortin
  */
 trait Serializer[T] {
+  val typeManifest:Manifest[T]
+  def serializedClass = typeManifest.erasure
+
   def toBytes(t: T): ByteBuffer
 
   def fromBytes(b: ByteBuffer): T
@@ -33,6 +36,7 @@ trait Serializer[T] {
 
 /**
  * Object factory for serializers.  Provides convenient access and referencing.
+ * @todo this should be changed to an instance that can be updated with custom serializers.
  */
 object Serializers {
   protected[serializer] val LongClass = classOf[Long]
@@ -79,6 +83,7 @@ object Serializers {
  */
 case object ASCIISerializer extends Serializer[String] {
   val ascii = Charset.forName("US-ASCII")
+  val typeManifest = manifest[String]
 
   def toBytes(str: String) = ByteBuffer.wrap(str.getBytes(ascii))
 
@@ -98,6 +103,7 @@ case object ASCIISerializer extends Serializer[String] {
  */
 case object UTF8Serializer extends Serializer[String] {
   val utf8 = Charset.forName("UTF-8")
+  val typeManifest = manifest[String]
 
   def toBytes(str: String) = ByteBuffer.wrap(str.getBytes(utf8))
 
@@ -118,6 +124,7 @@ case object UTF8Serializer extends Serializer[String] {
  */
 case object UUIDSerializer extends Serializer[UUID] {
   val serialType = classOf[UUID]
+  val typeManifest = manifest[UUID]
 
   def fromBytes(bb: ByteBuffer) = {
     var msb = 0L
@@ -143,8 +150,8 @@ case object UUIDSerializer extends Serializer[UUID] {
   }
 
   def toBytes(uuid: UUID) = {
-    val msb = uuid.getMostSignificantBits()
-    val lsb = uuid.getLeastSignificantBits()
+    val msb = uuid.getMostSignificantBits
+    val lsb = uuid.getLeastSignificantBits
     val buffer = new Array[Byte](16)
 
     (0 until 8).foreach {(i) => buffer(i) = (msb >>> 8 * (7 - i)).asInstanceOf[Byte]}
@@ -165,6 +172,7 @@ case object UUIDSerializer extends Serializer[UUID] {
 case object LongSerializer extends Serializer[Long] {
   val serialType = classOf[java.lang.Long]
   val size = 8
+  val typeManifest = manifest[Long]
 
   def toBytes(v: Long) = {
     val b = ByteBuffer.allocate(size)
@@ -197,6 +205,8 @@ case object LongSerializer extends Serializer[Long] {
  * Date Serializer
  */
 case object DateSerializer extends Serializer[Date] {
+  val typeManifest = manifest[Date]
+
 	def toBytes(v:Date) = {
 		LongSerializer.toBytes(v.getTime)
 	}
@@ -218,6 +228,7 @@ case object DateSerializer extends Serializer[Date] {
 case object IntSerializer extends Serializer[Int] {
   val serialSerializer = classOf[java.lang.Integer]
   val bytesPerInt = java.lang.Integer.SIZE / java.lang.Byte.SIZE
+  val typeManifest = manifest[Int]
 
   def toBytes(v: Int) = ByteBuffer.allocate(8)
           .put(0, (v >>> 56).asInstanceOf[Byte])
@@ -244,6 +255,8 @@ case object IntSerializer extends Serializer[Int] {
  * Boolean Serializer
  */
 case object BooleanSerializer extends Serializer[Boolean] {
+  val typeManifest = manifest[Boolean]
+
 	def  toBytes(obj:Boolean):ByteBuffer = {
 		    val b:Array[Byte] = Array(1)
 		    b(0) =  if(obj == true) 1.asInstanceOf[Byte] else 0.asInstanceOf[Byte]
@@ -251,7 +264,7 @@ case object BooleanSerializer extends Serializer[Boolean] {
 	  }
 
 	  def fromBytes(bytes:ByteBuffer):Boolean =  {
-	    if (bytes == null || !bytes.hasArray()) 
+	    if (bytes == null || !bytes.hasArray)
 	      null.asInstanceOf[Boolean]
 			else
 	    	bytes.array()(0) == 1.asInstanceOf[Byte]

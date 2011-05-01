@@ -20,6 +20,8 @@ import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
+import org.brzy.calista.Session
+import org.brzy.calista.schema.Conversions
 
 
 class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
@@ -28,7 +30,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personSuperColumn = "super_column"
 	val personDate = new Date
 	
-  @Test def mapEntity = {
+  @Test def mapEntity() {
 	 	sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = new SPerson(personKey,personSuperColumn,"name",100,personDate)
@@ -56,6 +58,12 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
           fail("No person by key")
       }
 		}
+    sessionManager.doWith { (session:Session) =>
+      import Conversions._
+      val columns = session.list(familyName|^personKey)
+      assertNotNull(columns)
+      assertEquals(1,columns.size)
+    }
   }
 }
 

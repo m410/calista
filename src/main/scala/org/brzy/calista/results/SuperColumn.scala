@@ -14,8 +14,8 @@
 package org.brzy.calista.results
 
 import java.nio.ByteBuffer
-import org.brzy.calista.serializer.Serializer
 import org.brzy.calista.schema.ColumnOrSuperColumn
+import org.brzy.calista.serializer.{Serializers, Serializer}
 
 /**
  * Represents the return value of a query that returns a super column
@@ -24,5 +24,8 @@ import org.brzy.calista.schema.ColumnOrSuperColumn
  */
 case class SuperColumn[T](bytes: Array[Byte], serializer: Serializer[T], columns: List[Column])
         extends ColumnOrSuperColumn {
+
   def key: T = serializer.fromBytes(bytes)
+
+  def keyAs[T]()(implicit m:Manifest[T]) = Serializers.fromClassBytes(m.erasure,bytes)
 }

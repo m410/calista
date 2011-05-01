@@ -202,6 +202,12 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     sliceRange(sc.\("",""),defaultConsistency)
   }
 
+  /**
+   * List all the super columns and columns under the key
+   */
+  def list(sc: SuperKey[_]): List[ColumnOrSuperColumn] = {
+    sliceRange(sc.\("",""),defaultConsistency)
+  }
 
 	/**
 	 * List the columns by slice predicate.  This uses the default consistency.
@@ -229,6 +235,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * List all the columns by slice range and Consistency Level. This uses the default consistencey.
    */
   def sliceRange(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
+    log.debug("range slice: " + range)
     val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     results.map(sc => fromColumnOrSuperColumn(sc)).toList
   }
