@@ -63,7 +63,16 @@ case class Mapping[T <: StandardEntity[_] : Manifest](
     })
     val toArray = args.toArray.asInstanceOf[Array[java.lang.Object]]
     log.debug("args: {}",toArray.mkString("[",",","]"))
-    constructor.newInstance(toArray:_*).asInstanceOf[T]
+
+    try {
+      constructor.newInstance(toArray:_*).asInstanceOf[T]
+    }
+    catch {
+      case e:Exception =>
+        val className = manifest[T].erasure.getName
+        val args =  toArray.mkString("[",",","]")
+        throw new InvalidMappingException("Could not create instance of '"+className+"' with args: " + args,e)
+    }
   }
 
 	/**
