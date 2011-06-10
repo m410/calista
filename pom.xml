@@ -138,7 +138,7 @@
 		<dependency>
 			<groupId>org.brzy.fab</groupId>
 			<artifactId>fab-util</artifactId>
-			<version>0.5</version>
+			<version>0.6</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
