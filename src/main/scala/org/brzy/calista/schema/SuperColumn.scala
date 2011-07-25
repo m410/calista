@@ -22,7 +22,7 @@ import org.brzy.calista.serializer.Serializers
  *
  * @author Michael Fortin
  */
-case class SuperColumn[T](key: T, parent: SuperKey[_])(implicit m: Manifest[T])
+protected case class SuperColumn[T](key: T, parent: SuperKey[_])(implicit m: Manifest[T])
         extends Key with ColumnOrSuperColumn {
 
 	/**

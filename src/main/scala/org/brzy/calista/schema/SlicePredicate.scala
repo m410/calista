@@ -25,7 +25,7 @@ import org.brzy.calista.serializer.Serializers
  *
  * @author Michael Fortin
  */
-case class SlicePredicate[T](columns: List[T], key: Key) {
+protected case class SlicePredicate[T](columns: List[T], key: Key) {
 
   def toByteList = columns.map(c => Serializers.toBytes(c))
 

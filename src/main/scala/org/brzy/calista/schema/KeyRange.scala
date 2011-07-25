@@ -26,7 +26,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-case class KeyRange[T,C](
+protected case class KeyRange[T,C](
         start:T,
         finish:T,
         predicate:SlicePredicate[C],

@@ -20,7 +20,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) extends Key {
+protected case class SuperKey[T](key:T,family:ColumnFamily)(implicit t:Manifest[T]) extends Key {
 
 	/**
 	 * Used by the DSL to create a Super column from this super key, using this key as the parent.

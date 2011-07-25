@@ -88,11 +88,11 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] implicit def toColumn(c: Column[_, _]) = {
-    val ccol = new CassandraColumn()
-    ccol.setName(c.nameBytes)
-    ccol.setValue(c.valueBytes)
-    ccol.setTimestamp(c.timestamp.getTime)
-    ccol
+    val column = new CassandraColumn()
+    column.setName(c.nameBytes)
+    column.setValue(c.valueBytes)
+    column.setTimestamp(c.timestamp.getTime)
+    column
   }
 
   private[this] implicit def toSlicePredicate(sp: SlicePredicate[_]) = {
@@ -191,9 +191,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     val predicate = new CassandraSlicePredicate().setSlice_range(sliceRange)
     client.get_count(key.keyBytes, columnParent, predicate, level)
   }
-
-
-
 
 	/**
 	 * List all the columns under the given key.

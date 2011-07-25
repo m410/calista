@@ -27,7 +27,7 @@ import org.brzy.calista.serializer.Serializers
  *
  * @author Michael Fortin
  */
-case class SliceRange[T](start: T, finish: T, reverse: Boolean = false, count: Int = 100, key: Key) {
+protected case class SliceRange[T](start: T, finish: T, reverse: Boolean = false, count: Int = 100, key: Key) {
   def startBytes = Serializers.toBytes(start)
 
   def finishBytes = Serializers.toBytes(finish)

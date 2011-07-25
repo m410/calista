@@ -21,4 +21,4 @@ import java.nio.ByteBuffer
  * 
  * @author Michael Fortin
  */
-case class ColumnParent(family:String,superColumn:ByteBuffer)
+protected case class ColumnParent(family:String,superColumn:ByteBuffer)

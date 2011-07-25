@@ -7,6 +7,6 @@ import java.util.Date
  * 
  * @author Michael Fortin
  */
-class CounterColumn[K:Manifest](name: K, value: Long, timestamp: Date, parent: Key) {
+protected class CounterColumn[K:Manifest](name: K, value: Long, timestamp: Date, parent: Key) {
 
 }

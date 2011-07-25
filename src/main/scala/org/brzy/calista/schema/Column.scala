@@ -18,7 +18,8 @@ import java.util.Date
 import org.brzy.calista.serializer.{Serializers, UTF8Serializer}
 
 /**
- * Represents a column in the datastore.  
+ * Represents a column in the datastore.  This column should only be created by calling one of the
+ * methods of the StandardKey or SuperColumn classes.
  *
  * @tparam K The key or name column type
  * @tparam V The value type
@@ -29,7 +30,7 @@ import org.brzy.calista.serializer.{Serializers, UTF8Serializer}
  *
  * @author Michael Fortin
  */
-case class Column[K, V](name: K, value: V, timestamp: Date, parent: Key)(implicit k: Manifest[K], v: Manifest[V])
+protected case class Column[K, V](name: K, value: V, timestamp: Date, parent: Key)(implicit k: Manifest[K], v: Manifest[V])
         extends ColumnOrSuperColumn {
 	
 	/**

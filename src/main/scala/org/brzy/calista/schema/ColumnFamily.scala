@@ -23,7 +23,9 @@ import org.brzy.calista.Session
  * @author Michael Fortin
  */
 case class ColumnFamily(name: String) {
-	
+
+  type StandardOrCounterOrSuperKey = Either[StandardKey[_],SuperKey[_]]
+
 	/**
 	 * Add a child key to the column family, return that key.  
 	 */
@@ -34,13 +36,15 @@ case class ColumnFamily(name: String) {
 	 */
   def |^[T](key: T)(implicit t: Manifest[T]) = SuperKey(key, this)
 
-  def key[T](key: T)(implicit t: Manifest[T]) = {
+  def key[T](key: T)(implicit t: Manifest[T]):StandardOrCounterOrSuperKey = {
     val family = Calista.value.asInstanceOf[Session].ksDef.families.find(_.name == name).get
 
-    if(family.columnType == "Standard")
-      StandardKey(key, this)
+    if (family.columnType == "Standard")
+      Left(StandardKey(key, this)) // pass along the column family definition
+    else if (family.columnType == "Counter")
+      Left(StandardKey(key, this))
     else
-      SuperKey(key,this)
+      Right(SuperKey(key,this))
   }
 
 	/**

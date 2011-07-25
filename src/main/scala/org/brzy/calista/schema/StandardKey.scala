@@ -22,7 +22,7 @@ import org.brzy.calista.serializer.Serializers._
  * 
  * @author Michael Fortin
  */
-case class StandardKey[T](key:T, family:ColumnFamily)(implicit m:Manifest[T]) extends Key {
+protected case class StandardKey[T](key:T, family:ColumnFamily)(implicit m:Manifest[T]) extends Key {
 
   def keyBytes = {
     val buf = toBytes(key)
