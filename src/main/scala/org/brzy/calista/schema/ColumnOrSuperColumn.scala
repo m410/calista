@@ -25,6 +25,6 @@ trait ColumnOrSuperColumn {
   /**
    * The parent can be a Standard key, a Super Key or a Super Column.
    */
-  // doesn't compile because results.Column & superColumn also exntend this.
+  // doesn't compile because results.Column & superColumn also extend this.
 //  def parent:Key
 }

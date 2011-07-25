@@ -22,5 +22,4 @@ package org.brzy.calista
 case class KeyspaceDefinition(
     name:String,
     strategyClass:String,
-    replicationFactor:Int,
     families:List[FamilyDefinition])

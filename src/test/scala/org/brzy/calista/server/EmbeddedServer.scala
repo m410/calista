@@ -32,7 +32,7 @@ object EmbeddedServer {
   val log = LoggerFactory.getLogger(this.getClass)
   val hosts = Host("localhost", 9160, 250) :: Nil
   val homeDirectory = File("target/cassandra.home.unit-tests")
-  homeDirectory.trash
+  homeDirectory.trash()
   homeDirectory.mkdirs
 
   log.debug("creating cassandra instance at: " + homeDirectory.getCanonicalPath)
@@ -46,15 +46,15 @@ object EmbeddedServer {
   val logSource = new JFile(this.getClass.getResource("/log4j-server.properties").getPath)
   logSource copyTo homeDirectory
 
-  loadSchemaFromYaml
+//  loadSchemaFromYaml
   System.setProperty("storage-config", homeDirectory.getCanonicalPath)
   log.debug("creating data file and log location directories")
 
   val daemon = actor {
     val daemon = new CassandraDaemon
     daemon.init(new Array[String](0))
-    daemon.start
-  }.start
+    daemon.start()
+  }.start()
 
   // try to make sockets until the server opens up - there has to be a better
   // way - just not sure what it is.
@@ -78,13 +78,13 @@ object EmbeddedServer {
     }
   }
 
-  def loadSchemaFromYaml = {
-    import collection.JavaConversions._
-
-    for (ksm: KSMetaData <- DatabaseDescriptor.readTablesFromYaml()) {
-      for (cfm: CFMetaData <- ksm.cfMetaData().values())
-        CFMetaData.map(cfm)
-      DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion())
-    }
-  }
+//  def loadSchemaFromYaml = {
+//    import collection.JavaConversions._
+//
+//    for (ksm: KSMetaData <- DatabaseDescriptor.readTablesFromYaml()) {
+//      for (cfm: CFMetaData <- ksm.cfMetaData().values())
+//        CFMetaData.map(cfm)
+//      DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion)
+//    }
+//  }
 }

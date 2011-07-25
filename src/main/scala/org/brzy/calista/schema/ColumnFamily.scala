@@ -13,6 +13,9 @@
  */
 package org.brzy.calista.schema
 
+import org.brzy.calista.ocm.Calista
+import org.brzy.calista.Session
+
 /**
  * Represents a column family to query in the database.
  *
@@ -31,9 +34,18 @@ case class ColumnFamily(name: String) {
 	 */
   def |^[T](key: T)(implicit t: Manifest[T]) = SuperKey(key, this)
 
+  def key[T](key: T)(implicit t: Manifest[T]) = {
+    val family = Calista.value.asInstanceOf[Session].ksDef.families.find(_.name == name).get
+
+    if(family.columnType == "Standard")
+      StandardKey(key, this)
+    else
+      SuperKey(key,this)
+  }
+
 	/**
 	 * Create a key range from this key family used to query the datastore.
 	 */
-  def \[T,C](start: T, end: T, columns:List[C], count: Int = 100) = 
+  def \[T,C](start: T, end: T, columns:List[C], count: Int = 100) =
 			KeyRange(start, end, SlicePredicate(columns, null), this, count)
 }

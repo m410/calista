@@ -14,7 +14,6 @@
 package org.brzy.calista
 
 import org.apache.cassandra.thrift.Cassandra
-import org.apache.cassandra.config.{KSMetaData, CFMetaData, DatabaseDescriptor}
 
 import org.apache.thrift.transport.{TSocket, TFramedTransport}
 import org.apache.thrift.protocol.TBinaryProtocol
@@ -47,13 +46,12 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
     val client = new Cassandra.Client(protocol, protocol)
-    sock.open
+    sock.open()
 
     try {
       val ksdef = client.describe_keyspace(keyspace)
       KeyspaceDefinition(ksdef.name,
       ksdef.strategy_class,
-      ksdef.replication_factor,
       ksdef.cf_defs.map(cfdef=>{
         FamilyDefinition(cfdef.name,
           cfdef.column_type,
@@ -66,7 +64,7 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
       )
     }
     finally {
-      sock.close
+      sock.close()
     }
   }
 
@@ -77,13 +75,13 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
     val client = new Cassandra.Client(protocol, protocol)
-    sock.open
+    sock.open()
 
     try {
       client.describe_cluster_name
     }
     finally {
-      sock.close
+      sock.close()
     }
   }
 
@@ -94,30 +92,30 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
     val client = new Cassandra.Client(protocol, protocol)
-    sock.open
+    sock.open()
 
     try {
       client.describe_version
     }
     finally {
-      sock.close
+      sock.close()
     }
   }
   
-	/**
-	 * Tells the cassandra server to load a configuration from it's own configuration file.  As of version
-	 * 7 of cassandra, the configurations are not automatically loaded, you have to do it via
-	 * cassandera-cli tool or via this api.
-	 */
-	def loadSchemaFromConfig = {
-    import collection.JavaConversions._
-
-    for (ksm: KSMetaData <- DatabaseDescriptor.readTablesFromYaml()) {
-      for (cfm: CFMetaData <- ksm.cfMetaData().values())
-        CFMetaData.map(cfm)
-      DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion())
-    }
-  }
+//	/**
+//	 * Tells the cassandra server to load a configuration from it's own configuration file.  As of version
+//	 * 7 of cassandra, the configurations are not automatically loaded, you have to do it via
+//	 * cassandera-cli tool or via this api.
+//	 */
+//	def loadSchemaFromConfig = {
+//    import collection.JavaConversions._
+//
+//    for (ksm: KSMetaData <- DatabaseDescriptor.readTablesFromYaml()) {
+//      for (cfm: CFMetaData <- ksm.cfMetaData().values())
+//        CFMetaData.map(cfm)
+//      DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion())
+//    }
+//  }
 
 	/**
 	 * This creates a new session to interact with cassandra using the configured keyspaceDefinition and
@@ -131,10 +129,10 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
 	/**
 	 * Manaages the life cycle of a session automatically.
 	 */
-  def doWith(f: (Session) => Unit) = {
+  def doWith(f: (Session) => Unit) {
     val session = createSession
     f(session)
-    session.close
+    session.close()
   }
 }
 

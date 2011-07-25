@@ -37,9 +37,12 @@ import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassand
  * by the SessionManager class, and Initialized with default values.  Socket connections
  * to the datastore are lazily initialized and are keep open until session.close is called.
  *
+ * Thrift api reference:
+ * https://github.com/apache/cassandra/blob/cassandra-0.8/interface/cassandra.thrift
+ *
  * @param host the host to connect too.
- * @param ksDef The KeySpace Defininition used as a reference to map requests to the datastore.
- * @param defaultConsistency The Default consistency to use when connecting to the datastore.  It
+ * @param ksDef The KeySpace Defininition used as a reference to map requests to the data store.
+ * @param defaultConsistency The Default consistency to use when connecting to the data store.  It
  * 				defaults to Consistency.ONE.
  *
  * @author Michael Fortin
@@ -65,7 +68,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     case EACH_QUORUM => ConsistencyLevel.EACH_QUORUM
     case LOCAL_QUORUM => ConsistencyLevel.LOCAL_QUORUM
     case Consistency.All => ConsistencyLevel.ALL
-    case _ => error("Unknown Level")
+    case _ => sys.error("Unknown Level")
   }
 
   private[this] implicit def toColumnPath(c: ColumnPath) = {
@@ -85,7 +88,11 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] implicit def toColumn(c: Column[_, _]) = {
-    new CassandraColumn(c.nameBytes, c.valueBytes, c.timestamp.getTime)
+    val ccol = new CassandraColumn()
+    ccol.setName(c.nameBytes)
+    ccol.setValue(c.valueBytes)
+    ccol.setTimestamp(c.timestamp.getTime)
+    ccol
   }
 
   private[this] implicit def toSlicePredicate(sp: SlicePredicate[_]) = {
@@ -103,9 +110,9 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     if (cos.column != null)
       RColumn(cos.column.getName, cos.column.getValue, new Date(cos.column.getTimestamp))
     else {
-			val sCol = cos.getSuper_column()
-			val cols = sCol.getColumns().map(c=>RColumn(c.getName(), c.getValue(), new Date(c.getTimestamp()))).toList
-			RSuperColumn(sCol.getName(), null, cols)
+			val sCol = cos.getSuper_column
+			val cols = sCol.getColumns.map(c=>RColumn(c.getName, c.getValue, new Date(c.getTimestamp))).toList
+			RSuperColumn(sCol.getName, null, cols)
 		}
   }
 
@@ -118,7 +125,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * socket connections are lazily and implicitly opened, but must be explicitly closed.  To end
    * a session this must be called.
 	 */
-  def close = {
+  def close() {
     if (openSock)
       sock.close()
   }
@@ -149,7 +156,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column[_, _], level: Consistency = defaultConsistency) = {
+  def insert(column: Column[_, _], level: Consistency = defaultConsistency) {
     log.debug("insert: {}",column)
     client.insert(keyFor(column), column.columnParent, column, level)
   }
@@ -157,21 +164,21 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 * Remove a column and it's value.
    */
-  def remove(column: Column[_, _]): Unit = {
+  def remove(column: Column[_, _]) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
 	/**
 	 * Remove a key and all it's child columns by using the default consistency level.
    */
-	def remove(key: StandardKey[_]): Unit = {
+	def remove(key: StandardKey[_]) {
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 
 	/**
 	 * Removes a key by the path and timestamp with the given consistency level.
    */
-  def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency): Unit = {
+  def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency) {
     client.remove(k, path, timestamp, level)
   }
 
@@ -225,14 +232,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 	/**
-	 * List all the columns by slice range. This uses the default consistencey.
+	 * List all the columns by slice range. This uses the default consistency.
    */
   def sliceRange(range: SliceRange[_]): List[ColumnOrSuperColumn] = {
     sliceRange(range, defaultConsistency)
   }
 
 	/**
-	 * List all the columns by slice range and Consistency Level. This uses the default consistencey.
+	 * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
   def sliceRange(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
     log.debug("range slice: " + range)
@@ -275,13 +282,13 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         partial(index -1)
       }
 
-      def remove = {}
+      def remove(){}
     }
   }
 
 
   /**
-   * Queries the datastore by returning the key range inclusively.
+   * Queries the data store by returning the key range inclusively.
    */
   def keyRange(range: KeyRange[_,_], level: Consistency = defaultConsistency):List[KeySlice] = {
     val columnParent = range.columnParent
@@ -310,7 +317,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * Batch mutation, <b>This is not Implemented</b>
 	 */
   def batch(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
-    error("Not Implemented yet")
+    sys.error("Not Implemented yet")
   }
 
 }
