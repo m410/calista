@@ -2,6 +2,7 @@ package org.brzy.calista.results
 
 import java.nio.ByteBuffer
 import org.brzy.calista.serializer.Serializers
+import java.util.Date
 
 /**
  * Document Me..
@@ -14,7 +15,8 @@ case class Row(
         key:ByteBuffer,
         superColumn:ByteBuffer,
         column:ByteBuffer,
-        value:ByteBuffer) {
+        value:ByteBuffer,
+        timestamp:Date) {
 
   def keyAs[T:Manifest]:T = as[T](key)
 
