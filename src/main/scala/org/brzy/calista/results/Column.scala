@@ -23,6 +23,7 @@ import org.brzy.calista.serializer.{Serializers, UTF8Serializer, Serializer}
  *
  * @author Michael Fortin
  */
+@deprecated
 case class Column(name: Array[Byte], value: Array[Byte], timestamp: Date) extends ColumnOrSuperColumn {
 	
 	/**

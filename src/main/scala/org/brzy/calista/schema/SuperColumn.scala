@@ -16,34 +16,56 @@ package org.brzy.calista.schema
 import java.nio.ByteBuffer
 import java.util.Date
 import org.brzy.calista.serializer.Serializers
+import org.brzy.calista.FamilyDefinition
 
 /**
  * A super column in a cassandra datastore.
  *
  * @author Michael Fortin
  */
-protected case class SuperColumn[T](key: T, parent: SuperKey[_])(implicit m: Manifest[T])
-        extends Key with ColumnOrSuperColumn {
+protected case class SuperColumn[T:Manifest](key: T, parent: SuperKey[_],familyDef:FamilyDefinition)
+        extends Key
+        with ColumnOrSuperColumn {
 
-	/**
-	 * Used by the DSL to create a Column from this key, using this super column as the parent.
-	*/
-  def |[N, V](sKey: N, value: V = null, timestamp: Date = new Date())(implicit n: Manifest[N], v: Manifest[V]) =
-    Column(sKey, value, timestamp, this)
-
-  /**
-	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-	 */
-  def \\[A<:AnyRef](columns:List[A]) = SlicePredicate(columns,this)
-
-	/**
-	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
-	 */
-  def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
+  def nodePath = parent.nodePath + ":SuperColumn("+key+")"
 
   def keyBytes = Serializers.toBytes(key)
 
   def family = parent.family
 
   def columnPath = ColumnPath(parent.family.name,keyBytes,null)
+
+  override def |[N: Manifest](name: N) = {
+    if (familyDef.columnType == "Standard")
+      column(name,this)
+    else
+      counter(name,this)
+  }
+
+  def column[N: Manifest](name: N) = ColumnName(name,this)
+
+  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
+
+  override def |[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) =
+    column(sKey, value, timestamp)
+
+  def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) =
+    Column(sKey, value, timestamp, this)
+
+  /**
+	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+	 */
+  override def \[A:Manifest](columns:Array[A]) = slicePredicate(columns).resultSet
+
+  def slicePredicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
+
+	/**
+	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
+	 */
+  override def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
+    sliceRange(start,end, reverse, count).resultSet
+
+  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) =
+    SliceRange(start,end, reverse, count,this)
+
 }

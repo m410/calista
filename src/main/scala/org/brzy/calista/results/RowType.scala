@@ -9,7 +9,9 @@ import org.scalastuff.scalabeans.Enum
  */
 class RowType private ()
 object RowType extends Enum[RowType] {
+  val Empty = new RowType
   val Standard = new RowType
+  val StandardCounter = new RowType
   val Super = new RowType
-  val Counter = new RowType
+  val SuperCounter = new RowType
 }

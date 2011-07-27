@@ -19,6 +19,7 @@ import org.brzy.calista.serializer.{UTF8Serializer, Serializer}
 
 import org.slf4j.LoggerFactory
 import collection.JavaConversions._
+import com.sun.tools.doclets.standard.Standard
 
 /**
  * Defines the object to column mapping.
@@ -33,7 +34,7 @@ import collection.JavaConversions._
 case class Mapping[T <: StandardEntity[_] : Manifest](
         family: String,
         columnNameSerializer: Serializer[_],
-        attributes: Attribute*) {
+        attributes: MappingAttribute*) {
   protected[this] val log = LoggerFactory.getLogger(classOf[Mapping[_]])
 
 	/**
@@ -80,22 +81,23 @@ case class Mapping[T <: StandardEntity[_] : Manifest](
 	 */
   def toColumns(t: T): List[SColumn[_, _]] = {
     import org.brzy.calista.schema.Conversions._
-    val key = attributes.find(_.isInstanceOf[Key]).get
-    val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
-    val clazz = t.getClass
-    attributes.filter(a=>{!a.isInstanceOf[Key] && !a.isInstanceOf[SuperColumn]}).map(a=>{
-      val col = a.asInstanceOf[Column]
-      val colValue = clazz.getMethod(col.name).invoke(t)
-      val k = clazz.getMethod("key").invoke(t)
-
-      superColOption match {
-        case Some(s) =>
-          val suCol = clazz.getMethod("superColumn").invoke(t)
-          family |^ k | suCol | (col.name, colValue)
-        case _ =>
-          family | k | (col.name, colValue)
-      }
-    }).toList
+//    val key = attributes.find(_.isInstanceOf[Key]).get
+//    val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
+//    val clazz = t.getClass
+//    attributes.filter(a=>{!a.isInstanceOf[Key] && !a.isInstanceOf[SuperColumn]}).map(a=>{
+//      val col = a.asInstanceOf[Column]
+//      val colValue = clazz.getMethod(col.name).invoke(t)
+//      val k = clazz.getMethod("key").invoke(t)
+//
+//      superColOption match {
+//        case Some(s) =>
+//          val suCol = clazz.getMethod("superColumn").invoke(t)
+//          family |^ k | suCol | (col.name, colValue)
+//        case _ =>
+//          family | k | (col.name, colValue)
+//      }
+//    }).toList
+    List.empty[SColumn[_, _]]
   }
 
 	/**
@@ -103,7 +105,7 @@ case class Mapping[T <: StandardEntity[_] : Manifest](
 	 */
   def toKey(t: T): StandardKey[_] = {
     import org.brzy.calista.schema.Conversions._
-    family | t.key
+    {family | t.key}.asInstanceOf[StandardKey[_]]
   }
 }
 

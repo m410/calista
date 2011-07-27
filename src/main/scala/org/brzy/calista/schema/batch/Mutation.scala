@@ -1,4 +1,4 @@
-package org.brzy.calista.schema
+package org.brzy.calista.schema.batch
 
 /**
  * Not Implemented, used for batch update operations.

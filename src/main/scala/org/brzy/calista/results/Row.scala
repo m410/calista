@@ -29,3 +29,7 @@ case class Row(
   protected[this] def as[T:Manifest](b:ByteBuffer):T =
       Serializers.fromClassBytes(manifest[T].erasure,b.array()).asInstanceOf[T]
 }
+
+object Row {
+  def empty = Row(RowType.Empty,null,null,null,null,null,null)
+}

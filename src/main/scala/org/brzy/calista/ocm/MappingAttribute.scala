@@ -20,27 +20,27 @@ import org.brzy.calista.serializer.UTF8Serializer
  *
  * @author Michael Fortin
  */
-sealed class Attribute
+sealed class MappingAttribute
 
 /**
  * An attribute of a scala object that is mapped to a cassandra column.
  *
  * @param serializer How to read and write the datatype to the database.
  */
-case class Key(serializer: Serializer[_] = UTF8Serializer) extends Attribute
+case class Key(serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 /**
  * An attribute of a scala object that is mapped to a cassandra column.
  *
  * @param serializer How to read and write the datatype to the database.
  */
-case class SuperColumn(serializer: Serializer[_] = UTF8Serializer) extends Attribute
+case class SuperColumn(serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 /**
  * An attribute of a scala object that is mapped to a cassandra column.
  *
  * @param serializer How to read and write the datatype to the database.
  */
-case class Column(name: String, serializer: Serializer[_] = UTF8Serializer) extends Attribute
+case class Column(name: String, serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 

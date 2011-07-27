@@ -9,6 +9,7 @@ import java.util.Date
  * 
  * @author Michael Fortin
  */
+@deprecated
 trait ColumnNameValue[N,V] {
 
   def value:V

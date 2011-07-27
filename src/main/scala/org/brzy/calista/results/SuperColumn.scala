@@ -22,6 +22,7 @@ import org.brzy.calista.serializer.{Serializers, Serializer}
  *
  * @author Michael Fortin
  */
+@deprecated
 case class SuperColumn[T](bytes: Array[Byte], serializer: Serializer[T], columns: List[Column])
         extends ColumnOrSuperColumn {
 

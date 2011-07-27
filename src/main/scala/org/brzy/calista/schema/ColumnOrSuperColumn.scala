@@ -20,6 +20,7 @@ package org.brzy.calista.schema
  * @author Michael Fortin
  * @version $Id: $
  */
+@deprecated
 trait ColumnOrSuperColumn {
 
   /**

@@ -19,6 +19,7 @@ package org.brzy.calista.ocm
  * 
  * @author Michael Fortin
  */
+@deprecated
 trait StandardEntity[T] {
 	def key:T
 }
@@ -26,6 +27,7 @@ trait StandardEntity[T] {
 /**
  * 
  */
+@deprecated
 trait SuperEntity[T,S] extends StandardEntity[T] {
   def superColumn:S
 }

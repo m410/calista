@@ -20,7 +20,7 @@ import java.nio.ByteBuffer
  * 
  * @author Michael Fortin
  */
-trait Key {
+trait Key extends DslNode {
   def keyBytes:ByteBuffer
   def family:ColumnFamily
   def columnPath:ColumnPath

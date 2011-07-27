@@ -12,13 +12,13 @@ import org.brzy.calista.results.{Row, ResultSet}
  */
 trait DslNode {
 
-  def nodeName: String
+  def nodePath: String
 
   /**
    * @returns can be a key, super key, a super column, or a column with name only.
    */
   def |[N: Manifest](name: N): DslNode =
-    throw new InvalidNodeUseException(nodeName)
+    throw new InvalidNodeUseException(nodePath)
 
   /**
    * This is only implemented on keys and super columns.  This creates a column that is not
@@ -27,8 +27,8 @@ trait DslNode {
    *
    * @returns describes a full column
    */
-  def |[N: Manifest, V: Manifest](key: N, value: V = null, timestamp: Date = new Date()): Column[N, V] =
-    throw new InvalidNodeUseException(nodeName)
+  def |[N: Manifest, V: Manifest](key: N, value: V = null, timestamp: Date): Column[N, V] =
+    throw new InvalidNodeUseException(nodePath)
 
   /**
    * SlicePredicate
@@ -36,7 +36,7 @@ trait DslNode {
    * @returns a result set of rows
    */
   def \[N: Manifest](name: Array[N]): ResultSet =
-    throw new InvalidNodeUseException(nodeName)
+    throw new InvalidNodeUseException(nodePath)
 
   /**
    * SliceRange, this can be called from a key or a super column, it returns a list or rows. It
@@ -44,26 +44,32 @@ trait DslNode {
    *
    * @returns a result set of rows
    */
-  def \\[N: Manifest](begin: N, end: N, reverse: Boolean = false, max: Int = 100): ResultSet =
-    throw new InvalidNodeUseException(nodeName)
+  def \\[N: Manifest](begin: N, end: N, reverse: Boolean, max: Int): ResultSet =
+    throw new InvalidNodeUseException(nodePath)
 
   /**
    * called on counter column nodes only, this adds the value to the counter column name.
    */
   def +=(amount: Long) {
-    throw new InvalidNodeUseException(nodeName)
+    throw new InvalidNodeUseException(nodePath)
   }
 
   /**
    * called on counter column nodes only, this subtracts the value to the counter column name.
    */
   def -=(amount: Long) {
-    throw new InvalidNodeUseException(nodeName)
+    throw new InvalidNodeUseException(nodePath)
   }
 
   /**
-   * Only applies to standard columns or counter columns with names only.  This sets the value to
+   * Only applies to standard columns with names only.  This sets the value to
    * the column.
    */
-  def <=[N: Manifest](name: N) = throw new InvalidNodeUseException(nodeName)
+  def <=[N: Manifest](value: N){
+    throw new InvalidNodeUseException(nodePath)
+  }
+
+  def as[V:Manifest]:V = throw new InvalidNodeUseException(nodePath)
+
+  def count:Long = throw new InvalidNodeUseException(nodePath)
 }

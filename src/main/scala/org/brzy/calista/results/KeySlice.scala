@@ -9,6 +9,7 @@ import org.brzy.calista.serializer.Serializer
  * 
  * @author Michael Fortin
  */
+@deprecated
 case class KeySlice(key:Array[Byte],columns:List[ColumnOrSuperColumn]) {
   def keyAs[T](s:Serializer[T]):T = s.fromBytes(key)
 }

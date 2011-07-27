@@ -15,6 +15,7 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.serializer.Serializers._
+import org.brzy.calista.FamilyDefinition
 
 /**
  * A key can have one of two parents, a super column or a column family.  This is a standard
@@ -22,28 +23,46 @@ import org.brzy.calista.serializer.Serializers._
  * 
  * @author Michael Fortin
  */
-protected case class StandardKey[T](key:T, family:ColumnFamily)(implicit m:Manifest[T]) extends Key {
+protected case class StandardKey[T:Manifest](key:T, family:ColumnFamily, familyDef:FamilyDefinition)
+        extends Key {
 
-  def keyBytes = {
-    val buf = toBytes(key)
-    buf
-  }
+
+  def nodePath = family.nodePath + ":StandardKey("+key+")"
+
+  def keyBytes = toBytes(key)
 
   def columnPath = ColumnPath(family.name,null,null)
 
-	/**
-	 * Used by the DSL to create a column from this key, and setting this key as the columns parent.
-	 */
-  def |[N,V](key:N,value:V = null,timestamp:Date = new Date())(implicit n:Manifest[N],v:Manifest[V]) =
-    Column(key,value,timestamp,this)
+  override def |[N: Manifest](name: N) = {
+    if (familyDef.columnType == "Standard")
+      column(name,this)
+    else
+      counter(name,this)
+  }
 
+  def column[N: Manifest](name: N) = ColumnName(name,this)
+
+  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
+
+  override def |[N:Manifest,V:Manifest](key:N,value:V = null,timestamp:Date = new Date()) =
+    column(key,value,timestamp)
+
+  def column[N:Manifest,V:Manifest](key:N,value:V,timestamp:Date) =
+    Column(key,value,timestamp,this)
+  
 	/**
 	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
 	 */
-  def \\[A<:AnyRef](columns:List[A]) = SlicePredicate(columns,this)
+  override def \[A:Manifest](columns:Array[A]) = predicate(columns).resultSet
+
+  def predicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
   
 	/**
 	 * Used by the DSL to create a SliceRange from this key, using this key as the parent.
 	 */
-  def \[A](start:A,end:A,count:Int = 100) = SliceRange(start,end,true, count,this)
+  override def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
+      sliceRange(start,end,reverse, count).resultSet
+
+  def sliceRange[T:Manifest](start:T,end:T,reverse:Boolean,count:Int) =
+      SliceRange(start,end,reverse, count,this)
 }

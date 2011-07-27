@@ -15,6 +15,7 @@ package org.brzy.calista.schema
 
 import java.nio.ByteBuffer
 import org.brzy.calista.serializer.Serializers
+import org.brzy.calista.results.{Row, ResultSet}
 
 /**
  * Used to query the datastore, and only return columns within the provided list.
@@ -25,12 +26,15 @@ import org.brzy.calista.serializer.Serializers
  *
  * @author Michael Fortin
  */
-protected case class SlicePredicate[T](columns: List[T], key: Key) {
+protected case class SlicePredicate[T](columns: Array[T], key: Key) {
 
-  def toByteList = columns.map(c => Serializers.toBytes(c))
+  def toByteList = columns.map(c => Serializers.toBytes(c)).toList
 
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
+
+  // TODO fix me
+  def resultSet = ResultSet(List.empty[Row])
 }

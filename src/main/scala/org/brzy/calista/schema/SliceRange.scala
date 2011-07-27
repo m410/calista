@@ -14,6 +14,7 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.serializer.Serializers
+import org.brzy.calista.results.{Row, ResultSet}
 
 /**
  * Slice of columns under a key.
@@ -43,4 +44,6 @@ protected case class SliceRange[T](start: T, finish: T, reverse: Boolean = false
     case s: SuperKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
+
+  def resultSet = ResultSet(List.empty[Row])
 }

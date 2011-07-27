@@ -17,39 +17,46 @@ import org.brzy.calista.ocm.Calista
 import org.brzy.calista.Session
 
 /**
- * Represents a column family to query in the database.
+ * Represents a column family to query in the database.  This is the entry point to DSL access
+ * to the datastore.
  *
  * @param name the name of the column family.
  * @author Michael Fortin
  */
-case class ColumnFamily(name: String) {
+case class ColumnFamily(name: String) extends DslNode {
 
-  type StandardOrCounterOrSuperKey = Either[StandardKey[_],SuperKey[_]]
+  def nodePath = "Family('"+name+"')"
 
-	/**
-	 * Add a child key to the column family, return that key.  
-	 */
-  def |[T](key: T)(implicit t: Manifest[T]) = StandardKey(key, this)
-
-	/**
-	 * Add a child super column to the column family, return that super column.  
-	 */
-  def |^[T](key: T)(implicit t: Manifest[T]) = SuperKey(key, this)
-
-  def key[T](key: T)(implicit t: Manifest[T]):StandardOrCounterOrSuperKey = {
-    val family = Calista.value.asInstanceOf[Session].ksDef.families.find(_.name == name).get
-
-    if (family.columnType == "Standard")
-      Left(StandardKey(key, this)) // pass along the column family definition
-    else if (family.columnType == "Counter")
-      Left(StandardKey(key, this))
-    else
-      Right(SuperKey(key,this))
+  override def |[T:Manifest](k: T) = key(k) match {
+    case Left(l) => l
+    case Right(r) => r
   }
 
-	/**
-	 * Create a key range from this key family used to query the datastore.
-	 */
-  def \[T,C](start: T, end: T, columns:List[C], count: Int = 100) =
-			KeyRange(start, end, SlicePredicate(columns, null), this, count)
+  /**
+   * Non DSL access to the key under the column family.  This will return either a standard key
+   * or a super key.  The type of key is discovered by the meta data on the datastore.
+   *
+   * @returns
+   * @throws UnknownFamilyException if the family name does not exist in the data store.
+   */
+  def key[T:Manifest](key: T):Either[StandardKey[T],SuperKey[T]] = {
+    val family = Calista.value.asInstanceOf[Session].ksDef.families.find(_.name == name) match {
+      case Some(f) => f
+      case _ => throw new UnknownFamilyException("No ColumnFamily with name: '" + name +"'")
+    }
+
+    if (family.columnType == "Standard")
+      Left(StandardKey(key, this, family)) // pass along the column family definition
+    else if (family.columnType == "Counter")
+      Left(StandardKey(key, this, family))
+    else
+      Right(SuperKey(key,this, family))
+  }
+
+
+//	/**
+//	 * Create a key range from this key family used to query the datastore.
+//	 */
+//  override def \\[N: Manifest](begin: N, end: N, reverse: Boolean = false, max: Int = 100) =
+//			KeyRange(begin, end, SlicePredicate(columns, null), this, max)
 }

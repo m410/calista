@@ -13,7 +13,7 @@
  */
 package org.brzy.calista
 
-import results.{KeySlice, Column => RColumn, SuperColumn => RSuperColumn}
+import results.{RowType, Row, KeySlice, Column => RColumn, SuperColumn => RSuperColumn}
 import schema._
 import schema.Consistency._
 import serializer.Serializers
@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 
 
 import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange}
+import org.apache.ivy.plugins.version.Match
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It
@@ -107,7 +108,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   private[this] def fromColumnOrSuperColumn(cos: CassandraColumnOrSuperColumn) = {
     if (cos == null)
       null
-    if (cos.column != null)
+    else if (cos.column != null)
       RColumn(cos.column.getName, cos.column.getValue, new Date(cos.column.getTimestamp))
     else {
 			val sCol = cos.getSuper_column
@@ -119,6 +120,34 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   private[this] def keyFor(c: Column[_, _]) = c.parent match {
     case s: StandardKey[_] => s.keyBytes
     case s: SuperColumn[_] => s.parent.keyBytes
+  }
+
+  private def toRow(cos: CassandraColumnOrSuperColumn,query:Column[_,_]):List[Row] = {
+    if (cos == null)
+      List.empty[Row]
+    else if (cos.column != null) { //rowType,family,key,superColumn,column,value,Date
+      val familyName = query.parent.family.name
+      val name = cos.column.getName
+      val value = cos.column.getValue
+      val timestamp = new Date(cos.column.getTimestamp)
+      val key = query.name //TODO Probably wrong
+      List(Row(RowType.Standard, familyName, key, null, name, value, timestamp))
+    }
+    else if (cos.getSuper_column != null) {
+      val rType = RowType.Super
+			val sCol = cos.getSuper_column
+      val fName = query.parent.family.name
+      val key = query.name //TODO Probably wrong
+      sCol.getColumns.map(c=>{
+        Row(rType,fName,key,sCol.getName, c.getName, c.getValue, new Date(c.getTimestamp))
+      }).toList
+		}
+    else if (cos.getCounter_column != null) {
+      List.empty[Row]
+    }
+    else if (cos.getCounter_super_column != null) {
+      List.empty[Row]
+    }
   }
 
 	/**
@@ -135,6 +164,8 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * return a results.Column with the name and value
    */
   def get(column: Column[_, _]): Option[ColumnOrSuperColumn] = get(column, defaultConsistency)
+
+  def add(column: Column[_, _]): Row = null// todo STUBBED  
 
   /**
    * Read the value of a single column, with the given consistency.
