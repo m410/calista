@@ -15,6 +15,7 @@ package org.brzy.calista.ocm
 
 import org.brzy.calista.results.{KeySlice, Column=>RColumn}
 import org.brzy.calista.schema.{ColumnFamily}
+import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
 
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
@@ -39,8 +40,8 @@ trait StandardDao[K, T <: StandardEntity[K]] {
 	 * Get an instance of the mapped class by it's key.
 	 */
 	def apply(key: K)(implicit t: Manifest[K]): T = {
-    import org.brzy.calista.schema.Conversions._
-    val columns = session.list(mapping.family | key)
+    val query = ColumnFamily(mapping.family).standardKey(key)
+    val columns = session.list(query)
     mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]])
 	}
 
@@ -48,8 +49,8 @@ trait StandardDao[K, T <: StandardEntity[K]] {
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
   def get(key: K)(implicit t: Manifest[K]): Option[T] = {
-    import org.brzy.calista.schema.Conversions._
-    val columns = session.list(mapping.family | key)
+    val query = ColumnFamily(mapping.family).standardKey(key)
+    val columns = session.list(query)
 
     if (columns.size > 0)
       Option(mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]]))
@@ -67,10 +68,12 @@ trait StandardDao[K, T <: StandardEntity[K]] {
 	 */
   def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
     val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
-    session.keyRange(ColumnFamily(mapping.family).\(start, end, names, count)).map(ks => {
-      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.asInstanceOf[Key].serializer
-      mapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[RColumn]])
-    })
+    // TODO FIX ME
+//    session.keyRange(ColumnFamily(mapping.family).\(start, end, names, count)).map(ks => {
+//      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.asInstanceOf[Key].serializer
+//      mapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[RColumn]])
+//    })
+    List.empty[T]
   }
 
 	/**

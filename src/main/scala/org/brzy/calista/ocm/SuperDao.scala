@@ -39,8 +39,8 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 	 * Get an instance of the mapped class by it's key.
 	 */
 	def apply(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): T = {
-    import org.brzy.calista.schema.Conversions._
-    val columns = session.list(mapping.family |^ key | superColumn)
+    val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
+    val columns = session.list(queryCol)
     mapping.newInstance(key, superColumn, columns.asInstanceOf[List[RColumn]])
 	}
 
@@ -48,8 +48,8 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
   def get(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): Option[T] = {
-    import org.brzy.calista.schema.Conversions._
-    val columns = session.list(mapping.family |^ key | superColumn)
+    val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
+    val columns = session.list(queryCol)
 
     if (columns.size > 0)
       Option(mapping.newInstance(key,superColumn, columns.asInstanceOf[List[RColumn]]))
@@ -59,7 +59,7 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 
 	/**
 	 * List instances of this type by providing a start key and an end key. Note that this may not return
-	 * the order that you would expect, depending on the partitioner you are using.
+	 * the order that you would expect, depending on the practitioner you are using.
 	 *
 	 * @param start The first key to return.
 	 * @param end The last key to return
@@ -67,10 +67,12 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 	 */
   def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
     val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
-    session.keyRange(ColumnFamily(mapping.family).\(start, end, names, count)).map(ks => {
-      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.asInstanceOf[Key].serializer
-      mapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[RColumn]])
-    })
+    // TODO FIX ME
+//    session.keyRange(ColumnFamily(mapping.family).\(start, end, names, count)).map(ks => {
+//      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.asInstanceOf[Key].serializer
+//      mapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[RColumn]])
+//    })
+    List.empty[T]
   }
 
 	/**

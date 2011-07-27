@@ -53,6 +53,15 @@ case class ColumnFamily(name: String) extends DslNode {
       Right(SuperKey(key,this, family))
   }
 
+  def superKey[T:Manifest](key: T):SuperKey[T] = {
+    val family = Calista.value.asInstanceOf[Session].ksDef.families.find(_.name == name).get
+    SuperKey(key,this, family)
+  }
+
+  def standardKey[T:Manifest](key: T):StandardKey[T] = {
+    val family = Calista.value.asInstanceOf[Session].ksDef.families.find(_.name == name).get
+    StandardKey(key,this, family)
+  }
 
 //	/**
 //	 * Create a key range from this key family used to query the datastore.

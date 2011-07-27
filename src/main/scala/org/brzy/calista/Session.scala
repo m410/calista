@@ -22,6 +22,7 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
 import collection.JavaConversions._
 import collection.mutable.HashMap
+import batch.Mutation
 
 import java.util.{Date,Iterator}
 import java.nio.ByteBuffer
@@ -122,30 +123,33 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     case s: SuperColumn[_] => s.parent.keyBytes
   }
 
-  private def toRow(cos: CassandraColumnOrSuperColumn,query:Column[_,_]):List[Row] = {
+  private def toRows(cos: CassandraColumnOrSuperColumn,query:Column[_,_]):List[Row] = {
     if (cos == null)
       List.empty[Row]
     else if (cos.column != null) { //rowType,family,key,superColumn,column,value,Date
       val familyName = query.parent.family.name
-      val name = cos.column.getName
-      val value = cos.column.getValue
+      val name = ByteBuffer.wrap(cos.column.getName)
+      val value = ByteBuffer.wrap(cos.column.getValue)
       val timestamp = new Date(cos.column.getTimestamp)
-      val key = query.name //TODO Probably wrong
+      val key = query.parent.keyBytes
       List(Row(RowType.Standard, familyName, key, null, name, value, timestamp))
     }
     else if (cos.getSuper_column != null) {
       val rType = RowType.Super
 			val sCol = cos.getSuper_column
       val fName = query.parent.family.name
-      val key = query.name //TODO Probably wrong
+      val key = query.parent.keyBytes
+      val sColName = ByteBuffer.wrap(sCol.getName)
       sCol.getColumns.map(c=>{
-        Row(rType,fName,key,sCol.getName, c.getName, c.getValue, new Date(c.getTimestamp))
+        val name = ByteBuffer.wrap(c.getName)
+        val value = ByteBuffer.wrap(c.getValue)
+        Row(rType,fName,key,sColName, name, value, new Date(c.getTimestamp))
       }).toList
 		}
     else if (cos.getCounter_column != null) {
       List.empty[Row]
     }
-    else if (cos.getCounter_super_column != null) {
+    else { // counter super column
       List.empty[Row]
     }
   }
@@ -227,21 +231,21 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * List all the columns under the given key.
    */
 	def list(key: StandardKey[_]): List[ColumnOrSuperColumn] = {
-    sliceRange(key.\("",""),defaultConsistency)
+    sliceRange(key.sliceRange("","",false,100),defaultConsistency)
   }
 
   /**
    * List all the columns under the given super column.
    */
   def list(sc: SuperColumn[_]): List[ColumnOrSuperColumn] = {
-    sliceRange(sc.\("",""),defaultConsistency)
+    sliceRange(sc.sliceRange("","",false,100),defaultConsistency)
   }
 
   /**
    * List all the super columns and columns under the key
    */
   def list(sc: SuperKey[_]): List[ColumnOrSuperColumn] = {
-    sliceRange(sc.\("",""),defaultConsistency)
+    sliceRange(sc.sliceRange("","",false,100),defaultConsistency)
   }
 
 	/**
