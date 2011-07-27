@@ -13,7 +13,7 @@
  */
 package org.brzy.calista
 
-import results.{RowType, Row, KeySlice, Column => RColumn, SuperColumn => RSuperColumn}
+import results.{ResultSet, RowType, Row, KeySlice, Column => RColumn, SuperColumn => RSuperColumn}
 import schema._
 import schema.Consistency._
 import serializer.Serializers
@@ -22,15 +22,13 @@ import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
 import collection.JavaConversions._
 import collection.mutable.HashMap
-import batch.Mutation
 
-import java.util.{Date,Iterator}
 import java.nio.ByteBuffer
 import org.slf4j.LoggerFactory
 
-
 import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange}
-import org.apache.ivy.plugins.version.Match
+import java.util.{Date, Iterator}
+import sun.jvm.hotspot.debugger.posix.elf.ELFSectionHeader
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It
@@ -38,7 +36,7 @@ import org.apache.ivy.plugins.version.Match
  * the classes in the schema package to classes in the thrift api.  Instances are created
  * by the SessionManager class, and Initialized with default values.  Socket connections
  * to the datastore are lazily initialized and are keep open until session.close is called.
- *
+ * <p>
  * Thrift api reference:
  * https://github.com/apache/cassandra/blob/cassandra-0.8/interface/cassandra.thrift
  *
@@ -106,6 +104,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     new CassandraSlicePredicate().setSlice_range(r)
   }
 
+  @deprecated
   private[this] def fromColumnOrSuperColumn(cos: CassandraColumnOrSuperColumn) = {
     if (cos == null)
       null
@@ -124,18 +123,20 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private def toRows(cos: CassandraColumnOrSuperColumn,query:Column[_,_]):List[Row] = {
-    if (cos == null)
+    if (cos == null) {
       List.empty[Row]
-    else if (cos.column != null) { //rowType,family,key,superColumn,column,value,Date
+    }
+    else if (cos.column != null || cos.getCounter_column != null) {
       val familyName = query.parent.family.name
       val name = ByteBuffer.wrap(cos.column.getName)
       val value = ByteBuffer.wrap(cos.column.getValue)
       val timestamp = new Date(cos.column.getTimestamp)
       val key = query.parent.keyBytes
-      List(Row(RowType.Standard, familyName, key, null, name, value, timestamp))
+      val rowType = if(cos.column != null) RowType.Standard else RowType.StandardCounter
+      List(Row(rowType, familyName, key, null, name, value, timestamp))
     }
-    else if (cos.getSuper_column != null) {
-      val rType = RowType.Super
+    else if (cos.getSuper_column != null || cos.getCounter_super_column != null) {
+      val rType = if(cos.getSuper_column != null) RowType.Super else RowType.SuperCounter
 			val sCol = cos.getSuper_column
       val fName = query.parent.family.name
       val key = query.parent.keyBytes
@@ -146,11 +147,8 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         Row(rType,fName,key,sColName, name, value, new Date(c.getTimestamp))
       }).toList
 		}
-    else if (cos.getCounter_column != null) {
-      List.empty[Row]
-    }
-    else { // counter super column
-      List.empty[Row]
+    else {
+      sys.error("Unknown column return type: '"+cos+"'" )
     }
   }
 
@@ -344,12 +342,22 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 
-
-	/**
-	 * Batch mutation, <b>This is not Implemented</b>
-	 */
-  def batch(mutations:List[Mutation], level: Consistency = defaultConsistency) = {
-    sys.error("Not Implemented yet")
+  def query(query:String,compression:String = ""):ResultSet = {
+    ResultSet(List.empty[Row])
   }
+
+  def addKeyspace(keyspace:KeyspaceDefinition){}
+  def updateKeyspace(keyspace:KeyspaceDefinition){}
+  def dropKeyspace(keyspace:KeyspaceDefinition){}
+
+  def addColumnFamily(family:FamilyDefinition){}
+  def updateColumnFamily(family:FamilyDefinition){}
+  def dropColumnFamily(family:FamilyDefinition){}
+
+  def describeKeyspace(name:String):KeyspaceDefinition = null
+  def describeKeyspaces():List[KeyspaceDefinition] = List.empty[KeyspaceDefinition]
+  def describeClusterName():String = ""
+  def describeRing(){}
+
 
 }
