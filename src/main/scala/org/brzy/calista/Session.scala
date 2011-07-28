@@ -13,7 +13,7 @@
  */
 package org.brzy.calista
 
-import results.{ResultSet, RowType, Row, KeySlice, Column => RColumn, SuperColumn => RSuperColumn}
+import results.{ResultSet, RowType, Row}
 import schema._
 import schema.Consistency._
 import serializer.Serializers
@@ -21,14 +21,13 @@ import serializer.Serializers
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
 import collection.JavaConversions._
-import collection.mutable.HashMap
 
 import java.nio.ByteBuffer
 import org.slf4j.LoggerFactory
 
 import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange}
 import java.util.{Date, Iterator}
-import sun.jvm.hotspot.debugger.posix.elf.ELFSectionHeader
+import javax.xml.transform.Result
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It
@@ -104,47 +103,30 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     new CassandraSlicePredicate().setSlice_range(r)
   }
 
-  @deprecated
-  private[this] def fromColumnOrSuperColumn(cos: CassandraColumnOrSuperColumn) = {
-    if (cos == null)
-      null
-    else if (cos.column != null)
-      RColumn(cos.column.getName, cos.column.getValue, new Date(cos.column.getTimestamp))
-    else {
-			val sCol = cos.getSuper_column
-			val cols = sCol.getColumns.map(c=>RColumn(c.getName, c.getValue, new Date(c.getTimestamp))).toList
-			RSuperColumn(sCol.getName, null, cols)
-		}
-  }
-
   private[this] def keyFor(c: Column[_, _]) = c.parent match {
     case s: StandardKey[_] => s.keyBytes
     case s: SuperColumn[_] => s.parent.keyBytes
   }
 
-  private def toRows(cos: CassandraColumnOrSuperColumn,query:Column[_,_]):List[Row] = {
+  private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {
     if (cos == null) {
       List.empty[Row]
     }
     else if (cos.column != null || cos.getCounter_column != null) {
-      val familyName = query.parent.family.name
       val name = ByteBuffer.wrap(cos.column.getName)
       val value = ByteBuffer.wrap(cos.column.getValue)
       val timestamp = new Date(cos.column.getTimestamp)
-      val key = query.parent.keyBytes
       val rowType = if(cos.column != null) RowType.Standard else RowType.StandardCounter
       List(Row(rowType, familyName, key, null, name, value, timestamp))
     }
     else if (cos.getSuper_column != null || cos.getCounter_super_column != null) {
       val rType = if(cos.getSuper_column != null) RowType.Super else RowType.SuperCounter
 			val sCol = cos.getSuper_column
-      val fName = query.parent.family.name
-      val key = query.parent.keyBytes
       val sColName = ByteBuffer.wrap(sCol.getName)
       sCol.getColumns.map(c=>{
         val name = ByteBuffer.wrap(c.getName)
         val value = ByteBuffer.wrap(c.getValue)
-        Row(rType,fName,key,sColName, name, value, new Date(c.getTimestamp))
+        Row(rType,familyName,key,sColName, name, value, new Date(c.getTimestamp))
       }).toList
 		}
     else {
@@ -165,19 +147,28 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * get the value of the column.  This assumes the input column does not have a value, this will
 	 * return a results.Column with the name and value
    */
-  def get(column: Column[_, _]): Option[ColumnOrSuperColumn] = get(column, defaultConsistency)
+  def get(column: Column[_, _]): Option[Row] = get(column, defaultConsistency)
 
-  def add(column: Column[_, _]): Row = null// todo STUBBED  
+  /**
+   * Increments a counter column.
+   */
+  // todo finish me
+  def add(column: Column[_, _]): Row = null
 
   /**
    * Read the value of a single column, with the given consistency.
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column[_, _], level: Consistency): Option[ColumnOrSuperColumn] = {
+  def get(column: Column[_, _], level: Consistency): Option[Row] = {
     try {
       val columnOrSuperColumn = client.get(keyFor(column), column.columnPath, level)
-      Option(fromColumnOrSuperColumn(columnOrSuperColumn))
+      val list = toRows(columnOrSuperColumn, column.parent.family.name, column.parent.keyBytes)
+
+      if (list.isEmpty)
+        Option(null)
+      else
+        Option(list.last)
     }
     catch {
       case e: NotFoundException =>
@@ -228,69 +219,77 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 * List all the columns under the given key.
    */
-	def list(key: StandardKey[_]): List[ColumnOrSuperColumn] = {
+	def list(key: StandardKey[_]): ResultSet = {
     sliceRange(key.sliceRange("","",false,100),defaultConsistency)
   }
 
   /**
    * List all the columns under the given super column.
    */
-  def list(sc: SuperColumn[_]): List[ColumnOrSuperColumn] = {
+  def list(sc: SuperColumn[_]): ResultSet = {
     sliceRange(sc.sliceRange("","",false,100),defaultConsistency)
   }
 
   /**
    * List all the super columns and columns under the key
    */
-  def list(sc: SuperKey[_]): List[ColumnOrSuperColumn] = {
+  def list(sc: SuperKey[_]): ResultSet = {
     sliceRange(sc.sliceRange("","",false,100),defaultConsistency)
   }
 
 	/**
 	 * List the columns by slice predicate.  This uses the default consistency.
    */
-  def slice(predicate: SlicePredicate[_]): List[ColumnOrSuperColumn] = {
+  def slice(predicate: SlicePredicate[_]): ResultSet = {
     slice(predicate, defaultConsistency)
   }
 
 	/**
 	 * List all the columns by slice predicate and consistency level.
    */
-  def slice(predicate: SlicePredicate[_], level: Consistency): List[ColumnOrSuperColumn] = {
+  def slice(predicate: SlicePredicate[_], level: Consistency): ResultSet = {
     val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
-    results.map(sc => fromColumnOrSuperColumn(sc)).toList
+    val family = predicate.columnParent.family
+    val key = predicate.key.keyBytes
+    ResultSet(results.flatMap(sc => { toRows(sc, family, key)}).toList)
   }
 
 	/**
 	 * List all the columns by slice range. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange[_]): List[ColumnOrSuperColumn] = {
+  def sliceRange(range: SliceRange[_]): ResultSet = {
     sliceRange(range, defaultConsistency)
   }
 
 	/**
 	 * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange[_], level: Consistency): List[ColumnOrSuperColumn] = {
+  def sliceRange(range: SliceRange[_], level: Consistency): ResultSet = {
     log.debug("range slice: " + range)
     val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
-    results.map(sc => fromColumnOrSuperColumn(sc)).toList
+    val key = range.key.keyBytes
+    val family = range.columnParent.family
+    ResultSet(results.flatMap(sc => { toRows(sc, family, key)}).toList)
   }
 
   /**
    *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
    *  iterate over all elements including the start and end columns.
    */
-  def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[ColumnOrSuperColumn] = {
-    new Iterator[ColumnOrSuperColumn] {
-      private[this] var partial = sliceRange(slice).asInstanceOf[List[ColumnOrSuperColumn]]
+  def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[Row] = {
+    new Iterator[Row] {
+      private[this] var partial = sliceRange(slice).asInstanceOf[List[Row]]
       private[this] var index = 0
 
       def hasNext:Boolean = {
         if(partial.size > 0 && index == partial.size) {
-          val partialLast:Array[Byte] = partial.last match {
-            case c:RColumn =>c.name
-            case s:RSuperColumn[_]=>s.bytes.array
+          import results.RowType._
+          val lastRow = partial.last
+          val partialLast:Array[Byte] = lastRow.rowType match {
+            case Standard => lastRow.column.array()
+            case StandardCounter => lastRow.column.array()
+            case Super => lastRow.superColumn.array()
+            case SuperCounter => lastRow.superColumn.array()
           }
           val sliceLast = slice.finishBytes.array
 
@@ -299,7 +298,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
               val pStart = Serializers.fromClassBytes(m.erasure,partialLast)
               val pFin = Serializers.fromClassBytes(m.erasure,sliceLast)
               val sliceCopy = slice.copy(start = pStart, finish = pFin)
-              sliceRange(sliceCopy).asInstanceOf[List[ColumnOrSuperColumn]]
+              sliceRange(sliceCopy).asInstanceOf[List[Row]]
             }
             index = 1 // skip the first, because the slice is inclusive
           }
@@ -307,7 +306,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         index < partial.size
       }
 
-      def next:ColumnOrSuperColumn = {
+      def next:Row = {
         index = index + 1
         partial(index -1)
       }
@@ -320,43 +319,58 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   /**
    * Queries the data store by returning the key range inclusively.
    */
-  def keyRange(range: KeyRange[_,_], level: Consistency = defaultConsistency):List[KeySlice] = {
+  def keyRange(range: KeyRange[_,_], level: Consistency = defaultConsistency): ResultSet = {
     val columnParent = range.columnParent
     val predicate = range.predicate
     val slice = client.get_range_slices(columnParent,predicate,range,level)
-    slice.map(k=>KeySlice(k.getKey,k.getColumns.map(c=>fromColumnOrSuperColumn(c)).toList)).toList
+    val family = range.columnParent.family
+    val list = slice.toList.flatMap(k=>{
+      k.getColumns.toList.flatMap(c=>{
+        val key = ByteBuffer.wrap(k.getKey)
+        toRows(c, family, key)})
+    })
+    ResultSet(list)
   }
 
 	/**
 	 * List all the columns by Key range using the default consistency.
    */
-  def keyRange[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): Map[T, List[ColumnOrSuperColumn]] = {
+  def keyRange[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): ResultSet = {
     val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
-    val map = HashMap[T, List[ColumnOrSuperColumn]]()
-    results.foreach(keyslice => {
-      val tKey = Serializers.fromBytes(range.start,ByteBuffer.wrap(keyslice.getKey))
-      val columnList = keyslice.getColumns.map(c => fromColumnOrSuperColumn(c)).toList
-      map += tKey -> columnList
+    val list = results.toList.flatMap(keyslice => {
+      val key = ByteBuffer.wrap(keyslice.getKey)
+      val family = range.columnParent.family
+      keyslice.getColumns.toList.flatMap(c => { toRows(c, family, key)})
     })
-    map.toMap
+    ResultSet(list)
   }
 
-
+  // todo finish me
   def query(query:String,compression:String = ""):ResultSet = {
     ResultSet(List.empty[Row])
   }
 
+  // todo finish me
   def addKeyspace(keyspace:KeyspaceDefinition){}
+  // todo finish me
   def updateKeyspace(keyspace:KeyspaceDefinition){}
+  // todo finish me
   def dropKeyspace(keyspace:KeyspaceDefinition){}
 
+  // todo finish me
   def addColumnFamily(family:FamilyDefinition){}
+  // todo finish me
   def updateColumnFamily(family:FamilyDefinition){}
+  // todo finish me
   def dropColumnFamily(family:FamilyDefinition){}
 
+  // todo finish me
   def describeKeyspace(name:String):KeyspaceDefinition = null
+  // todo finish me
   def describeKeyspaces():List[KeyspaceDefinition] = List.empty[KeyspaceDefinition]
+  // todo finish me
   def describeClusterName():String = ""
+  // todo finish me
   def describeRing(){}
 
 

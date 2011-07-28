@@ -19,8 +19,6 @@ import org.junit.Test
 import org.junit.Assert._
 import java.util.UUID
 import org.brzy.calista.serializer.{UUIDSerializer, UTF8Serializer}
-import org.brzy.calista.results.{Column=>RColumn}
-
 class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testSetAndGetStandardColumn = {

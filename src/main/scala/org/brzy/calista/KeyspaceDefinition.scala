@@ -14,7 +14,23 @@
 package org.brzy.calista
 
 /**
- * A description of the Keyspace and all it's attributes and elements.  
+ * A description of the Keyspace and all it's attributes and elements.
+ *
+ * This is just a proxy to the underlying casandra thrift object which looks like this:
+ * {{{
+ * /* describes a keyspace. */
+ * struct KsDef {
+ *     1: required string name,
+ *     2: required string strategy_class,
+ *     3: optional map<string,string> strategy_options,
+ *
+ *     /** @deprecated */
+ *     4: optional i32 replication_factor,
+ *
+ *     5: required list<CfDef> cf_defs,
+ *     6: optional bool durable_writes=1,
+ * }
+ * }}}
  * 
  * @see SessionManager.keyspaceDefinition
  * @author Michael Fortin

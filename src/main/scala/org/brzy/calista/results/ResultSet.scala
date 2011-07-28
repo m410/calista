@@ -22,6 +22,8 @@ import sun.java2d.SunGraphicsEnvironment.T1Filter
  */
 case class ResultSet(rows:List[Row]) {
 
+  def size = rows.size
+  
   /**
    * Converts the rows returned by the query into a map where the key is the column name.
    */

@@ -13,7 +13,6 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.results.{Column=>RColumn}
 import org.brzy.calista.schema.ColumnFamily
 
 /**
@@ -38,21 +37,21 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
 	/**
 	 * Get an instance of the mapped class by it's key.
 	 */
-	def apply(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): T = {
+	def apply[K:Manifest,S:Manifest](key: K, superColumn:Option[S] = None): T = {
     val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
     val columns = session.list(queryCol)
-    mapping.newInstance(key, superColumn, columns.asInstanceOf[List[RColumn]])
+    mapping.newInstance(key, superColumn, columns)
 	}
 
 	/**
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
-  def get(key: K, superColumn:S)(implicit k: Manifest[K],s: Manifest[S]): Option[T] = {
+  def get[K:Manifest,S:Manifest](key: K, superColumn:Option[S] = None): Option[T] = {
     val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
     val columns = session.list(queryCol)
 
     if (columns.size > 0)
-      Option(mapping.newInstance(key,superColumn, columns.asInstanceOf[List[RColumn]]))
+      Option(mapping.newInstance(key, superColumn, columns))
     else
       None
   }

@@ -30,8 +30,7 @@ import org.brzy.calista.serializer.{Serializers, UTF8Serializer}
  *
  * @author Michael Fortin
  */
-protected case class Column[K:Manifest, V:Manifest](name: K, value: V, timestamp: Date, parent: Key)
-        extends ColumnOrSuperColumn {
+protected case class Column[K:Manifest, V:Manifest](name: K, value: V, timestamp: Date, parent: Key) {
 	
 	/**
 	 * Return the name converted to bytes.

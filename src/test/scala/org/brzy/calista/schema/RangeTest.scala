@@ -18,7 +18,6 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.results.{SuperColumn=>RSuperColumn}
 import org.brzy.calista.serializer.UTF8Serializer
 
 

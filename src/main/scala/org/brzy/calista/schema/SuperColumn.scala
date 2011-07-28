@@ -24,8 +24,7 @@ import org.brzy.calista.FamilyDefinition
  * @author Michael Fortin
  */
 protected case class SuperColumn[T:Manifest](key: T, parent: SuperKey[_],familyDef:FamilyDefinition)
-        extends Key
-        with ColumnOrSuperColumn {
+        extends Key {
 
   def nodePath = parent.nodePath + ":SuperColumn("+key+")"
 

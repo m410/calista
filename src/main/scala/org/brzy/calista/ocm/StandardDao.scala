@@ -13,7 +13,6 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.results.{KeySlice, Column=>RColumn}
 import org.brzy.calista.schema.{ColumnFamily}
 import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
 
@@ -42,7 +41,7 @@ trait StandardDao[K, T <: StandardEntity[K]] {
 	def apply(key: K)(implicit t: Manifest[K]): T = {
     val query = ColumnFamily(mapping.family).standardKey(key)
     val columns = session.list(query)
-    mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]])
+    mapping.newInstance(key,None,columns)
 	}
 
 	/**
@@ -53,7 +52,7 @@ trait StandardDao[K, T <: StandardEntity[K]] {
     val columns = session.list(query)
 
     if (columns.size > 0)
-      Option(mapping.newInstance(key: K, columns.asInstanceOf[List[RColumn]]))
+      Option(mapping.newInstance(key, None, columns))
     else
       None
   }

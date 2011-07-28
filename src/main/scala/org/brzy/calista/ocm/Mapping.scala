@@ -13,13 +13,13 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.results.{Column=>RColumn}
-import org.brzy.calista.schema.{Column=>SColumn,StandardKey}
-import org.brzy.calista.serializer.{UTF8Serializer, Serializer}
+import org.brzy.calista.serializer.Serializer
+import org.brzy.calista.schema.{ColumnFamily, StandardKey,Column=>SColumn}
+import org.brzy.calista.results.{ResultSet, Row}
 
+import org.scalastuff.scalabeans.Preamble._
 import org.slf4j.LoggerFactory
-import collection.JavaConversions._
-import com.sun.tools.doclets.standard.Standard
+import java.util.Date
 
 /**
  * Defines the object to column mapping.
@@ -31,81 +31,76 @@ import com.sun.tools.doclets.standard.Standard
  *
  * @author Michael Fortin
  */
-case class Mapping[T <: StandardEntity[_] : Manifest](
+case class Mapping[T <: AnyRef : Manifest](
         family: String,
         columnNameSerializer: Serializer[_],
         attributes: MappingAttribute*) {
   protected[this] val log = LoggerFactory.getLogger(classOf[Mapping[_]])
 
-	/**
-	 * Creates a new instance from the key and list of columns.
-	 */
-  def newInstance[K](key:K, columns: List[RColumn]): T = newInstance(key,null,columns)
-
   /**
 	 * Creates a new instance from the key and list of columns.
 	 */
-  def newInstance[K,S](key:K, superColumn:S, columns: List[RColumn]): T = {
-    val constructor = manifest[T].erasure.getConstructors()(0)
-    val paramTypes = constructor.getParameterTypes
-    var attrIdx = -1
-    val args = attributes.map(attr=>{
-      attrIdx = attrIdx + 1
-      attr match {
-        case k:Key => key
-        case s:SuperColumn => superColumn
-        case c:Column =>
-          columns.find(_.nameAs(columnNameSerializer) == c.name) match {
-            case Some(c) => c.valueAs(paramTypes(attrIdx))
-            case _ => null // todo set a default value
-          }
-        case _=>
-      }
-    })
-    val toArray = args.toArray.asInstanceOf[Array[java.lang.Object]]
-    log.debug("args: {}",toArray.mkString("[",",","]"))
+  def newInstance[K:Manifest,S:Manifest](key:K, superColumn:Option[S], columns: ResultSet): T = {
+    val colMap = columns.rows.map(r=>{
+      columnNameSerializer.fromBytes(r.column) -> r
+    }).toMap
+    val descriptor = descriptorOf[T]
+    val builder = descriptor.newBuilder()
+    val attributeKey = attributes.find(_.isInstanceOf[Key]).get
+    val keyProperty = descriptor.properties.find(_.name == attributeKey.name).get
+    builder.set(keyProperty, key)
 
-    try {
-      constructor.newInstance(toArray:_*).asInstanceOf[T]
+    superColumn match {
+      case Some(sc) =>
+        val attributeSuCol = attributes.find(_.isInstanceOf[SuperColumn]).get
+        val scProperty = descriptor.properties.find(_.name == attributeSuCol.name).get
+        builder.set(scProperty, sc)
+      case _ =>
     }
-    catch {
-      case e:Exception =>
-        val className = manifest[T].erasure.getName
-        val args =  toArray.mkString("[",",","]")
-        throw new InvalidMappingException("Could not create instance of '"+className+"' with args: " + args,e)
-    }
+
+    attributes.filter(_.isInstanceOf[Column]).foreach(column =>{
+      val attr = attributes.find(_.isInstanceOf[Column]).get
+      val prop = descriptor.properties.find(_.name == attr.name).get
+      val value = attr.serializer.fromBytes(colMap(attr.name).value)
+      builder.set(prop, value)
+    })
+
+    builder.result().asInstanceOf[T]
   }
 
 	/**
 	 * Creates a list of columns from the persistable object.
 	 */
   def toColumns(t: T): List[SColumn[_, _]] = {
-    import org.brzy.calista.schema.Conversions._
-//    val key = attributes.find(_.isInstanceOf[Key]).get
-//    val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
-//    val clazz = t.getClass
-//    attributes.filter(a=>{!a.isInstanceOf[Key] && !a.isInstanceOf[SuperColumn]}).map(a=>{
-//      val col = a.asInstanceOf[Column]
-//      val colValue = clazz.getMethod(col.name).invoke(t)
-//      val k = clazz.getMethod("key").invoke(t)
-//
-//      superColOption match {
-//        case Some(s) =>
-//          val suCol = clazz.getMethod("superColumn").invoke(t)
-//          family |^ k | suCol | (col.name, colValue)
-//        case _ =>
-//          family | k | (col.name, colValue)
-//      }
-//    }).toList
-    List.empty[SColumn[_, _]]
+    val descriptor = descriptorOf[T]
+    val key = attributes.find(_.isInstanceOf[Key]).get
+    val keyValue = descriptor.get(t,key.name)
+    val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
+
+    attributes.filter(_.isInstanceOf[Column]).map(attr=>{
+      val columnValue = descriptor.get(t,attr.name)
+
+      superColOption match {
+        case Some(s) =>
+          val v = descriptor.get(t,s.name)
+          ColumnFamily(family).superKey(keyValue).superColumn(v).column(attr.name,columnValue,new Date())
+        case _ =>
+          ColumnFamily(family).standardKey(keyValue).column(attr.name,columnValue,new Date())
+      }
+    }).toList
   }
 
 	/**
 	 *
 	 */
   def toKey(t: T): StandardKey[_] = {
-    import org.brzy.calista.schema.Conversions._
-    {family | t.key}.asInstanceOf[StandardKey[_]]
+    val key = attributes.find(_ match {
+      case k:Key => true
+      case _ => false
+    }).get
+    val descriptor = descriptorOf[T]
+    val keyValue = descriptor.get(t,key.name)
+    ColumnFamily(family).standardKey(keyValue)
   }
 }
 
