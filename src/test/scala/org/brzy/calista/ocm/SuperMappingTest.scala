@@ -39,7 +39,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 
 	 	sessionManager.doWith { session =>
        import org.brzy.calista.schema.Conversions._
-       val key = familyName |^ personKey | personSuperColumn
+       val key = familyName | personKey | personSuperColumn
        val columns = session.list(key)
        assertNotNull(columns)
        assertEquals(3,columns.size)
@@ -47,7 +47,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 
 		sessionManager.doWith { session =>
 			Calista.value = Option(session)
-			val person = SPerson.get(personKey, personSuperColumn) match {
+			val person = SPerson.get(personKey, Option(personSuperColumn)) match {
         case Some(person) =>
           assertNotNull(person)
           assertNotNull(person.key)
@@ -60,7 +60,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
     sessionManager.doWith { (session:Session) =>
       import Conversions._
-      val columns = session.list(familyName|^personKey)
+      val columns = session.list(familyName|personKey)
       assertNotNull(columns)
       assertEquals(1,columns.size)
     }
@@ -72,14 +72,13 @@ case class SPerson(key:String,
     name:String,
     count:Int,
     created:Date)
-    extends SuperEntity[String,String]
 
 object SPerson extends SuperDao[String,String,SPerson] {
   def mapping = new Mapping[SPerson](
       "SPerson",
       UTF8Serializer,
-			Key(),
-      SuperColumn(),
+			Key("key"),
+      SuperColumn("superColumn"),
       Column("name"),
       Column("count",IntSerializer),
       Column("created",DateSerializer))

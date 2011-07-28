@@ -21,7 +21,7 @@ import java.util.UUID
 import org.brzy.calista.serializer.{UUIDSerializer, UTF8Serializer}
 class GetSetTest extends JUnitSuite with EmbeddedTest {
 
-  @Test def testSetAndGetStandardColumn = {
+  @Test def testSetAndGetStandardColumn() {
     import Conversions._
     val key = "Standard" | "testKey"
 
@@ -40,7 +40,7 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
   }
 
   // create a single column, save it, and get it out
-  @Test def testSetAndGetSuperColumn = {
+  @Test def testSetAndGetSuperColumn() {
     import Conversions._
     val superColumn = "Super" |^ "superKey" | 12345L
 		val columnName = UUID.randomUUID

@@ -22,7 +22,7 @@ import org.brzy.calista.server.EmbeddedTest
 
 class PredicateTest extends JUnitSuite with EmbeddedTest  {
 
-  @Test def testPredicateOnStandard = {
+  @Test def testPredicateOnStandard() {
     import Conversions._
     val key = "Standard"|"predicate-key"
 

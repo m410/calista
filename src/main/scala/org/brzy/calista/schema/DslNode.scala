@@ -1,7 +1,7 @@
 package org.brzy.calista.schema
 
-import java.util.Date
 import org.brzy.calista.results.{Row, ResultSet}
+import java.util.Date
 
 /**
  * This is so different levels of the dsl access tree can be treated the same.  Many of these
@@ -27,7 +27,7 @@ trait DslNode {
    *
    * @returns describes a full column
    */
-  def |[N: Manifest, V: Manifest](key: N, value: V = null, timestamp: Date): Column[N, V] =
+  def |[N: Manifest, V: Manifest](key: N, value: V, timestamp: Date = new Date()): Column[N, V] =
     throw new InvalidNodeUseException(nodePath)
 
   /**
@@ -44,7 +44,7 @@ trait DslNode {
    *
    * @returns a result set of rows
    */
-  def \\[N: Manifest](begin: N, end: N, reverse: Boolean, max: Int): ResultSet =
+  def \\[N: Manifest](begin: N, end: N, reverse: Boolean = false, max: Int = 100): ResultSet =
     throw new InvalidNodeUseException(nodePath)
 
   /**

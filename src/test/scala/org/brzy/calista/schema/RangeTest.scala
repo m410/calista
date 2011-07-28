@@ -23,7 +23,7 @@ import org.brzy.calista.serializer.UTF8Serializer
 
 class RangeTest extends JUnitSuite with EmbeddedTest {
 
-  @Test def testPredicateOnStandard = {
+  @Test def testPredicateOnStandard() {
     import Conversions._
 
     sessionManager.doWith { session =>
@@ -44,7 +44,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     }
   }
 
-  @Test def testSuperSlice = {
+  @Test def testSuperSlice() {
     import Conversions._
     
     sessionManager.doWith { session =>

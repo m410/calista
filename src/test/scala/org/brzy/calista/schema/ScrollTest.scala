@@ -9,7 +9,7 @@ import org.brzy.calista.serializer.UTF8Serializer
 
 class ScrollTest extends JUnitSuite with EmbeddedTest {
 
-  @Test def smallScroll = {
+  @Test def smallScroll() {
     import Conversions._
 
     sessionManager.doWith { session =>
@@ -26,7 +26,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
-      val sliceRange = {"Standard"|"key-range-0"}\("column2","column6")
+      val sliceRange = "Standard"|"key-range-0"\\("column2","column6")
       val iterator = session.scrollSliceRange(sliceRange)
       var count = 0
 
@@ -42,7 +42,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
   }
 
 
-  @Test def pagingScroll = {
+  @Test def pagingScroll() {
     import Conversions._
 
     sessionManager.doWith { session =>
@@ -59,7 +59,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
-      val sliceRange = {"Standard"|"key-range-0"}\("column2","column8",3)
+      val sliceRange = {"Standard"|"key-range-0"}\Array("column2","column8",3)
       val iterator = session.scrollSliceRange(sliceRange)
       var count = 0
 
@@ -74,7 +74,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     }
   }
 
-  @Test def pagingMissingScroll = {
+  @Test def pagingMissingScroll() {
     import Conversions._
 
     sessionManager.doWith { session =>
@@ -91,7 +91,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
-      val sliceRange = {"Standard"|"key-range-0"}\("column01","column07")
+      val sliceRange = {"Standard"|"key-range-0"}\\("column01","column07")
       val iterator = session.scrollSliceRange(sliceRange)
       var count = 0
 
@@ -108,11 +108,11 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
 
 
 
-  @Test def emptyScroll = {
+  @Test def emptyScroll() {
     import Conversions._
 
     sessionManager.doWith { session =>
-      val sliceRange = {"Standard"|"key-range-0"}\("column001","column007")
+      val sliceRange = {"Standard"|"key-range-0"}\\("column001","column007")
       val iterator = session.scrollSliceRange(sliceRange)
       var count = 0
 

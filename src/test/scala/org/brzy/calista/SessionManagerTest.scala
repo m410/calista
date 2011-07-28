@@ -20,7 +20,7 @@ import server.EmbeddedTest
 
 
 class SessionManagerTest extends JUnitSuite with EmbeddedTest {
-  @Test def testSchema = {
+  @Test def testSchema() {
     val sm = new SessionManager
     val schema = sm.keyspaceDefinition
     assertNotNull(schema)

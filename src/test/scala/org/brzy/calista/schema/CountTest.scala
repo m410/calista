@@ -20,7 +20,7 @@ import org.brzy.calista.server.EmbeddedTest
 
 
 class CountTest extends JUnitSuite with EmbeddedTest {
-  @Test def countTest = {
+  @Test def countTest() {
     import Conversions._
     val key = "Standard" | "count"
 

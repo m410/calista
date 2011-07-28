@@ -25,7 +25,7 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"
 	val personDate = new Date
 	
-  @Test def mapEntity = {
+  @Test def mapEntity() {
 	 	sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = new Person(personKey,"name",100,personDate)
@@ -58,13 +58,13 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
   }
 }
 
-case class Person(key:String,name:String,count:Int,created:Date)  extends StandardEntity[String]
+case class Person(key:String,name:String,count:Int,created:Date)
 
 object Person extends StandardDao[String,Person] {
   def mapping = Mapping[Person](
       "Person",
       UTF8Serializer,
-			Key(),
+			Key("key"),
       Column("name"),
       Column("count",IntSerializer),
       Column("created",DateSerializer))

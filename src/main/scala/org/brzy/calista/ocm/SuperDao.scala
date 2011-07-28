@@ -14,6 +14,7 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.schema.ColumnFamily
+import org.brzy.calista.results.ResultSet
 
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
@@ -31,7 +32,7 @@ import org.brzy.calista.schema.ColumnFamily
  *
  * @author Michael Fortin
  */
-trait SuperDao[K, S, T <: SuperEntity[K,S]] {
+trait SuperDao[K, S, T <: AnyRef] {
   protected[this] def session = Calista.value.get
 
 	/**
@@ -56,23 +57,24 @@ trait SuperDao[K, S, T <: SuperEntity[K,S]] {
       None
   }
 
-	/**
-	 * List instances of this type by providing a start key and an end key. Note that this may not return
-	 * the order that you would expect, depending on the practitioner you are using.
-	 *
-	 * @param start The first key to return.
-	 * @param end The last key to return
-	 * @param count The maximum number of results to return.
-	 */
-  def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
-    val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
-    // TODO FIX ME
-//    session.keyRange(ColumnFamily(mapping.family).\(start, end, names, count)).map(ks => {
-//      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.asInstanceOf[Key].serializer
-//      mapping.newInstance(keySerializer.fromBytes(ks.key), ks.columns.asInstanceOf[List[RColumn]])
+//	/**
+//	 * List instances of this type by providing a start key and an end key. Note that this may not return
+//	 * the order that you would expect, depending on the practitioner you are using.
+//	 *
+//	 * @param start The first key to return.
+//	 * @param end The last key to return
+//	 * @param count The maximum number of results to return.
+//	 */
+//  def list(start: K, end: K, count: Int = 100)(implicit t: Manifest[K]):List[T] = {
+//    val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
+//    val range = ColumnFamily(mapping.family).keyRange(start, end, names, count)
+//
+//    session.keyRange(range).toKeyMap[K].map(ks => {
+//      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.serializer
+//      val resultSet = ResultSet(ks._2)
+//      mapping.newInstance(keySerializer.fromBytes(ks._1), None, resultSet)
 //    })
-    List.empty[T]
-  }
+//  }
 
 	/**
 	 *	This holds implicit function on the entity.  The functions can be called directly on the entity

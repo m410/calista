@@ -19,7 +19,7 @@ import org.junit.Assert._
 
 
 class BooleanSerializerTest extends JUnitSuite {
-	@Test def testBooleanUnapply = {
+	@Test def testBooleanUnapply() {
 		val t = true
 		t match {
 			case BooleanSerializer(x) => 
@@ -37,13 +37,13 @@ class BooleanSerializerTest extends JUnitSuite {
 		}
 		
   }
-  @Test def testBooleanType = {
+  @Test def testBooleanType() {
 		val t = false
     def buf = BooleanSerializer.toBytes(t)
     assertEquals(1,buf.array.length)
   }
 
-  @Test def testTypes = {
+  @Test def testTypes() {
 		val t = true
     def buf = Serializers.toBytes(t)
     assertEquals(1,buf.array.length)

@@ -63,9 +63,6 @@ case class ColumnFamily(name: String) extends DslNode {
     StandardKey(key,this, family)
   }
 
-//	/**
-//	 * Create a key range from this key family used to query the datastore.
-//	 */
-//  override def \\[N: Manifest](begin: N, end: N, reverse: Boolean = false, max: Int = 100) =
-//			KeyRange(begin, end, SlicePredicate(columns, null), this, max)
+  def keyRange[T,C:Manifest](start: T, end: T, columns:List[C], count: Int = 100) =
+			KeyRange(start, end, SlicePredicate(columns.toArray, null), this, count)
 }

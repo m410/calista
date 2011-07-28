@@ -20,7 +20,7 @@ import org.brzy.calista.server.EmbeddedTest
 
 
 class RemoveTest extends JUnitSuite with EmbeddedTest {
-  @Test def removeTest = {
+  @Test def removeTest() {
     import Conversions._
 
     val key = "Standard" | "remover"

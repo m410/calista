@@ -20,7 +20,7 @@ import org.junit.Assert._
 import java.util.UUID
 
 class UsageTest extends JUnitSuite {
-  @Test def testDsl = {
+  @Test def testDsl() {
     import Conversions._
 
     val standardKey:StandardKey[String] =
