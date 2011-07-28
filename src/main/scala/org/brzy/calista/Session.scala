@@ -25,9 +25,9 @@ import collection.JavaConversions._
 import java.nio.ByteBuffer
 import org.slf4j.LoggerFactory
 
-import org.apache.cassandra.thrift.{NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange}
 import java.util.{Date, Iterator}
-import javax.xml.transform.Result
+import org.apache.cassandra.thrift.{Compression, CfDef, KsDef, NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange,TokenRange=>CassandraTokenRange}
+import system.{TokenRange, FamilyDefinition, KeyspaceDefinition}
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It
@@ -132,6 +132,27 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     else {
       sys.error("Unknown column return type: '"+cos+"'" )
     }
+  }
+
+  private[this] implicit def toKsDef(c: KeyspaceDefinition) = {
+    val d = new KsDef()
+    // todo finish me
+//    d.set
+    d
+  }
+
+  private[this] implicit def toCfDef(f: FamilyDefinition) = {
+    val d = new CfDef()
+    // todo finish me
+//    d.set
+    d
+  }
+
+  private[this] implicit def toTokenRange(f: TokenRange) = {
+    val d = new CassandraTokenRange()
+    // todo finish me
+//    d.set
+    d
   }
 
 	/**
@@ -345,33 +366,50 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     ResultSet(list)
   }
 
-  // todo finish me
   def query(query:String,compression:String = ""):ResultSet = {
-    ResultSet(List.empty[Row])
+    val result = client.execute_cql_query(ByteBuffer.wrap(query.getBytes),Compression.NONE)
+  // todo finish me
+//    if (result.rows.size() > 0)
+//      ResultSet(result.rows.map(r=>toRows()).toList)
+//    else
+      ResultSet(List.empty[Row])
   }
 
-  // todo finish me
-  def addKeyspace(keyspace:KeyspaceDefinition){}
-  // todo finish me
-  def updateKeyspace(keyspace:KeyspaceDefinition){}
-  // todo finish me
-  def dropKeyspace(keyspace:KeyspaceDefinition){}
 
-  // todo finish me
-  def addColumnFamily(family:FamilyDefinition){}
-  // todo finish me
-  def updateColumnFamily(family:FamilyDefinition){}
-  // todo finish me
-  def dropColumnFamily(family:FamilyDefinition){}
+  def addKeyspace(keyspace:KeyspaceDefinition){
+    client.system_add_keyspace(keyspace)
+  }
 
-  // todo finish me
-  def describeKeyspace(name:String):KeyspaceDefinition = null
-  // todo finish me
-  def describeKeyspaces():List[KeyspaceDefinition] = List.empty[KeyspaceDefinition]
-  // todo finish me
-  def describeClusterName():String = ""
-  // todo finish me
-  def describeRing(){}
+  def updateKeyspace(keyspace:KeyspaceDefinition){
+    client.system_update_keyspace(keyspace)
+  }
+
+  def dropKeyspace(keyspace:String){
+    client.system_drop_keyspace(keyspace)
+  }
+
+  def addColumnFamily(family:FamilyDefinition){
+    client.system_add_column_family(family)
+  }
+  def updateColumnFamily(family:FamilyDefinition){
+    client.system_update_column_family(family)
+  }
+
+  def dropColumnFamily(family:String){
+    client.system_drop_column_family(family)
+  }
+
+  def describeKeyspace(name:String) = KeyspaceDefinition(client.describe_keyspace(name))
+
+  def describeKeyspaces = client.describe_keyspaces().map(ksDef => {
+    KeyspaceDefinition(ksDef)
+  }).toList
+
+  def describeClusterName = client.describe_cluster_name()
+
+  def describeVersion = client.describe_version()
+
+  def describeRing(keyspace:String) = client.describe_ring(keyspace).map(t=>TokenRange(t))
 
 
 }

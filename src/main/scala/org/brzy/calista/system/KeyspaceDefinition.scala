@@ -1,3 +1,7 @@
+package org.brzy.calista.system
+
+import org.apache.cassandra.thrift.KsDef
+
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
  *
@@ -11,14 +15,11 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista
-
 /**
  * A description of the Keyspace and all it's attributes and elements.
  *
  * This is just a proxy to the underlying casandra thrift object which looks like this:
  * {{{
- * /* describes a keyspace. */
  * struct KsDef {
  *     1: required string name,
  *     2: required string strategy_class,
@@ -38,4 +39,16 @@ package org.brzy.calista
 case class KeyspaceDefinition(
     name:String,
     strategyClass:String,
-    families:List[FamilyDefinition])
+    strategyOptions:Option[Map[String,String]] = None,
+    families:List[FamilyDefinition],
+    durableWrites:Boolean = true)
+
+
+object KeyspaceDefinition {
+  def apply(kdef:KsDef) = {
+    new KeyspaceDefinition(
+      name="",
+      strategyClass = "",
+      families = List.empty[FamilyDefinition])
+  }
+}

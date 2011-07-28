@@ -14,7 +14,7 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.FamilyDefinition
+import org.brzy.calista.system.FamilyDefinition
 
 /**
  * A super key has a Column family as a parent.

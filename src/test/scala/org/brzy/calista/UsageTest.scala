@@ -21,48 +21,26 @@ import java.util.UUID
 
 class UsageTest extends JUnitSuite {
   @Test def testDsl() {
-    import Conversions._
+    import schema.Conversions._
 
-    val standardKey:StandardKey[String] =
-        "Family" | "key"
+    val standardKey = "Family"|"key"
     
-    val standardKeyWithUUID:StandardKey[UUID] =
-        "Family" | UUID.randomUUID
+    val standardKeyWithUUID = "Family"|UUID.randomUUID
 
-    val standardKeyWithLong:StandardKey[Long] =
-        "Family" | 22343L
+    val standardKeyWithLong = "Family"|22343L
 
-    val standardColumn:Column[String,String] =
-        "Family" | "key" |("column", "value")
-//    val standardColumn = ColumnFamily("Family").key("key").column("column", "value")
+    val standardColumn = "Family"|"key"|("column", "value")
 
-//    val resultOfGet <= {"Family"|"key"|("column")} // get the value
-//    "Family"|"key"|("column") <= "someValue" // set the value on the column
+    val standardKeyRange = "Family"\("start","end",List.empty[String],20)
 
-    val standardKeyRange:KeyRange[String,String] =
-        "Family" \("start","end",List.empty[String],20)
+    val standardSliceRange = "Family"|"key"\("start","finish")
 
-    val standardSliceRange:SliceRange[String] =
-        {"Family" | "key"}\("start","finish")
+    val standardSlicePredicate = "Family"|"key"\\List("column","column3","column3")
 
-    val standardSlicePredicate:SlicePredicate[String] =
-        {"Family"|"key"}\\List("column","column3","column3")
-//    val ssp2 = ColumnFamily("Family").key("key").predicate(List("column","column3","column3"))
+    val superKey = "Super"|"SuperKey"
 
-    val superKey:SuperKey[String] =
-        "Super" |^ "SuperKey"
+    val superColumn = "Super"|"SuperKey"|"SuperColumn"
 
-    val superColumn:SuperColumn[String] =
-        "Super" |^ "SuperKey" | "SuperColumn"
-
-    val superColumnVal:Column[String,String] =
-        "Super" |^ "SuperKey" | "SuperColumn" |("column", "value")
-
-//    val superSlicePredicate = "Super" |^ "key" \\("column","column1")
-//    val superSlicePredicate2 = "Super" |^ "key" | "SuperColumn" \\("column","column1")
-//    val superSliceRange = "Super" |^ "key" \("start","finish",true,10)
-//    val superSliceRange2 = "Super" |^ "key" | "SuperColumn" \("start","finish",true,10)
-
-//    "Super-s" |^ "SuperKey" | "SuperColumn" |("column", "value").save
+    val superColumnVal = "Super"|"SuperKey"|"SuperColumn"|("column", "value")
   }
 }

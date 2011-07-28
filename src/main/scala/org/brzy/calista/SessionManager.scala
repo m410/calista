@@ -19,6 +19,7 @@ import org.apache.thrift.transport.{TSocket, TFramedTransport}
 import org.apache.thrift.protocol.TBinaryProtocol
 
 import collection.JavaConversions._
+import system.{FamilyDefinition, KeyspaceDefinition}
 
 /**
  * Session Manager works in a similar fashion as the Entity Manager Factory  in JPA.  It's 
@@ -49,19 +50,7 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
     sock.open()
 
     try {
-      val ksdef = client.describe_keyspace(keyspace)
-      KeyspaceDefinition(ksdef.name,
-      ksdef.strategy_class,
-      ksdef.cf_defs.map(cfdef=>{
-        FamilyDefinition(cfdef.name,
-          cfdef.column_type,
-          cfdef.comparator_type,
-          cfdef.subcomparator_type,
-          cfdef.comment,
-          cfdef.row_cache_size,
-          cfdef.key_cache_size)}
-        ).toList
-      )
+      KeyspaceDefinition(client.describe_keyspace(keyspace))
     }
     finally {
       sock.close()

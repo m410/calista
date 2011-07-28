@@ -15,7 +15,7 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.serializer.Serializers._
-import org.brzy.calista.FamilyDefinition
+import org.brzy.calista.system.FamilyDefinition
 
 /**
  * A key can have one of two parents, a super column or a column family.  This is a standard

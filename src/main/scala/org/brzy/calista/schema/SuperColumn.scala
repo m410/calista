@@ -16,7 +16,7 @@ package org.brzy.calista.schema
 import java.nio.ByteBuffer
 import java.util.Date
 import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.FamilyDefinition
+import org.brzy.calista.system.FamilyDefinition
 
 /**
  * A super column in a cassandra datastore.

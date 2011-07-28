@@ -1,3 +1,7 @@
+package org.brzy.calista.system
+
+import org.apache.cassandra.thrift.CfDef
+
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
  *
@@ -11,14 +15,11 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista
-
 /**
  * A description of the Family, including all it's attributes.
  *
  * This is just a proxy to the underlying casandra thrift object which looks like this:
  * {{{
- * /* describes a column family. */
  * struct CfDef {
  *     1: required string keyspace,
  *     2: required string name,
@@ -51,11 +52,34 @@ package org.brzy.calista
  * @see SessionManager.keyspaceDefinition
  * @author Michael Fortin
  */
-case class FamilyDefinition(
-    name:String,
-    columnType:String,
-    comparatorType:String,
-    subcomparatorType:String,
-    comment:String,
-    rowCacheSize:Double,
-    keyCacheSize:Double)
+class FamilyDefinition(
+    val name:String,
+    val columnType:String = "Standard",
+    val comparatorType: Option[String ] = Option("BytesType"),
+    val subcomparatorType: Option[String] = None,
+    val comment: Option[String] = None,
+    val rowCacheSize: Option[Double ] = Option(0.0),
+    val keyCacheSize: Option[Double ] = Option(200000),
+    val readRepairChance: Option[Double ] = Option(1.0),
+    val columnMetadata: Option[List[ColumnDefinition] ] = None,
+    val gcGraceSeconds: Option[Int] = None,
+    val defaultValidationClass: Option[String] = None,
+    val id: Option[Int] = None,
+    val minCompactionThreshold: Option[Int] = None,
+    val maxCompactionThreshold: Option[Int] = None,
+    val rowCacheSavePeriodInSeconds: Option[Int] = None,
+    val keyCacheSavePeriodInSeconds: Option[Int] = None,
+    val memtableFlushAfterMins: Option[Int] = None,
+    val memtableThroughputInMb: Option[Int] = None,
+    val memtableOperationsInMillions: Option[Double] = None,
+    val replicateOnWrite: Option[Boolean] = None,
+    val mergeShardsChance: Option[Double] = None,
+    val keyValidationClass: Option[String] = None,
+    val rowCacheProvider: Option[String ] = Option("org.apache.cassandra.cache.ConcurrentLinkedHashCacheProvider"),
+    val keyAlias:Option[Array[Byte]] = None)
+
+object FamilyDefinition {
+  def apply(fdef:CfDef) = {
+    new FamilyDefinition(name = "New Family")
+  }
+}
