@@ -14,7 +14,7 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.schema.ColumnFamily
-import org.brzy.calista.results.ResultSet
+import org.brzy.calista.Calista
 
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds

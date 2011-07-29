@@ -90,21 +90,6 @@ class SessionManager(keyspace:String = "Test", url:String = "localhost", port:In
       sock.close()
     }
   }
-  
-//	/**
-//	 * Tells the cassandra server to load a configuration from it's own configuration file.  As of version
-//	 * 7 of cassandra, the configurations are not automatically loaded, you have to do it via
-//	 * cassandera-cli tool or via this api.
-//	 */
-//	def loadSchemaFromConfig = {
-//    import collection.JavaConversions._
-//
-//    for (ksm: KSMetaData <- DatabaseDescriptor.readTablesFromYaml()) {
-//      for (cfm: CFMetaData <- ksm.cfMetaData().values())
-//        CFMetaData.map(cfm)
-//      DatabaseDescriptor.setTableDefinition(ksm, DatabaseDescriptor.getDefsVersion())
-//    }
-//  }
 
 	/**
 	 * This creates a new session to interact with cassandra using the configured keyspaceDefinition and

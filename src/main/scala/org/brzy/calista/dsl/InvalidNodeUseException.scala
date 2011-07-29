@@ -1,3 +1,5 @@
+package org.brzy.calista.dsl
+
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
  *
@@ -11,8 +13,6 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.schema
-
 import java.lang.RuntimeException
 
 /**

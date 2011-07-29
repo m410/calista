@@ -40,7 +40,7 @@ import org.apache.cassandra.thrift.{CounterColumn, Compression, CfDef, KsDef, No
  * https://github.com/apache/cassandra/blob/cassandra-0.8/interface/cassandra.thrift
  *
  * @param host the host to connect too.
- * @param ksDef The KeySpace Defininition used as a reference to map requests to the data store.
+ * @param ksDef The KeySpace Definition used as a reference to map requests to the data store.
  * @param defaultConsistency The Default consistency to use when connecting to the data store.  It
  * 				defaults to Consistency.ONE.
  *

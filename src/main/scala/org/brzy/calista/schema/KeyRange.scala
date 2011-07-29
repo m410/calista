@@ -17,7 +17,9 @@ import org.brzy.calista.serializer.Serializers
 
 /**
  * Used to query the datastore for multiple keys.
- * 
+ * <p>
+ * Note that this is not accessible via the dsl.
+ *
  * @param start The first key to return.
  * @param finish The last key to return.
  * @param predicate Predicate to refine the query.
@@ -26,7 +28,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-protected case class KeyRange[T,C](
+case class KeyRange[T,C] protected[schema] (
         start:T,
         finish:T,
         predicate:SlicePredicate[C],

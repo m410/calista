@@ -1,3 +1,5 @@
+package org.brzy.calista
+
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
  *
@@ -11,9 +13,6 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.ocm
-
-import org.brzy.calista.Session
 import util.DynamicVariable
 
 /**

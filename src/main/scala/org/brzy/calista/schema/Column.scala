@@ -13,9 +13,10 @@
  */
 package org.brzy.calista.schema
 
-import java.nio.ByteBuffer
 import java.util.Date
-import org.brzy.calista.serializer.{Serializers, UTF8Serializer}
+import org.brzy.calista.serializer.{Serializers}
+import org.brzy.calista.Session
+import org.brzy.calista.Calista
 
 /**
  * Represents a column in the datastore.  This column should only be created by calling one of the
@@ -30,7 +31,7 @@ import org.brzy.calista.serializer.{Serializers, UTF8Serializer}
  *
  * @author Michael Fortin
  */
-protected case class Column[K:Manifest, V:Manifest](name: K, value: V, timestamp: Date, parent: Key) {
+case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, timestamp: Date, parent: Key) {
 	
 	/**
 	 * Return the name converted to bytes.
@@ -61,5 +62,13 @@ protected case class Column[K:Manifest, V:Manifest](name: K, value: V, timestamp
   def columnParent: ColumnParent = parent match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+  }
+
+  /**
+   * Returns a sigle row represented by the column path.
+   */
+  def row = {
+    val session = Calista.value.asInstanceOf[Session]
+    session.get(this)
   }
 }

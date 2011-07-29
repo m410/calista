@@ -21,9 +21,8 @@ import org.brzy.calista.system.FamilyDefinition
  * 
  * @author Michael Fortin
  */
-protected case class SuperKey[T:Manifest](key:T,family:ColumnFamily, familyDef:FamilyDefinition)
-        extends Key
-        with DslNode {
+case class SuperKey[T:Manifest] protected[schema] (key:T,family:ColumnFamily, familyDef:FamilyDefinition)
+        extends Key{
 
   def nodePath = family.nodePath + ":SuperKey("+key+")"
 
@@ -39,7 +38,7 @@ protected case class SuperKey[T:Manifest](key:T,family:ColumnFamily, familyDef:F
 	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
 	 */
   override def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
-    sliceRange(start, end, reverse, count).resultSet
+    sliceRange(start, end, reverse, count)
 
   def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) =
     SliceRange(start, end, reverse, count,this)

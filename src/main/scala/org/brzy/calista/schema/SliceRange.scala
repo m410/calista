@@ -14,7 +14,8 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.results.{Row, ResultSet}
+import org.brzy.calista.Calista
+import org.brzy.calista.Session
 
 /**
  * Slice of columns under a key.
@@ -28,7 +29,7 @@ import org.brzy.calista.results.{Row, ResultSet}
  *
  * @author Michael Fortin
  */
-protected case class SliceRange[T](start: T, finish: T, reverse: Boolean = false, count: Int = 100, key: Key) {
+case class SliceRange[T] protected[schema] (start: T, finish: T, reverse: Boolean, count: Int, key: Key) {
   def startBytes = Serializers.toBytes(start)
 
   def finishBytes = Serializers.toBytes(finish)
@@ -45,5 +46,13 @@ protected case class SliceRange[T](start: T, finish: T, reverse: Boolean = false
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
 
-  def resultSet = ResultSet(List.empty[Row])
+  def results = {
+    val session = Calista.value.asInstanceOf[Session]
+    session.sliceRange(this)
+  }
+
+  def iterate(implicit m:Manifest[T]) = {
+    val session = Calista.value.asInstanceOf[Session]
+    session.scrollSliceRange(this)
+  }
 }

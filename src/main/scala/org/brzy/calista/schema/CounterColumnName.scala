@@ -14,18 +14,16 @@
 package org.brzy.calista.schema
 
 import java.util.Date
-import io.BytePickle.Def
-import org.brzy.calista.ocm.Calista
+import org.brzy.calista.Calista
 import org.brzy.calista.Session
-import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
-import org.brzy.calista.results.Row
+import org.brzy.calista.dsl.DslNode
 
 /**
  * This represents the counter column when querying cassandra
  * 
  * @author Michael Fortin
  */
-protected case class CounterColumnName[K:Manifest](name: K,parent:Key) extends DslNode {
+case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) extends DslNode {
   def nodePath = parent.nodePath +":Counter("+name+")"
 
 

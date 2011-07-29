@@ -13,9 +13,9 @@
  */
 package org.brzy.calista.schema
 
-import java.nio.ByteBuffer
 import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.results.{Row, ResultSet}
+import org.brzy.calista.Calista
+import org.brzy.calista.Session
 
 /**
  * Used to query the datastore, and only return columns within the provided list.
@@ -26,7 +26,7 @@ import org.brzy.calista.results.{Row, ResultSet}
  *
  * @author Michael Fortin
  */
-protected case class SlicePredicate[T](columns: Array[T], key: Key) {
+case class SlicePredicate[T] protected[schema] (columns: Array[T], key: Key) {
 
   def toByteList = columns.map(c => Serializers.toBytes(c)).toList
 
@@ -35,6 +35,8 @@ protected case class SlicePredicate[T](columns: Array[T], key: Key) {
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
 
-  // TODO fix me
-  def resultSet = ResultSet(List.empty[Row])
+  def results = {
+    val session = Calista.value.asInstanceOf[Session]
+    session.slice(this)
+  }
 }

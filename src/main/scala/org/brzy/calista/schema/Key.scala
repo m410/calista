@@ -14,6 +14,7 @@
 package org.brzy.calista.schema
 
 import java.nio.ByteBuffer
+import org.brzy.calista.dsl.DslNode
 
 /**
  * Common traits to keys and super columns.  

@@ -13,33 +13,32 @@
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.ocm.Calista
+import org.brzy.calista.Calista
 import org.brzy.calista.Session
 import java.util.Date
-import org.brzy.calista.results.Row
+import org.brzy.calista.dsl.DslNode
+
 
 /**
- * Document Me..
+ * Represents only the name part of a column, not the value or timestamp.  It's used to query
+ * the datastore.
  * 
  * @author Michael Fortin
- * @version $Id: $
  */
-
-protected case class ColumnName[N:Manifest](name:N,parent:Key) extends DslNode {
+case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends DslNode {
   def nodePath = parent.nodePath + ":Column("+name+")"
-
-  override def <=[V: Manifest](value: V) {
-    set(value)
-  }
 
   def set[V:Manifest](value:V) {
     val session = Calista.value.asInstanceOf[Session]
     session.insert(Column(name,value,new Date(),parent))
   }
 
-  override def as[V: Manifest] = {
+  override def valueAs[V: Manifest] = {
     val session = Calista.value.asInstanceOf[Session]
-    val optionColumn = session.get(Column(name,null,new Date(),parent))
-    null.asInstanceOf[V]
+    val optionRow = session.get(Column(name,null,new Date(),parent))
+    optionRow match {
+      case Some(row) => Option(row.valueAs[V])
+      case _ => None
+    }
   }
 }

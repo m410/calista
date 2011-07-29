@@ -23,7 +23,7 @@ import org.brzy.calista.system.FamilyDefinition
  *
  * @author Michael Fortin
  */
-protected case class SuperColumn[T:Manifest](key: T, parent: SuperKey[_],familyDef:FamilyDefinition)
+case class SuperColumn[T:Manifest] protected[schema] (key: T, parent: SuperKey[_],familyDef:FamilyDefinition)
         extends Key {
 
   def nodePath = parent.nodePath + ":SuperColumn("+key+")"
@@ -45,7 +45,7 @@ protected case class SuperColumn[T:Manifest](key: T, parent: SuperKey[_],familyD
 
   def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 
-  override def |[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) =
+  override def ||[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) =
     column(sKey, value, timestamp)
 
   def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) =
@@ -54,7 +54,7 @@ protected case class SuperColumn[T:Manifest](key: T, parent: SuperKey[_],familyD
   /**
 	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
 	 */
-  override def \[A:Manifest](columns:Array[A]) = slicePredicate(columns).resultSet
+  override def \[A:Manifest](columns:A*) = slicePredicate(columns.toArray)
 
   def slicePredicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
 
@@ -62,7 +62,7 @@ protected case class SuperColumn[T:Manifest](key: T, parent: SuperKey[_],familyD
 	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
 	 */
   override def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
-    sliceRange(start,end, reverse, count).resultSet
+    sliceRange(start,end, reverse, count)
 
   def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) =
     SliceRange(start,end, reverse, count,this)
