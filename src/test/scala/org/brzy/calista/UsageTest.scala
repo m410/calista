@@ -23,24 +23,37 @@ class UsageTest extends JUnitSuite {
   @Test def testDsl() {
     import schema.Conversions._
 
-    val standardKey = "Family"|"key"
-    
-    val standardKeyWithUUID = "Family"|UUID.randomUUID
+    // Standard Column Family operations
+    val stdKey =         "StandardFamily"|"key"
+    val stdColumnName =  "StandardFamily"|"key"|"column"
+    val stdColumnValue = "StandardFamily"|"key"|"column".as[String]
+    val stdColumn =      "StandardFamily"|"key"|("column", "value")
+    val stdKeyRange =    "StandardFamily"\\("start","end",20)
+    val stdSliceRange =  "StandardFamily"|"key"\\("start","finish")
+    val stdPredicate =   "StandardFamily"|"key"\Array("column","column3","column3")
+    "StandardFamily"|"key"|"column" <= "New Vaue"
 
-    val standardKeyWithLong = "Family"|22343L
+    // Counter column family operations
+    val countKey =         "CountFamily"|"key"
+    val countColumnName =  "CountFamily"|"key"|"column"
+    val countColumnValue = "CountFamily"|"key"|"column".as[String]
+    val countColumn =      "CountFamily"|"key"|("column", "value")
+    val countKeyRange =    "CountFamily"\\("start","end",20)
+    val countSliceRange =  "CountFamily"|"key"\\("start","finish")
+    val countPredicate =   "CountFamily"|"key"\Array("column","column3","column3")
+    "CounterFamily"|"key"|"column" += 5
+    "CounterFamily"|"key"|"column" -= 2
 
-    val standardColumn = "Family"|"key"|("column", "value")
 
-    val standardKeyRange = "Family"\("start","end",List.empty[String],20)
-
-    val standardSliceRange = "Family"|"key"\("start","finish")
-
-    val standardSlicePredicate = "Family"|"key"\\List("column","column3","column3")
-
-    val superKey = "Super"|"SuperKey"
-
-    val superColumn = "Super"|"SuperKey"|"SuperColumn"
-
-    val superColumnVal = "Super"|"SuperKey"|"SuperColumn"|("column", "value")
+    // SuperColumn family operations
+    val superKey =         "SuperFamily"|"key"
+    val superColumnSCol =  "SuperFamily"|"key"|"superColumn"
+    val superColumnName =  "SuperFamily"|"key"|"superColumn"|"column".as[String]
+    val superColumn =      "SuperFamily"|"key"|"superColumn"|("column", "value")
+    val superColumnPred =  "SuperFamily"|"key"\Array("column", "column2")
+    val superColumnPred2=  "SuperFamily"|"key"|"superColumn"\Array("column", "column2")
+    val superColumnSlice = "SuperFamily"|"key"\\("start", "end")
+    val superColumnSlice2= "SuperFamily"|"key"|"superColumn"\\("start", "end")
+    "SuperFamily"|"key"|"superColumn"|"column" <= "New Vaue"
   }
 }

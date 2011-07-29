@@ -59,7 +59,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
-      val sliceRange = {"Standard"|"key-range-0"}\Array("column2","column8",3)
+      val sliceRange = "Standard"|"key-range-0"\Array("column2","column8",3)
       val iterator = session.scrollSliceRange(sliceRange)
       var count = 0
 

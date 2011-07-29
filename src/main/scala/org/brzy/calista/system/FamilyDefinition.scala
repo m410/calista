@@ -1,6 +1,7 @@
 package org.brzy.calista.system
 
 import org.apache.cassandra.thrift.CfDef
+import collection.JavaConversions._
 
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
@@ -72,7 +73,7 @@ class FamilyDefinition(
     val memtableFlushAfterMins: Option[Int] = None,
     val memtableThroughputInMb: Option[Int] = None,
     val memtableOperationsInMillions: Option[Double] = None,
-    val replicateOnWrite: Option[Boolean] = None,
+    val replicateOnWrite:Option[Boolean] = None,
     val mergeShardsChance: Option[Double] = None,
     val keyValidationClass: Option[String] = None,
     val rowCacheProvider: Option[String ] = Option("org.apache.cassandra.cache.ConcurrentLinkedHashCacheProvider"),
@@ -80,6 +81,29 @@ class FamilyDefinition(
 
 object FamilyDefinition {
   def apply(fdef:CfDef) = {
-    new FamilyDefinition(name = "New Family")
+    new FamilyDefinition(
+      name = fdef.getName,
+      columnType = fdef.getColumn_type,
+      comparatorType = Option(fdef.getComparator_type),
+      subcomparatorType = Option(fdef.getSubcomparator_type),
+      comment = Option(fdef.getComment),
+      rowCacheSize = Option(fdef.getRow_cache_size),
+      keyCacheSize = Option(fdef.getKey_cache_size),
+      readRepairChance = Option(fdef.getRead_repair_chance),
+      columnMetadata = Option(fdef.getColumn_metadata.map(c=>ColumnDefinition(c)).toList),
+      gcGraceSeconds = Option(fdef.getGc_grace_seconds),
+      defaultValidationClass = Option(fdef.getDefault_validation_class),
+      id = Option(fdef.getId),
+      minCompactionThreshold = Option(fdef.getMin_compaction_threshold),
+      maxCompactionThreshold = Option(fdef.getMax_compaction_threshold),
+      rowCacheSavePeriodInSeconds = Option(fdef.getRow_cache_save_period_in_seconds),
+      keyCacheSavePeriodInSeconds = Option(fdef.getKey_cache_save_period_in_seconds),
+      memtableFlushAfterMins = Option(fdef.getMemtable_flush_after_mins),
+      memtableThroughputInMb = Option(fdef.getMemtable_throughput_in_mb),
+      memtableOperationsInMillions = Option(fdef.getMemtable_operations_in_millions),
+      mergeShardsChance = Option(fdef.getMerge_shards_chance),
+      keyValidationClass = Option(fdef.getKey_validation_class),
+      rowCacheProvider = Option(fdef.getRow_cache_provider),
+      keyAlias = Option(fdef.getKey_alias))
   }
 }

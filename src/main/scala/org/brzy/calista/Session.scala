@@ -26,8 +26,8 @@ import java.nio.ByteBuffer
 import org.slf4j.LoggerFactory
 
 import java.util.{Date, Iterator}
-import org.apache.cassandra.thrift.{Compression, CfDef, KsDef, NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange,TokenRange=>CassandraTokenRange}
 import system.{TokenRange, FamilyDefinition, KeyspaceDefinition}
+import org.apache.cassandra.thrift.{CounterColumn, Compression, CfDef, KsDef, NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange, TokenRange => CassandraTokenRange}
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It
@@ -136,22 +136,48 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 
   private[this] implicit def toKsDef(c: KeyspaceDefinition) = {
     val d = new KsDef()
-    // todo finish me
-//    d.set
+    d.setName(c.name)
+    d.setStrategy_class(c.strategyClass)
+    if (c.strategyOptions.isDefined)
+      d.setStrategy_options(c.strategyOptions.get)
+    d.setCf_defs(c.families.map(c=>toCfDef(c)))
+    d.setDurable_writes(c.durableWrites)
     d
   }
 
   private[this] implicit def toCfDef(f: FamilyDefinition) = {
     val d = new CfDef()
-    // todo finish me
-//    d.set
+    d.setName(f.name)
+    d.setComparator_type(f.comparatorType.get)
+    if (f.subcomparatorType.isDefined) d.setSubcomparator_type(f.subcomparatorType.get)
+    if (f.comment.isDefined) d.setComment(f.comment.get)
+    if (f.rowCacheSize.isDefined) d.setRow_cache_size(f.rowCacheSize.get)
+    if (f.keyCacheSize.isDefined) d.setKey_cache_size(f.keyCacheSize.get)
+    if (f.readRepairChance.isDefined) d.setRead_repair_chance(f.readRepairChance.get)
+    if (f.columnMetadata.isDefined) d.setColumn_metadata(f.columnMetadata.get.map(_.asColumnDef))
+    if (f.gcGraceSeconds.isDefined) d.setGc_grace_seconds(f.gcGraceSeconds.get)
+    if (f.defaultValidationClass.isDefined) d.setDefault_validation_class(f.defaultValidationClass.get)
+    if (f.id.isDefined) d.setId(f.id.get)
+    if (f.minCompactionThreshold.isDefined) d.setMin_compaction_threshold(f.minCompactionThreshold.get)
+    if (f.maxCompactionThreshold.isDefined) d.setMax_compaction_threshold(f.maxCompactionThreshold.get)
+    if (f.rowCacheSavePeriodInSeconds.isDefined) d.setRow_cache_save_period_in_seconds(f.rowCacheSavePeriodInSeconds.get)
+    if (f.keyCacheSavePeriodInSeconds.isDefined) d.setKey_cache_save_period_in_seconds(f.keyCacheSavePeriodInSeconds.get)
+    if (f.memtableFlushAfterMins.isDefined) d.setMemtable_flush_after_mins(f.memtableFlushAfterMins.get)
+    if (f.memtableThroughputInMb.isDefined) d.setMemtable_throughput_in_mb(f.memtableThroughputInMb.get)
+    if (f.memtableOperationsInMillions.isDefined) d.setMemtable_operations_in_millions(f.memtableOperationsInMillions.get)
+    if (f.replicateOnWrite.isDefined) d.setReplicate_on_write(f.replicateOnWrite.get)
+    if (f.mergeShardsChance.isDefined) d.setMerge_shards_chance(f.mergeShardsChance.get)
+    if (f.keyValidationClass.isDefined) d.setKey_validation_class(f.keyValidationClass.get)
+    if (f.rowCacheProvider.isDefined) d.setRow_cache_provider(f.rowCacheProvider.get)
+    if (f.keyAlias.isDefined) d.setKey_alias(f.keyAlias.get)
     d
   }
 
   private[this] implicit def toTokenRange(f: TokenRange) = {
     val d = new CassandraTokenRange()
-    // todo finish me
-//    d.set
+    d.setStart_token(f.startToken)
+    d.setEnd_token(f.endToken)
+    d.setEndpoints(f.endpoints)
     d
   }
 
@@ -173,8 +199,13 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   /**
    * Increments a counter column.
    */
-  // todo finish me
-  def add(column: Column[_, _]): Row = null
+  def add(column: Column[_, _], level: Consistency = defaultConsistency) {
+    log.debug("insert: {}",column)
+    val counter = new CounterColumn()
+    counter.setName(column.nameBytes)
+    counter.setValue(column.value.asInstanceOf[Long])
+    client.add(keyFor(column), column.columnParent, counter, level)
+  }
 
   /**
    * Read the value of a single column, with the given consistency.

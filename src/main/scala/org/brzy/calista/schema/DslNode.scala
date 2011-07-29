@@ -72,4 +72,6 @@ trait DslNode {
   def as[V:Manifest]:V = throw new InvalidNodeUseException(nodePath)
 
   def count:Long = throw new InvalidNodeUseException(nodePath)
+
+  // def scroll:Interator[Row]
 }
