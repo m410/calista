@@ -33,7 +33,7 @@ import system.{FamilyDefinition, KeyspaceDefinition}
  *
  * @author Michael Fortin
  */
-class SessionManager(keyspace:String = "Test", url:String = "localhost", port:Int = 9160) {
+class SessionManager(keyspace:String, url:String, port:Int = 9160) {
 
 	/**
 	 * the host and port for where this session manager connects.

@@ -17,13 +17,15 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import server.EmbeddedTest
+import system.KeyspaceDefinition
 
 
 class SessionManagerTest extends JUnitSuite with EmbeddedTest {
   @Test def testSchema() {
-    val sm = new SessionManager
+    val sm = new SessionManager("Test","localhost")
     val schema = sm.keyspaceDefinition
     assertNotNull(schema)
     println(schema)
+
   }
 }

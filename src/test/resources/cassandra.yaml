@@ -1,10 +1,5 @@
 # Cassandra storage config YAML 
 
-#NOTE !!!!!!!! NOTE 
-# See http://wiki.apache.org/cassandra/StorageConfiguration for
-# full explanations of configuration directives
-#NOTE !!!!!!!! NOTE 
-
 cluster_name: 'Test Cluster'
 initial_token:
 auto_bootstrap: false
@@ -15,20 +10,21 @@ authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
 authority: org.apache.cassandra.auth.AllowAllAuthority
 partitioner: org.apache.cassandra.dht.RandomPartitioner
 data_file_directories:
-    - /Users/m410/Projects/Brzy/calista/target/cassandra.home.unit-tests/data
-commitlog_directory: /Users/m410/Projects/Brzy/calista/target/cassandra.home.unit-tests/commitlog
-saved_caches_directory: /Users/m410/Projects/Brzy/calista/target/cassandra.home.unit-tests/saved_caches
+commitlog_directory: /var/lib/cassandra/commitlog
+saved_caches_directory: /var/lib/cassandra/saved_caches
 commitlog_rotation_threshold_in_mb: 128
 commitlog_sync: periodic
 commitlog_sync_period_in_ms: 10000
+seed_provider:
+    - class_name: org.apache.cassandra.locator.SimpleSeedProvider
+      parameters:
+          - seeds: "127.0.0.1"
 flush_largest_memtables_at: 0.75
 reduce_cache_sizes_at: 0.85
 reduce_cache_capacity_to: 0.6
-seeds:
-    - 127.0.0.1
-disk_access_mode: auto
 concurrent_reads: 32
 concurrent_writes: 32
+memtable_flush_queue_size: 4
 sliced_buffer_size_in_kb: 64
 storage_port: 7000
 listen_address: localhost
@@ -41,6 +37,7 @@ incremental_backups: false
 snapshot_before_compaction: false
 column_index_size_in_kb: 64
 in_memory_compaction_limit_in_mb: 64
+compaction_throughput_mb_per_sec: 16
 compaction_preheat_key_cache: true
 rpc_timeout_in_ms: 10000
 endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
@@ -50,14 +47,9 @@ dynamic_snitch_reset_interval_in_ms: 600000
 dynamic_snitch_badness_threshold: 0.0
 request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 index_interval: 128
-
-keyspaces:
-    - name: Test
-      replica_placement_strategy: org.apache.cassandra.locator.SimpleStrategy
-      replication_factor: 1
-      column_families:
-        - {name: Standard, compare_with: UTF8Type}
-        - {name: Person, compare_with: UTF8Type}
-        - {name: SPerson, column_type: Super, compare_with: UTF8Type, compare_subcolumns_with: UTF8Type}
-        - {name: Super, column_type: Super, compare_with: LongType, compare_subcolumns_with: LexicalUUIDType}
-        - {name: Super2, column_type: Super, compare_with: UTF8Type, compare_subcolumns_with: UTF8Type}
+encryption_options:
+    internode_encryption: none
+    keystore: conf/.keystore
+    keystore_password: cassandra
+    truststore: conf/.truststore
+    truststore_password: cassandra
