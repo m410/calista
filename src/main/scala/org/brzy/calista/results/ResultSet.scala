@@ -13,7 +13,6 @@
  */
 package org.brzy.calista.results
 
-import sun.java2d.SunGraphicsEnvironment.T1Filter
 import collection.mutable.ListBuffer
 
 /**
@@ -25,6 +24,8 @@ case class ResultSet(rows:List[Row]) {
 
   def size = rows.size
 
+  def isEmpty = rows.isEmpty
+  
   /**
    * Converts the rows returned by the query into a map where the key is the column name.
    */

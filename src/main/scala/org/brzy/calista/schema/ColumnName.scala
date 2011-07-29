@@ -33,6 +33,8 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends 
     session.insert(Column(name,value,new Date(),parent))
   }
 
+  def asColumn = Column(name,null,null, parent)
+
   override def valueAs[V: Manifest] = {
     val session = Calista.value.asInstanceOf[Session]
     val optionRow = session.get(Column(name,null,new Date(),parent))

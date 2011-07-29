@@ -54,12 +54,12 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
 
     sessionManager.doWith { session =>
 			val cName = superColumn | columnName
-      val result = session.get(cName.asInstanceOf[ColumnName[UUID]])
+      val result = session.get(cName.asInstanceOf[ColumnName[UUID]].asColumn)
       assertNotNull(result)
       assertTrue(result.isDefined)
       val column = result.get.asInstanceOf[Row]
       assertEquals("value", column.valueAs[String])
-      assertEquals(columnName.toString, column.nameAs[UUID].toString)
+      assertEquals(columnName.toString, column.columnAs[UUID].toString)
     }
   }
 }

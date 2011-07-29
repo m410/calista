@@ -220,7 +220,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       if (list.isEmpty)
         Option(null)
       else
-        Option(list.last)
+        Option(list.head)
     }
     catch {
       case e: NotFoundException =>
@@ -287,6 +287,16 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    */
   def list(sc: SuperKey[_]): ResultSet = {
     sliceRange(sc.sliceRange("","",false,100),defaultConsistency)
+  }
+
+  /**
+   * List all the super columns and columns under the key
+   */
+  def list[T:Manifest](cn: ColumnName[T]): ResultSet = {
+    get(cn.asColumn) match {
+      case Some(r) => ResultSet(List(r.asInstanceOf[Row]))
+      case _ => ResultSet(List.empty[Row])
+    }
   }
 
 	/**
