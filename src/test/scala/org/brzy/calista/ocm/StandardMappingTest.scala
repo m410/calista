@@ -17,9 +17,11 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 
+import org.brzy.calista.Calista
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
+import org.brzy.calista.schema.StandardKey
 
 class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"
@@ -29,13 +31,13 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	 	sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = new Person(personKey,"name",100,personDate)
-			person.insert
+			person.insert()
 		}
 
 	 	sessionManager.doWith { session =>
-       import org.brzy.calista.schema.Conversions._
+       import org.brzy.calista.dsl.Conversions._
        val key = "Person" | personKey
-       val columns = session.list(key)
+       val columns = session.list(key.asInstanceOf[StandardKey[String]])
        assertNotNull(columns)
        assertEquals(3,columns.size)
 		}

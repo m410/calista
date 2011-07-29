@@ -17,6 +17,7 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
+import org.brzy.calista.dsl.Conversions
 
 
 class RemoveTest extends JUnitSuite with EmbeddedTest {
@@ -25,15 +26,19 @@ class RemoveTest extends JUnitSuite with EmbeddedTest {
 
     val key = "Standard" | "remover"
     sessionManager.doWith { session =>
-        session.insert(key | ("column5", "value0"))
+        session.insert(key || ("column5", "value0"))
     }
 
     sessionManager.doWith { session =>
-      session.remove(key|("column5"))
+      {
+        val stdKey = key | "column5"
+        session.remove(stdKey.asInstanceOf[StandardKey[String]])
+      }
     }
 
     sessionManager.doWith { session =>
-      val result = session.get(key | ("column5"))
+      val stdKey = key | "column5"
+      val result = session.get(stdKey.asInstanceOf[StandardKey[String]])
       assertNotNull(result)
       assertTrue(result.isEmpty)
     }

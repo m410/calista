@@ -99,7 +99,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] implicit def toSlicePredicate(sp: SliceRange[_]) = {
-    val r = new CassandraSliceRange(sp.startBytes, sp.finishBytes, false, sp.count)
+    val r = new CassandraSliceRange(sp.startBytes, sp.finishBytes, false, sp.max)
     new CassandraSlicePredicate().setSlice_range(r)
   }
 

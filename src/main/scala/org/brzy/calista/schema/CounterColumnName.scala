@@ -40,7 +40,7 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
     session.add(Column(name, amount, new Date(), parent))
   }
 
-  override def count = {
+  override def countValue = {
     val session = Calista.value.asInstanceOf[Session]
     val optionReturnColumn = session.get(Column(name,null,new Date(),parent))
 

@@ -20,9 +20,9 @@ import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
-import org.brzy.calista.Session
-import org.brzy.calista.schema.Conversions
-
+import org.brzy.calista.dsl.Conversions
+import org.brzy.calista.{Calista, Session}
+import org.brzy.calista.schema.{SuperKey, ColumnName}
 
 class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
   val familyName = "SPerson"
@@ -34,13 +34,13 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 	 	sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = new SPerson(personKey,personSuperColumn,"name",100,personDate)
-			person.insert
+			person.insert()
 		}
 
 	 	sessionManager.doWith { session =>
-       import org.brzy.calista.schema.Conversions._
+       import org.brzy.calista.dsl.Conversions._
        val key = familyName | personKey | personSuperColumn
-       val columns = session.list(key)
+       val columns = session.list(key.asInstanceOf[ColumnName[String]])
        assertNotNull(columns)
        assertEquals(3,columns.size)
 		}
@@ -48,19 +48,20 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 		sessionManager.doWith { session =>
 			Calista.value = Option(session)
 			val person = SPerson.get(personKey, Option(personSuperColumn)) match {
-        case Some(person) =>
-          assertNotNull(person)
-          assertNotNull(person.key)
-          assertNotNull(person.name)
-          assertNotNull(person.count)
-          assertNotNull(person.created)
+        case Some(p) =>
+          assertNotNull(p)
+          assertNotNull(p.key)
+          assertNotNull(p.name)
+          assertNotNull(p.count)
+          assertNotNull(p.created)
         case _ =>
           fail("No person by key")
       }
 		}
     sessionManager.doWith { (session:Session) =>
       import Conversions._
-      val columns = session.list(familyName|personKey)
+      val sKey = familyName|personKey
+      val columns = session.list(sKey.asInstanceOf[SuperKey[String]])
       assertNotNull(columns)
       assertEquals(1,columns.size)
     }

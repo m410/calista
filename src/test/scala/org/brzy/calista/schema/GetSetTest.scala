@@ -18,7 +18,9 @@ import org.brzy.calista.server.EmbeddedTest
 import org.junit.Test
 import org.junit.Assert._
 import java.util.UUID
-import org.brzy.calista.serializer.{UUIDSerializer, UTF8Serializer}
+import org.brzy.calista.dsl.Conversions
+import org.brzy.calista.results.Row
+
 class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testSetAndGetStandardColumn() {
@@ -26,38 +28,38 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
     val key = "Standard" | "testKey"
 
     sessionManager.doWith { session =>
-      session.insert(key | ("column", "value"))
+      session.insert(key || ("column", "value"))
     }
 
     sessionManager.doWith { session =>
-      val result = session.get(key | ("column"))
+      val result = session.get(key || ("column",null))
       assertNotNull(result)
       assertTrue(result.isDefined)
-      val column = result.get.asInstanceOf[RColumn]
-      assertEquals("value", column.valueAs(UTF8Serializer))
-      assertEquals("column", column.nameAs(UTF8Serializer))
+      val column = result.get.asInstanceOf[Row]
+      assertEquals("value", column.valueAs[String])
+      assertEquals("column", column.columnAs[String])
     }
   }
 
   // create a single column, save it, and get it out
   @Test def testSetAndGetSuperColumn() {
     import Conversions._
-    val superColumn = "Super" |^ "superKey" | 12345L
+    val superColumn = "Super" | "superKey" | 12345L
 		val columnName = UUID.randomUUID
 
     sessionManager.doWith { session =>
-      val column = superColumn | (columnName, "value")
+      val column = superColumn || (columnName, "value")
       session.insert(column)
     }
 
     sessionManager.doWith { session =>
-			val getColumn = superColumn | (columnName)
-      val result = session.get(getColumn)
+			val cName = superColumn | columnName
+      val result = session.get(cName.asInstanceOf[ColumnName[UUID]])
       assertNotNull(result)
       assertTrue(result.isDefined)
-      val column = result.get.asInstanceOf[RColumn]
-      assertEquals("value", column.valueAs(UTF8Serializer))
-      assertEquals(columnName.toString, column.nameAs(UUIDSerializer).toString)
+      val column = result.get.asInstanceOf[Row]
+      assertEquals("value", column.valueAs[String])
+      assertEquals(columnName.toString, column.nameAs[UUID].toString)
     }
   }
 }

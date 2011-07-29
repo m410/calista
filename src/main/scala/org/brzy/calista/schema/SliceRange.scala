@@ -16,6 +16,8 @@ package org.brzy.calista.schema
 import org.brzy.calista.serializer.Serializers
 import org.brzy.calista.Calista
 import org.brzy.calista.Session
+import org.brzy.calista.dsl.DslNode
+import org.brzy.calista.results.Row
 
 /**
  * Slice of columns under a key.
@@ -29,7 +31,8 @@ import org.brzy.calista.Session
  *
  * @author Michael Fortin
  */
-case class SliceRange[T] protected[schema] (start: T, finish: T, reverse: Boolean, count: Int, key: Key) {
+case class SliceRange[T:Manifest] protected[schema] (start: T, finish: T, reverse: Boolean, max: Int, key: Key){
+
   def startBytes = Serializers.toBytes(start)
 
   def finishBytes = Serializers.toBytes(finish)
@@ -51,7 +54,7 @@ case class SliceRange[T] protected[schema] (start: T, finish: T, reverse: Boolea
     session.sliceRange(this)
   }
 
-  def iterate(implicit m:Manifest[T]) = {
+  def iterate:java.util.Iterator[Row] = {
     val session = Calista.value.asInstanceOf[Session]
     session.scrollSliceRange(this)
   }

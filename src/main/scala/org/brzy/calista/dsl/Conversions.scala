@@ -13,8 +13,10 @@
  */
 package org.brzy.calista.dsl
 
-
-import org.brzy.calista.schema.{ColumnName, ColumnFamily}
+import org.brzy.calista.schema.{SliceRange, ColumnName, ColumnFamily}
+import java.util.Iterator
+import org.brzy.calista.results.Row
+import org.brzy.calista.{Session, Calista}
 
 /**
  * This needs to be imported so that DSL to create columns can be used.
@@ -43,4 +45,5 @@ object Conversions {
   implicit def columnOps[K:Manifest](column:ColumnName[K]) = {
     new ColumnOps(column)
   }
+
 }

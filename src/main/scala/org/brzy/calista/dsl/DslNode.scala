@@ -71,7 +71,7 @@ trait DslNode {
   /**
    * Only applies to counter column names to get the value of the counter
    */
-  def count:Long = throw new InvalidNodeUseException(nodePath)
+  def countValue:Long = throw new InvalidNodeUseException(nodePath)
 
   /**
    * Applies to a column name node, super columns and keys.  This will remove the node from the
@@ -79,4 +79,7 @@ trait DslNode {
    */
   def remove() {throw new InvalidNodeUseException(nodePath)}
 
+  def results:ResultSet = {throw new InvalidNodeUseException(nodePath)}
+
+  def iterate:java.util.Iterator[Row] = {throw new InvalidNodeUseException(nodePath)}
 }
