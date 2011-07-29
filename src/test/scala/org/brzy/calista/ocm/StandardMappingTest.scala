@@ -29,7 +29,6 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	
   @Test def mapEntity() {
 	 	sessionManager.doWith { session =>
-			Calista.value = Option(session)
 			val person = new Person(personKey,"name",100,personDate)
 			person.insert()
 		}
@@ -43,7 +42,6 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 		sessionManager.doWith { session =>
-			Calista.value = Option(session)
 			val person = Person.get(personKey) match {
         case Some(person) =>
           assertNotNull(person)
@@ -54,8 +52,6 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
         case _ =>
           fail("No person by key")
       }
-
-			Calista.value = None
 		}
   }
 }

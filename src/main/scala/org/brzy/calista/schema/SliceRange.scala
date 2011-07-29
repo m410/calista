@@ -50,12 +50,12 @@ case class SliceRange[T:Manifest] protected[schema] (start: T, finish: T, revers
   }
 
   def results = {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     session.sliceRange(this)
   }
 
   def iterate:java.util.Iterator[Row] = {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     session.scrollSliceRange(this)
   }
 }

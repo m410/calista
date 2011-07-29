@@ -32,7 +32,6 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 	
   @Test def mapEntity() {
 	 	sessionManager.doWith { session =>
-			Calista.value = Option(session)
 			val person = new SPerson(personKey,personSuperColumn,"name",100,personDate)
 			person.insert()
 		}
@@ -46,7 +45,6 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 		sessionManager.doWith { session =>
-			Calista.value = Option(session)
 			val person = SPerson.get(personKey, Option(personSuperColumn)) match {
         case Some(p) =>
           assertNotNull(p)

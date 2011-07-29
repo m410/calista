@@ -15,7 +15,6 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.Calista
-import org.brzy.calista.Session
 import org.brzy.calista.dsl.DslNode
 
 /**
@@ -36,12 +35,12 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
   }
 
   def set(amount: Long) {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     session.add(Column(name, amount, new Date(), parent))
   }
 
   override def countValue = {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     val optionReturnColumn = session.get(Column(name,null,new Date(),parent))
 
     0

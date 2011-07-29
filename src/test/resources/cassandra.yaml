@@ -10,6 +10,7 @@ authenticator: org.apache.cassandra.auth.AllowAllAuthenticator
 authority: org.apache.cassandra.auth.AllowAllAuthority
 partitioner: org.apache.cassandra.dht.RandomPartitioner
 data_file_directories:
+    - target/cassandra/data
 commitlog_directory: /var/lib/cassandra/commitlog
 saved_caches_directory: /var/lib/cassandra/saved_caches
 commitlog_rotation_threshold_in_mb: 128
@@ -24,6 +25,7 @@ reduce_cache_sizes_at: 0.85
 reduce_cache_capacity_to: 0.6
 concurrent_reads: 32
 concurrent_writes: 32
+memtable_flush_writers: 1
 memtable_flush_queue_size: 4
 sliced_buffer_size_in_kb: 64
 storage_port: 7000

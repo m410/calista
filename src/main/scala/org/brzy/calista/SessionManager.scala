@@ -105,7 +105,9 @@ class SessionManager(keyspace:String, url:String, port:Int = 9160) {
 	 */
   def doWith(f: (Session) => Unit) {
     val session = createSession
+    Calista.value = Option(session)
     f(session)
+    Calista.value = None
     session.close()
   }
 }

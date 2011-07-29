@@ -15,7 +15,6 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.serializer.{Serializers}
-import org.brzy.calista.Session
 import org.brzy.calista.Calista
 
 /**
@@ -68,7 +67,7 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
    * Returns a sigle row represented by the column path.
    */
   def row = {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     session.get(this)
   }
 }

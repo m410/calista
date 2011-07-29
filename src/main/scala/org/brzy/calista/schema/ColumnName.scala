@@ -14,7 +14,6 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.Calista
-import org.brzy.calista.Session
 import java.util.Date
 import org.brzy.calista.dsl.DslNode
 
@@ -29,14 +28,14 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends 
   def nodePath = parent.nodePath + ":Column("+name+")"
 
   def set[V:Manifest](value:V) {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     session.insert(Column(name,value,new Date(),parent))
   }
 
   def asColumn = Column(name,null,null, parent)
 
   override def valueAs[V: Manifest] = {
-    val session = Calista.value.asInstanceOf[Session]
+    val session = Calista.value.get
     val optionRow = session.get(Column(name,null,new Date(),parent))
     optionRow match {
       case Some(row) => Option(row.valueAs[V])

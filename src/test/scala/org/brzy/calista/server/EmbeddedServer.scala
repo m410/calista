@@ -62,8 +62,8 @@ object EmbeddedServer {
   def checkConnection() {
      // try to make sockets until the server opens up - there has to be a better
   // way - just not sure what it is.
-  log.debug("Sleep for 4s")
-  Thread.sleep(4000)
+  log.debug("Sleep for 9s")
+  Thread.sleep(9000)
 
   val socket = new TSocket("localhost", 9160)
   var opened = false
@@ -94,39 +94,37 @@ object EmbeddedServer {
         families = List(
           new FamilyDefinition(
             name="Standard",
-            comparatorType = Option("UTF8type"))
-//          ,
-//          new FamilyDefinition(
-//            name="StandardFamily",
-//            comparatorType = Option("UTF8type")),
-//          new FamilyDefinition(
-//            name="Person",
-//            comparatorType = Option("UTF8type")),
-//          new FamilyDefinition(
-//            name="SPerson",
-//            columnType = "Super",
-//            comparatorType = Option("UTF8type"),
-//            subcomparatorType = Option("UTF8Type")),
-//          new FamilyDefinition(
-//            name="Super",
-//            columnType = "Super",
-//            comparatorType = Option("LongType"),
-//            subcomparatorType = Option("LexicalUUIDType")),
-//          new FamilyDefinition(
-//            name="SuperFamily",
-//            columnType = "Super",
-//            comparatorType = Option("UTF8type"),
-//            subcomparatorType = Option("UTF8Type")),
-//          new FamilyDefinition(
-//            name="Super2",
-//            columnType = "Super",
-//            comparatorType = Option("UTF8type"),
-//            subcomparatorType = Option("UTF8Type")),
-//          new FamilyDefinition(
-//            name="CountFamily",
-//            columnType = "Counter",
-//            comparatorType = Option("UTF8Type"))
-        )
+            comparatorType = Option("UTF8type")),
+          new FamilyDefinition(
+            name="StandardFamily",
+            comparatorType = Option("UTF8type")),
+          new FamilyDefinition(
+            name="Person",
+            comparatorType = Option("UTF8type")),
+          new FamilyDefinition(
+            name="SPerson",
+            columnType = "Super",
+            comparatorType = Option("UTF8type"),
+            subcomparatorType = Option("UTF8Type")),
+          new FamilyDefinition(
+            name="Super",
+            columnType = "Super",
+            comparatorType = Option("LongType"),
+            subcomparatorType = Option("LexicalUUIDType")),
+          new FamilyDefinition(
+            name="SuperFamily",
+            columnType = "Super",
+            comparatorType = Option("UTF8type"),
+            subcomparatorType = Option("UTF8Type")),
+          new FamilyDefinition(
+            name="Super2",
+            columnType = "Super",
+            comparatorType = Option("UTF8type"),
+            subcomparatorType = Option("UTF8Type")),
+          new FamilyDefinition(
+            name="CountFamily",
+            columnType = "Counter",
+            comparatorType = Option("UTF8Type")))
       ))
     })
   }
