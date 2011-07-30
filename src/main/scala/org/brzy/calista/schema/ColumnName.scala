@@ -16,6 +16,7 @@ package org.brzy.calista.schema
 import org.brzy.calista.Calista
 import java.util.Date
 import org.brzy.calista.dsl.DslNode
+import org.brzy.calista.serializer.Serializers
 
 
 /**
@@ -27,15 +28,44 @@ import org.brzy.calista.dsl.DslNode
 case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends DslNode {
   def nodePath = parent.nodePath + ":Column("+name+")"
 
+  /**
+   * Return the name converted to bytes.
+   */
+  def nameBytes = Serializers.toBytes(name)
+
+  /**
+   * Set the value of the column and insert it immediately.
+   */
   def set[V:Manifest](value:V) {
-    val session = Calista.value.get
+    val session = Calista.value
     session.insert(Column(name,value,new Date(),parent))
   }
 
   def asColumn = Column(name,null,null, parent)
 
+  /**
+	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
+	 * directly.
+	 */
+  def columnPath = {
+    val superCol = parent match {
+      case s: SuperColumn[_] => s.keyBytes
+      case _ => null
+    }
+    ColumnPath(parent.family.name, superCol, nameBytes)
+  }
+
+	/**
+	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
+	 * directly.
+	 */
+  def columnParent: ColumnParent = parent match {
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+  }
+
   override def valueAs[V: Manifest] = {
-    val session = Calista.value.get
+    val session = Calista.value
     val optionRow = session.get(Column(name,null,new Date(),parent))
     optionRow match {
       case Some(row) => Option(row.valueAs[V])

@@ -18,8 +18,8 @@ import org.apache.cassandra.thrift.Cassandra
 import org.apache.thrift.transport.{TSocket, TFramedTransport}
 import org.apache.thrift.protocol.TBinaryProtocol
 
-import collection.JavaConversions._
 import system.{FamilyDefinition, KeyspaceDefinition}
+import org.slf4j.LoggerFactory
 
 /**
  * Session Manager works in a similar fashion as the Entity Manager Factory  in JPA.  It's 
@@ -33,16 +33,16 @@ import system.{FamilyDefinition, KeyspaceDefinition}
  *
  * @author Michael Fortin
  */
-class SessionManager(keyspace:String, url:String, port:Int = 9160) {
+class SessionManager(keyspace: String, url: String, port: Int = 9160) {
 
-	/**
-	 * the host and port for where this session manager connects.
-	 */
+  /**
+   * the host and port for where this session manager connects.
+   */
   val host = Host(url, port, 2500)
 
-	/**
-	 * Outputs the keyspace definition.  This will output the keyspace, families and their attributes.
-	 */
+  /**
+   * Outputs the keyspace definition.  This will output the keyspace, families and their attributes.
+   */
   lazy val keyspaceDefinition = {
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
@@ -52,14 +52,23 @@ class SessionManager(keyspace:String, url:String, port:Int = 9160) {
     try {
       KeyspaceDefinition(client.describe_keyspace(keyspace))
     }
+    catch {
+      case e:Exception =>
+        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keyspace,e)
+        KeyspaceDefinition(
+          name = keyspace,
+          strategyClass = "",
+          families = List.empty[FamilyDefinition]
+        )
+    }
     finally {
       sock.close()
     }
   }
 
-	/**
-	 * Ouputs the cluster named provided by the datastore.
-	 */
+  /**
+   * Ouputs the cluster named provided by the datastore.
+   */
   lazy val clusterName = {
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
@@ -74,9 +83,9 @@ class SessionManager(keyspace:String, url:String, port:Int = 9160) {
     }
   }
 
-	/**
-	 * Outputs the version of the cassandra server
-	 */
+  /**
+   * Outputs the version of the cassandra server
+   */
   lazy val version = {
     val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
     val protocol = new TBinaryProtocol(sock)
@@ -91,23 +100,47 @@ class SessionManager(keyspace:String, url:String, port:Int = 9160) {
     }
   }
 
-	/**
-	 * This creates a new session to interact with cassandra using the configured keyspaceDefinition and
-	 * host.  Using this factory method required you to manage the life cycle your self. I will lazyly
-	 * open a connect to cassandra but it will not close it.
-	 * 
-	 * @see Session
-	 */
-  def createSession = new Session(host,keyspaceDefinition)
+  /**
+   * Checks to see if the keyspace exists, if it does it will update it, otherwise it wll create it.
+   * This is used for testing or development to create a keyspace.
+   */
+  def loadKeyspace(keyspace: KeyspaceDefinition) {
+    val session = new Session(host, null)
+    try {
+      session.describeKeyspace(keyspace.name)
+      session.updateKeyspace(keyspace)
+    }
+    catch {
+      case e: Exception =>
+        session.addKeyspace(keyspace)
+    }
+  }
 
-	/**
-	 * Manaages the life cycle of a session automatically.
-	 */
+  /**
+   * Checks to see if the columnFamily exists, if it does it will update it, otherwise it wll create it.
+   * This is used for testing or development to create a columnFamily.
+   */
+  def loadColumnFamily() {
+
+  }
+
+  /**
+   * This creates a new session to interact with cassandra using the configured keyspaceDefinition and
+   * host.  Using this factory method required you to manage the life cycle your self. I will lazyly
+   * open a connect to cassandra but it will not close it.
+   *
+   * @see Session
+   */
+  def createSession = new Session(host, keyspaceDefinition)
+
+  /**
+   * Manaages the life cycle of a session automatically.
+   */
   def doWith(f: (Session) => Unit) {
     val session = createSession
-    Calista.value = Option(session)
+    Calista.value = session
     f(session)
-    Calista.value = None
+    Calista.value = null
     session.close()
   }
 }

@@ -40,7 +40,7 @@ case class ColumnFamily(name: String) extends DslNode {
    * @throws UnknownFamilyException if the family name does not exist in the data store.
    */
   def key[T:Manifest](key: T):Either[StandardKey[T],SuperKey[T]] = {
-    val family = Calista.value.get.ksDef.families.find(_.name == name) match {
+    val family = Calista.value.ksDef.families.find(_.name == name) match {
       case Some(f) => f
       case _ => throw new UnknownFamilyException("No ColumnFamily with name: '" + name +"'")
     }
@@ -54,12 +54,12 @@ case class ColumnFamily(name: String) extends DslNode {
   }
 
   def superKey[T:Manifest](key: T):SuperKey[T] = {
-    val family = Calista.value.get.ksDef.families.find(_.name == name).get
+    val family = Calista.value.ksDef.families.find(_.name == name).get
     SuperKey(key,this, family)
   }
 
   def standardKey[T:Manifest](key: T):StandardKey[T] = {
-    val family = Calista.value.get.ksDef.families.find(_.name == name).get
+    val family = Calista.value.ksDef.families.find(_.name == name).get
     StandardKey(key,this, family)
   }
 

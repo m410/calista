@@ -20,4 +20,4 @@ import util.DynamicVariable
  * 
  * @author Michael Fortin
  */
-object Calista extends DynamicVariable(Option[Session](null))
+object Calista extends DynamicVariable[Session](null)

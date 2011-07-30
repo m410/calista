@@ -32,7 +32,7 @@ object Conversions {
   implicit def toKeyFamily(str:String) = ColumnFamily(str)
 
 //  implicit def <=[K,V](column:ColumnName[K])(implicit mk:Manifest[K]) = {
-//    val session = Calista.value.get
+//    val session = Calista.value
 //      session.get(column)
 //  }
 

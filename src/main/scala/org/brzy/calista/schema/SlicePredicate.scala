@@ -36,7 +36,7 @@ case class SlicePredicate[T] protected[schema] (columns: Array[T], key: Key) {
   }
 
   def results = {
-    val session = Calista.value.get
+    val session = Calista.value
     session.slice(this)
   }
 }

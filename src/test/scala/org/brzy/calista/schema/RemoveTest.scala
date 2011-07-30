@@ -30,15 +30,13 @@ class RemoveTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
-      {
         val stdKey = key | "column5"
-        session.remove(stdKey.asInstanceOf[StandardKey[String]])
-      }
+        session.remove(stdKey.asInstanceOf[ColumnName[String]])
     }
 
     sessionManager.doWith { session =>
       val stdKey = key | "column5"
-      val result = session.list(stdKey.asInstanceOf[StandardKey[String]])
+      val result = session.list(stdKey.asInstanceOf[ColumnName[String]])
       assertNotNull(result)
       assertTrue(result.isEmpty)
     }

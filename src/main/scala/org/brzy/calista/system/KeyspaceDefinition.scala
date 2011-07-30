@@ -40,9 +40,23 @@ import collection.JavaConversions._
 case class KeyspaceDefinition(
     name:String,
     strategyClass:String,
+    replicationFactor:Int = 1,
     strategyOptions:Option[Map[String,String]] = None,
     families:List[FamilyDefinition],
-    durableWrites:Boolean = true)
+    durableWrites:Boolean = true) {
+  
+  def toKsDef = {
+    val d = new KsDef()
+    d.setName(name)
+    d.setStrategy_class(strategyClass)
+    d.setReplication_factor(replicationFactor)
+    if (strategyOptions.isDefined)
+      d.setStrategy_options(strategyOptions.get)
+    d.setCf_defs(families.map(_.asCfDef))
+    d.setDurable_writes(durableWrites)
+    d
+  }
+}
 
 
 object KeyspaceDefinition {
@@ -50,6 +64,7 @@ object KeyspaceDefinition {
     new KeyspaceDefinition(
       name= kdef.getName,
       strategyClass = kdef.getStrategy_class,
+      replicationFactor = kdef.getReplication_factor,
       families = kdef.getCf_defs.map(c=>FamilyDefinition(c)).toList)
   }
 }

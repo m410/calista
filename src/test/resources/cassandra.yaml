@@ -11,8 +11,8 @@ authority: org.apache.cassandra.auth.AllowAllAuthority
 partitioner: org.apache.cassandra.dht.RandomPartitioner
 data_file_directories:
     - target/cassandra/data
-commitlog_directory: /var/lib/cassandra/commitlog
-saved_caches_directory: /var/lib/cassandra/saved_caches
+commitlog_directory: target/cassandra/commitlog
+saved_caches_directory: target/cassandra/saved_caches
 commitlog_rotation_threshold_in_mb: 128
 commitlog_sync: periodic
 commitlog_sync_period_in_ms: 10000

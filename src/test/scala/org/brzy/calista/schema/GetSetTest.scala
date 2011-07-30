@@ -25,13 +25,14 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testSetAndGetStandardColumn() {
     import Conversions._
-    val key = "Standard" | "testKey"
 
     sessionManager.doWith { session =>
+      val key = "Standard" | "testKey"
       session.insert(key || ("column", "value"))
     }
 
     sessionManager.doWith { session =>
+      val key = "Standard" | "testKey"
       val result = session.get(key || ("column",null))
       assertNotNull(result)
       assertTrue(result.isDefined)

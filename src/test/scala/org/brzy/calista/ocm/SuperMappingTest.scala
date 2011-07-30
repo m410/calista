@@ -21,8 +21,8 @@ import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
 import org.brzy.calista.dsl.Conversions
-import org.brzy.calista.{Calista, Session}
-import org.brzy.calista.schema.{SuperKey, ColumnName}
+import org.brzy.calista.{Session}
+import org.brzy.calista.schema.{SuperKey, SuperColumn=>SC}
 
 class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
   val familyName = "SPerson"
@@ -39,7 +39,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 	 	sessionManager.doWith { session =>
        import org.brzy.calista.dsl.Conversions._
        val key = familyName | personKey | personSuperColumn
-       val columns = session.list(key.asInstanceOf[ColumnName[String]])
+       val columns = session.list(key.asInstanceOf[SC[String]])
        assertNotNull(columns)
        assertEquals(3,columns.size)
 		}

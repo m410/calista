@@ -48,20 +48,22 @@ case class Mapping[T <: AnyRef : Manifest](
     val builder = descriptor.newBuilder()
     val attributeKey = attributes.find(_.isInstanceOf[Key]).get
     val keyProperty = descriptor.properties.find(_.name == attributeKey.name).get
+    log.debug("key:"+keyProperty+":"+key)
     builder.set(keyProperty, key)
 
     superColumn match {
       case Some(sc) =>
         val attributeSuCol = attributes.find(_.isInstanceOf[SuperColumn]).get
         val scProperty = descriptor.properties.find(_.name == attributeSuCol.name).get
+        log.debug("super:"+scProperty+":"+sc)
         builder.set(scProperty, sc)
       case _ =>
     }
 
     attributes.filter(_.isInstanceOf[Column]).foreach(column =>{
-      val attr = attributes.find(_.isInstanceOf[Column]).get
-      val prop = descriptor.properties.find(_.name == attr.name).get
-      val value = attr.serializer.fromBytes(colMap(attr.name).value)
+      val prop = descriptor.properties.find(_.name == column.name).get
+      val value = column.serializer.fromBytes(colMap(column.name).value)
+      log.debug("column:"+prop+":"+value)
       builder.set(prop, value)
     })
 

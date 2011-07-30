@@ -103,7 +103,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     new CassandraSlicePredicate().setSlice_range(r)
   }
 
-  private[this] def keyFor(c: Column[_, _]) = c.parent match {
+  private[this] def keyFor(c: {def parent:Key}) = c.parent match {
     case s: StandardKey[_] => s.keyBytes
     case s: SuperColumn[_] => s.parent.keyBytes
   }
@@ -134,50 +134,12 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     }
   }
 
-  private[this] implicit def toKsDef(c: KeyspaceDefinition) = {
-    val d = new KsDef()
-    d.setName(c.name)
-    d.setStrategy_class(c.strategyClass)
-    if (c.strategyOptions.isDefined)
-      d.setStrategy_options(c.strategyOptions.get)
-    d.setCf_defs(c.families.map(c=>toCfDef(c)))
-    d.setDurable_writes(c.durableWrites)
-    d
-  }
-
-  private[this] implicit def toCfDef(f: FamilyDefinition) = {
-    val d = new CfDef()
-    d.setName(f.name)
-    d.setComparator_type(f.comparatorType.get)
-    if (f.subcomparatorType.isDefined) d.setSubcomparator_type(f.subcomparatorType.get)
-    if (f.comment.isDefined) d.setComment(f.comment.get)
-    if (f.rowCacheSize.isDefined) d.setRow_cache_size(f.rowCacheSize.get)
-    if (f.keyCacheSize.isDefined) d.setKey_cache_size(f.keyCacheSize.get)
-    if (f.readRepairChance.isDefined) d.setRead_repair_chance(f.readRepairChance.get)
-    if (f.columnMetadata.isDefined) d.setColumn_metadata(f.columnMetadata.get.map(_.asColumnDef))
-    if (f.gcGraceSeconds.isDefined) d.setGc_grace_seconds(f.gcGraceSeconds.get)
-    if (f.defaultValidationClass.isDefined) d.setDefault_validation_class(f.defaultValidationClass.get)
-    if (f.id.isDefined) d.setId(f.id.get)
-    if (f.minCompactionThreshold.isDefined) d.setMin_compaction_threshold(f.minCompactionThreshold.get)
-    if (f.maxCompactionThreshold.isDefined) d.setMax_compaction_threshold(f.maxCompactionThreshold.get)
-    if (f.rowCacheSavePeriodInSeconds.isDefined) d.setRow_cache_save_period_in_seconds(f.rowCacheSavePeriodInSeconds.get)
-    if (f.keyCacheSavePeriodInSeconds.isDefined) d.setKey_cache_save_period_in_seconds(f.keyCacheSavePeriodInSeconds.get)
-    if (f.memtableFlushAfterMins.isDefined) d.setMemtable_flush_after_mins(f.memtableFlushAfterMins.get)
-    if (f.memtableThroughputInMb.isDefined) d.setMemtable_throughput_in_mb(f.memtableThroughputInMb.get)
-    if (f.memtableOperationsInMillions.isDefined) d.setMemtable_operations_in_millions(f.memtableOperationsInMillions.get)
-    if (f.replicateOnWrite.isDefined) d.setReplicate_on_write(f.replicateOnWrite.get)
-    if (f.mergeShardsChance.isDefined) d.setMerge_shards_chance(f.mergeShardsChance.get)
-    if (f.keyValidationClass.isDefined) d.setKey_validation_class(f.keyValidationClass.get)
-    if (f.rowCacheProvider.isDefined) d.setRow_cache_provider(f.rowCacheProvider.get)
-    if (f.keyAlias.isDefined) d.setKey_alias(f.keyAlias.get)
-    d
-  }
-
   private[this] implicit def toTokenRange(f: TokenRange) = {
     val d = new CassandraTokenRange()
     d.setStart_token(f.startToken)
     d.setEnd_token(f.endToken)
     d.setEndpoints(f.endpoints)
+    log.info("Add new TokenRange: " + d)
     d
   }
 
@@ -236,6 +198,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     log.debug("insert: {}",column)
     client.insert(keyFor(column), column.columnParent, column, level)
   }
+
+  /**
+   * Remove a column and it's value.
+   */
+  def remove(column: ColumnName[_]) {
+    remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
+  }
+
 
 	/**
 	 * Remove a column and it's value.
@@ -417,26 +387,42 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
 
-  def addKeyspace(keyspace:KeyspaceDefinition){
-    client.system_add_keyspace(keyspace)
+  def addKeyspace(ks:KeyspaceDefinition){
+    log.info("add keyspace: " + ks)
+    val protocol = new TBinaryProtocol(sock)
+    val c = new Cassandra.Client(protocol, protocol)
+    sock.open()
+    c.system_add_keyspace(ks.toKsDef)
+    sock.close()
   }
 
   def updateKeyspace(keyspace:KeyspaceDefinition){
-    client.system_update_keyspace(keyspace)
+    log.info("update keyspace: " + keyspace)
+    val protocol = new TBinaryProtocol(sock)
+    val c = new Cassandra.Client(protocol, protocol)
+    client.system_update_keyspace(keyspace.toKsDef)
+    sock.close()
   }
 
   def dropKeyspace(keyspace:String){
+    log.info("drop keyspace: " + keyspace)
+    val protocol = new TBinaryProtocol(sock)
+    val c = new Cassandra.Client(protocol, protocol)
     client.system_drop_keyspace(keyspace)
+    sock.close()
   }
 
   def addColumnFamily(family:FamilyDefinition){
-    client.system_add_column_family(family)
+    log.info("add columnFamily: " + family)
+    client.system_add_column_family(family.asCfDef)
   }
   def updateColumnFamily(family:FamilyDefinition){
-    client.system_update_column_family(family)
+    log.info("update columnFamily: " + family)
+    client.system_update_column_family(family.asCfDef)
   }
 
   def dropColumnFamily(family:String){
+    log.info("drop columnFamily: " + family)
     client.system_drop_column_family(family)
   }
 

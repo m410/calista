@@ -33,7 +33,7 @@ import org.brzy.calista.Calista
  * @author Michael Fortin
  */
 trait StandardDao[K, T <: AnyRef] {
-  protected[this] def session = Calista.value.get
+  protected[this] def session = Calista.value
 
 	/**
 	 * Get an instance of the mapped class by it's key.

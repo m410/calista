@@ -67,7 +67,7 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
    * Returns a sigle row represented by the column path.
    */
   def row = {
-    val session = Calista.value.get
+    val session = Calista.value
     session.get(this)
   }
 }

@@ -32,7 +32,8 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
 
         // get and set
         "StandardFamily" | "key" | "column" <= "New Value"
-        val stdColumnValue = "StandardFamily" | "key" | "column".valueAs[String]
+        val stdColumn = "StandardFamily" | "key" | "column"
+        val stdColumnValue = stdColumn.valueAs[String]
         assertEquals(stdColumnValue, "New Value")
 
         val stdSliceRange = "StandardFamily" | "key" \\ ("start", "finish")
@@ -58,7 +59,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         // get and add/subtract
         "CounterFamily" | "key" | "column" += 5
         "CounterFamily" | "key" | "column" -= 2
-        val countColumnValue = "CountFamily" | "key" | "column".countValue
+        val countColumnValue = {"CountFamily" | "key" | "column"}.countValue
         assert(countColumnValue == 3)
 
         val countSliceRange2 = "CountFamily" | "key" \\ ("start", "finish")

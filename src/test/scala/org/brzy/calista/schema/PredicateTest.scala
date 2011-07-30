@@ -25,9 +25,9 @@ class PredicateTest extends JUnitSuite with EmbeddedTest  {
 
   @Test def testPredicateOnStandard() {
     import Conversions._
-    val key = "Standard"|"predicate-key"
 
     sessionManager.doWith { session =>
+      val key = "Standard"|"predicate-key"
       session.insert(key || ("column0", "value0"))
       session.insert(key || ("column1", "value1"))
       session.insert(key || ("column2", "value2"))
@@ -36,6 +36,7 @@ class PredicateTest extends JUnitSuite with EmbeddedTest  {
     }
 
     sessionManager.doWith { session =>
+      val key = "Standard"|"predicate-key"
       val standardSlicePredicate = key\Array("column1","column2","column3")
       val columns = session.slice(standardSlicePredicate)
       assertNotNull(columns)

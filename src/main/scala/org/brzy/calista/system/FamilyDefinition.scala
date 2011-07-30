@@ -54,6 +54,7 @@ import collection.JavaConversions._
  * @author Michael Fortin
  */
 class FamilyDefinition(
+    val keyspace:String,
     val name:String,
     val columnType:String = "Standard",
     val comparatorType: Option[String ] = Option("BytesType"),
@@ -77,11 +78,56 @@ class FamilyDefinition(
     val mergeShardsChance: Option[Double] = None,
     val keyValidationClass: Option[String] = None,
     val rowCacheProvider: Option[String ] = Option("org.apache.cassandra.cache.ConcurrentLinkedHashCacheProvider"),
-    val keyAlias:Option[Array[Byte]] = None)
+    val keyAlias:Option[Array[Byte]] = None) {
+
+  def asCfDef  = {
+    val d = new CfDef()
+    d.setKeyspace(keyspace)
+    d.setName(name)
+    d.setColumn_type(columnType)
+    if (comparatorType.isDefined) d.setComparator_type(comparatorType.get)
+    if (subcomparatorType.isDefined) d.setSubcomparator_type(subcomparatorType.get)
+    if (comment.isDefined) d.setComment(comment.get)
+    if (rowCacheSize.isDefined) d.setRow_cache_size(rowCacheSize.get)
+    if (keyCacheSize.isDefined) d.setKey_cache_size(keyCacheSize.get)
+    if (readRepairChance.isDefined) d.setRead_repair_chance(readRepairChance.get)
+    if (columnMetadata.isDefined) d.setColumn_metadata(columnMetadata.get.map(_.asColumnDef))
+    if (gcGraceSeconds.isDefined) d.setGc_grace_seconds(gcGraceSeconds.get)
+    if (defaultValidationClass.isDefined) d.setDefault_validation_class(defaultValidationClass.get)
+    if (id.isDefined) d.setId(id.get)
+    if (minCompactionThreshold.isDefined) d.setMin_compaction_threshold(minCompactionThreshold.get)
+    if (maxCompactionThreshold.isDefined) d.setMax_compaction_threshold(maxCompactionThreshold.get)
+    if (rowCacheSavePeriodInSeconds.isDefined) d.setRow_cache_save_period_in_seconds(rowCacheSavePeriodInSeconds.get)
+    if (keyCacheSavePeriodInSeconds.isDefined) d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds.get)
+    if (memtableFlushAfterMins.isDefined) d.setMemtable_flush_after_mins(memtableFlushAfterMins.get)
+    if (memtableThroughputInMb.isDefined) d.setMemtable_throughput_in_mb(memtableThroughputInMb.get)
+    if (memtableOperationsInMillions.isDefined) d.setMemtable_operations_in_millions(memtableOperationsInMillions.get)
+    if (replicateOnWrite.isDefined) d.setReplicate_on_write(replicateOnWrite.get)
+    if (mergeShardsChance.isDefined) d.setMerge_shards_chance(mergeShardsChance.get)
+    if (keyValidationClass.isDefined) d.setKey_validation_class(keyValidationClass.get)
+    if (rowCacheProvider.isDefined) d.setRow_cache_provider(rowCacheProvider.get)
+    if (keyAlias.isDefined) d.setKey_alias(keyAlias.get)
+    d
+  }
+
+  override def toString = new StringBuilder()
+      .append("FamilyDefinition(")
+      .append("keyspace=")
+      .append(keyspace)
+      .append(", name=")
+      .append(name)
+      .append(", columnType=")
+      .append(columnType)
+      .append(", comparatorType=")
+      .append(comparatorType)
+      .append(")")
+      .toString()
+}
 
 object FamilyDefinition {
   def apply(fdef:CfDef) = {
     new FamilyDefinition(
+      keyspace = fdef.getKeyspace,
       name = fdef.getName,
       columnType = fdef.getColumn_type,
       comparatorType = Option(fdef.getComparator_type),

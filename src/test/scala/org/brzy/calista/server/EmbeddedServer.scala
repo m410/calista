@@ -16,13 +16,12 @@ package org.brzy.calista.server
 import java.io.{File => JFile}
 import org.brzy.fab.file.FileUtils._
 import org.apache.thrift.transport.TSocket
-import org.apache.cassandra.thrift.CassandraDaemon
-import org.apache.cassandra.config.{KSMetaData, CFMetaData, DatabaseDescriptor}
 import org.brzy.fab.file.File
 import org.slf4j.LoggerFactory
 import actors.Actor._
 import org.brzy.calista.{SessionManager, Host}
 import org.brzy.calista.system.{FamilyDefinition, KeyspaceDefinition}
+import org.apache.cassandra.thrift.{CassandraDaemon}
 
 /**
  * Run an embbeded cassandra server for testing.  Possibly also use for development.
@@ -56,76 +55,104 @@ object EmbeddedServer {
     daemon.start()
   }.start()
 
-  checkConnection()
+  pause()
   loadSchema()
 
-  def checkConnection() {
-     // try to make sockets until the server opens up - there has to be a better
-  // way - just not sure what it is.
-  log.debug("Sleep for 9s")
-  Thread.sleep(9000)
+  def pause() {
+    // try to make sockets until the server opens up - there has to be a better
+    // way - just not sure what it is.
+    log.debug("Sleep for 9s")
+    Thread.sleep(9000)
 
-  val socket = new TSocket("localhost", 9160)
-  var opened = false
-  while (!opened) {
-    try {
-      socket.open()
-      opened = true
-      log.debug("I was able to make a connection")
+    val socket = new TSocket("localhost", 9160)
+    var opened = false
+    while (!opened) {
+      try {
+        socket.open()
+        opened = true
+        log.debug("I was able to make a connection")
+      }
+      catch {
+        case e: Throwable => log.error("******************** Not started", e)
+        opened = true
+        sys.exit(1)
+      }
+      finally {
+        socket.close()
+      }
     }
-    catch {
-      case e: Throwable => log.error("******************** Not started", e)
-      opened = true
-    }
-    finally {
-      socket.close()
-    }
-  }
   }
 
 
   def loadSchema() {
-    log.debug("Setting up the keyspace")
-    val mgr = new SessionManager("Test","localhost")
-    mgr.doWith({session =>
-      session.addKeyspace(KeyspaceDefinition(
-        name = "Test",
-        strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
-        families = List(
-          new FamilyDefinition(
-            name="Standard",
-            comparatorType = Option("UTF8type")),
-          new FamilyDefinition(
-            name="StandardFamily",
-            comparatorType = Option("UTF8type")),
-          new FamilyDefinition(
-            name="Person",
-            comparatorType = Option("UTF8type")),
-          new FamilyDefinition(
-            name="SPerson",
+    log.info("Setting up the keyspace...")
+
+    val mgr = new SessionManager("Test", "127.0.0.1")
+    mgr.doWith({
+      session =>
+        try {
+
+          log.info("******************** Before add keyspace")
+          log.info("******************** Test")
+          session.addKeyspace(KeyspaceDefinition(
+            name = "Test",
+            strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
+            families = List.empty[FamilyDefinition]))
+          log.info("******************** Standard")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "Standard",
+            comparatorType = Option("UTF8Type")))
+          log.info("******************** StandardFamily")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "StandardFamily",
+            comparatorType = Option("UTF8Type")))
+          log.info("******************** Person")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "Person",
+            comparatorType = Option("UTF8Type")))
+          log.info("******************** SuperFamily")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "SuperFamily",
             columnType = "Super",
-            comparatorType = Option("UTF8type"),
-            subcomparatorType = Option("UTF8Type")),
-          new FamilyDefinition(
-            name="Super",
+            comparatorType = Option("UTF8Type"),
+            subcomparatorType = Option("UTF8Type")))
+          log.info("******************** CountFamily")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "CountFamily",
+            columnType = "Standard",
+            defaultValidationClass = Option("CounterColumnType"),
+            comparatorType = Option("UTF8Type")))
+          log.info("******************** SPerson")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "SPerson",
+            columnType = "Super",
+            comparatorType = Option("UTF8Type"),
+            subcomparatorType = Option("UTF8Type")))
+          log.info("******************** Super")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "Super",
             columnType = "Super",
             comparatorType = Option("LongType"),
-            subcomparatorType = Option("LexicalUUIDType")),
-          new FamilyDefinition(
-            name="SuperFamily",
+            subcomparatorType = Option("LexicalUUIDType")))
+          log.info("******************** Super2")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "Super2",
             columnType = "Super",
-            comparatorType = Option("UTF8type"),
-            subcomparatorType = Option("UTF8Type")),
-          new FamilyDefinition(
-            name="Super2",
-            columnType = "Super",
-            comparatorType = Option("UTF8type"),
-            subcomparatorType = Option("UTF8Type")),
-          new FamilyDefinition(
-            name="CountFamily",
-            columnType = "Counter",
-            comparatorType = Option("UTF8Type")))
-      ))
+            comparatorType = Option("UTF8Type"),
+            subcomparatorType = Option("UTF8Type")))
+
+        }
+        catch {
+          case e: Throwable => log.error("Could not initialize keyspace", e)
+        }
     })
   }
 }
