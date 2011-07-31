@@ -67,7 +67,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     case EACH_QUORUM => ConsistencyLevel.EACH_QUORUM
     case LOCAL_QUORUM => ConsistencyLevel.LOCAL_QUORUM
     case Consistency.All => ConsistencyLevel.ALL
-    case _ => sys.error("Unknown Level")
+    case _ => error("Unknown Level")
   }
 
   private[this] implicit def toColumnPath(c: ColumnPath) = {
@@ -147,7 +147,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       }).toList
 		}
     else {
-      sys.error("Unknown column return type: '"+cos+"'" )
+      error("Unknown column return type: '"+cos+"'" )
     }
   }
 

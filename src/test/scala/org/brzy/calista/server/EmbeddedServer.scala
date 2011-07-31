@@ -75,7 +75,7 @@ object EmbeddedServer {
       catch {
         case e: Throwable => log.error("******************** Not started", e)
         opened = true
-        sys.exit(1)
+        // sys.exit(1)
       }
       finally {
         socket.close()
