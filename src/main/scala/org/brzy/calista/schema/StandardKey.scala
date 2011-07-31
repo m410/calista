@@ -34,13 +34,14 @@ case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily
 
   def column[N: Manifest](name: N) = ColumnName(name,this)
 
+  def |#[N: Manifest](name: N) =  counter(name)
+
   def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 
   def |[N:Manifest,V:Manifest](key:N,value:V = null,timestamp:Date = new Date()) =
     column(key,value,timestamp)
 
-  def column[N:Manifest,V:Manifest](key:N,value:V,timestamp:Date) =
-    Column(key,value,timestamp,this)
+  def column[N:Manifest,V:Manifest](key:N,value:V,timestamp:Date) = Column(key,value,timestamp,this)
   
 	/**
 	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.

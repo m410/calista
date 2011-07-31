@@ -112,21 +112,38 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     if (cos == null) {
       List.empty[Row]
     }
-    else if (cos.column != null || cos.getCounter_column != null) {
-      val name = ByteBuffer.wrap(cos.column.getName)
-      val value = ByteBuffer.wrap(cos.column.getValue)
-      val timestamp = new Date(cos.column.getTimestamp)
-      val rowType = if(cos.column != null) RowType.Standard else RowType.StandardCounter
+    else if (cos.getColumn != null) {
+      val name = ByteBuffer.wrap(cos.getColumn.getName)
+      val value = ByteBuffer.wrap(cos.getColumn.getValue)
+      val timestamp = new Date(cos.getColumn.getTimestamp)
+      val rowType = RowType.Standard
       List(Row(rowType, familyName, key, null, name, value, timestamp))
     }
-    else if (cos.getSuper_column != null || cos.getCounter_super_column != null) {
-      val rType = if(cos.getSuper_column != null) RowType.Super else RowType.SuperCounter
+    else if (cos.getCounter_column != null) {
+      val name = ByteBuffer.wrap(cos.getCounter_column.getName)
+      val value = Serializers.toBytes(cos.getCounter_column.getValue)
+      val timestamp = null
+      val rowType = RowType.StandardCounter
+      List(Row(rowType, familyName, key, null, name, value, timestamp))
+    }
+    else if (cos.getSuper_column != null ) {
+      val rType = RowType.Super
 			val sCol = cos.getSuper_column
       val sColName = ByteBuffer.wrap(sCol.getName)
       sCol.getColumns.map(c=>{
         val name = ByteBuffer.wrap(c.getName)
         val value = ByteBuffer.wrap(c.getValue)
         Row(rType,familyName,key,sColName, name, value, new Date(c.getTimestamp))
+      }).toList
+		}
+    else if (cos.getCounter_super_column != null) {
+      val rType = RowType.SuperCounter
+			val sCol = cos.getCounter_super_column
+      val sColName = ByteBuffer.wrap(sCol.getName)
+      sCol.getColumns.map(c=>{
+        val name = ByteBuffer.wrap(c.getName)
+        val value = Serializers.toBytes(c.getValue)
+        Row(rType,familyName,key,sColName, name, value, null)
       }).toList
 		}
     else {

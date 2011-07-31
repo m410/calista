@@ -50,16 +50,20 @@ case class ColumnFamily(name: String) {
 //      Right(SuperKey(key,this, family))
 //  }
 
-  def superKey[T:Manifest](key: T):SuperKey[T] = {
-    val family = Calista.value.ksDef.families.find(_.name == name).get
-    SuperKey(key,this, family)
-  }
+  def superKey[T:Manifest](key: T):SuperKey[T] = SuperKey(key,this, familyDef)
 
-  def standardKey[T:Manifest](key: T):StandardKey[T] = {
-    val family = Calista.value.ksDef.families.find(_.name == name).get
-    StandardKey(key,this, family)
-  }
+  def standardKey[T:Manifest](key: T):StandardKey[T] = StandardKey(key,this, familyDef)
 
   def keyRange[T,C:Manifest](start: T, end: T, columns:List[C], count: Int = 100) =
 			KeyRange(start, end, SlicePredicate(columns.toArray, null), this, count)
+
+  protected[schema] def familyDef = try {
+    Calista.value.ksDef.families.find(_.name == name) match {
+      case Some(f) => f
+      case _ => throw new UnknownFamilyException("No ColumnFamily with name: " + name)
+    }
+  }
+  catch {
+    case n:NullPointerException => throw new SessionScopeException("Out of session scope",n)
+  }
 }

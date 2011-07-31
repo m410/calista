@@ -32,6 +32,10 @@ case class SuperKey[T:Manifest] protected[schema] (key:T,family:ColumnFamily, fa
 
   def superColumn[N:Manifest](sKey:N) = SuperColumn(sKey,this,familyDef)
 
+  def |#[N: Manifest](name: N) =  counter(name)
+
+  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
+
   /**
 	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
 	 */

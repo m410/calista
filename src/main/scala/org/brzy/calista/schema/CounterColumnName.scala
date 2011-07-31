@@ -15,7 +15,6 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.Calista
-import org.brzy.calista.dsl.DslNode
 
 /**
  * This represents the counter column when querying cassandra
@@ -26,22 +25,23 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
 
 
   def -=(amount: Long) {
-    set(-amount)
+    add(-amount)
   }
 
   def +=(amount: Long) {
-    set(amount)
+    add(amount)
   }
 
-  def set(amount: Long) {
+  def add(amount: Long) {
     val session = Calista.value
     session.add(Column(name, amount, new Date(), parent))
   }
 
-  def countValue = {
+  def count = {
     val session = Calista.value
-    val optionReturnColumn = session.get(Column(name,null,new Date(),parent))
-
-    0
+    session.get(Column(name,null,new Date(),parent)) match {
+      case Some(c) => c.valueAs[Long]
+      case _ => throw new NoColumnException("No column for name: " + name)
+    }
   }
 }
