@@ -6,7 +6,7 @@
 	<version>0.5-SNAPSHOT</version>
 	<inceptionYear>2011</inceptionYear>
 	<properties>
-    <!--  -->
+    <!-- works with 2.9, just need to change error to sys.error -->
 		<!-- <scala.version>2.9.0-1</scala.version> -->
 		<scala.version>2.8.1</scala.version>
 		<cassandra.version>0.8.2</cassandra.version>

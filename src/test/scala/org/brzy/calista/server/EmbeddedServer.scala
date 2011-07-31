@@ -91,7 +91,6 @@ object EmbeddedServer {
     mgr.doWith({
       session =>
         try {
-
           log.info("******************** Before add keyspace")
           log.info("******************** Test")
           session.addKeyspace(KeyspaceDefinition(
@@ -156,7 +155,6 @@ object EmbeddedServer {
             comparatorType = Option("UTF8Type"),
             subcomparatorType = Option("UTF8Type"),
             defaultValidationClass = Option("CounterColumnType")))
-
         }
         catch {
           case e: Throwable => log.error("Could not initialize keyspace", e)
