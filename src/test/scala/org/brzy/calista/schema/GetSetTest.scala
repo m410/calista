@@ -40,7 +40,15 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
       assertNotNull(row.rowType)
       assertNotNull(row.family)
       assertNotNull(row.key)
-      assertNull(row.superColumn)
+
+      try {
+        assertNull(row.superColumn)
+        fail("Should have thrown an exception on standard column")
+      }
+      catch {
+        case e:Exception => // ignore it
+      }
+
       assertNotNull(row.column)
       assertNotNull(row.value)
       assertNotNull(row.timestamp)

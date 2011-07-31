@@ -36,6 +36,8 @@ case class SuperColumn[T:Manifest] protected[schema] (key: T, parent: SuperKey[_
 
   def column[N: Manifest](name: N) = ColumnName(name,this)
 
+  def |#[N: Manifest](name: N) =  counter(name)
+
   def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 
   def |[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) = column(sKey, value, timestamp)

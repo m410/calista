@@ -148,6 +148,14 @@ object EmbeddedServer {
             columnType = "Super",
             comparatorType = Option("UTF8Type"),
             subcomparatorType = Option("UTF8Type")))
+          log.info("******************** SuperCountFamily")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "SuperCountFamily",
+            columnType = "Super",
+            comparatorType = Option("UTF8Type"),
+            subcomparatorType = Option("UTF8Type"),
+            defaultValidationClass = Option("CounterColumnType")))
 
         }
         catch {
