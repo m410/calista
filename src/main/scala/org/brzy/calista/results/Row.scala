@@ -33,9 +33,9 @@ case class Row(
 
   def keyAs[T:Manifest]:T = as[T](key)
 
-  def superColumnAs[T:Manifest]:T = as[T](column)
+  def superColumnAs[T:Manifest]:T = as[T](superColumn)
 
-  def columnAs[T:Manifest]:T = as[T](superColumn)
+  def columnAs[T:Manifest]:T = as[T](column)
 
   def valueAs[T:Manifest]:T = as[T](value)
 

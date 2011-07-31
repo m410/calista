@@ -23,9 +23,9 @@ import org.brzy.calista.dsl.Conversions
 class CountTest extends JUnitSuite with EmbeddedTest {
   @Test def countTest() {
     import Conversions._
-    val key = "Standard" | "count"
 
     sessionManager.doWith { session =>
+      val key = "Standard" | "count"
       session.insert(key | ("column5", "value0"))
       session.insert(key | ("column4", "value1"))
       session.insert(key | ("column3", "value2"))
@@ -34,6 +34,7 @@ class CountTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
+      val key = "Standard" | "count"
       val amount = session.count(key.asInstanceOf[StandardKey[String]])
       assertNotNull(amount)
       assertEquals(5,amount)

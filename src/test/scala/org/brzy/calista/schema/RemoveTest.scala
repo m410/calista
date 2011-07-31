@@ -24,17 +24,19 @@ class RemoveTest extends JUnitSuite with EmbeddedTest {
   @Test def removeTest() {
     import Conversions._
 
-    val key = "Standard" | "remover"
     sessionManager.doWith { session =>
+      val key = "Standard" | "remover"
         session.insert(key | ("column5", "value0"))
     }
 
     sessionManager.doWith { session =>
+      val key = "Standard" | "remover"
         val stdKey = key | "column5"
         session.remove(stdKey.asInstanceOf[ColumnName[String]])
     }
 
     sessionManager.doWith { session =>
+      val key = "Standard" | "remover"
       val stdKey = key | "column5"
       val result = session.list(stdKey.asInstanceOf[ColumnName[String]])
       assertNotNull(result)
