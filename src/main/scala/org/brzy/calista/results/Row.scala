@@ -16,20 +16,43 @@ package org.brzy.calista.results
 import java.nio.ByteBuffer
 import org.brzy.calista.serializer.Serializers
 import java.util.Date
+import RowType._
 
 /**
  * A single row in the data store.
  * 
  * @author Michael Fortin
  */
-case class Row(
-        rowType:RowType,
-        family:String,
-        key:ByteBuffer,
-        superColumn:ByteBuffer,
-        column:ByteBuffer,
-        value:ByteBuffer,
-        timestamp:Date) {
+class Row(
+    _rowType:RowType,
+    _family:String,
+    _key:ByteBuffer,
+    _superColumn:ByteBuffer,
+    _column:ByteBuffer,
+    _value:ByteBuffer,
+    _timestamp:Date) {
+
+  def rowType = _rowType
+
+  def family = _family
+
+  def key = _key
+
+  def superColumn = _rowType match {
+    case Super =>  _superColumn
+    case SuperCounter => _superColumn
+    case _ => throw new InvalidRowTypeAccessException("superColumn does not apply to: " + _rowType)
+  }
+
+  def column = _column
+
+  def value = _value
+
+  def timestamp = _rowType match {
+    case Standard =>  _timestamp
+    case Super => _timestamp
+    case _ => throw new InvalidRowTypeAccessException("timestamp does not apply to: " + _rowType)
+  }
 
   def keyAs[T:Manifest]:T = as[T](key)
 

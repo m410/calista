@@ -58,8 +58,9 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         val counter = "CountFamily" | "key" |# "column"
         assertTrue(counter.isInstanceOf[CounterColumnName[String]])
         counter += 5
+        counter += 3
         counter -= 2
-        assert(counter.count == 3)
+        assert(counter.count == 6)
 
         val countSliceRange2 = {"CountFamily" | "key"} \\ ("begin", "end")
         assertTrue(countSliceRange2.isInstanceOf[SliceRange[_]])

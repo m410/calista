@@ -16,15 +16,33 @@ package org.brzy.calista.results
 import org.scalastuff.scalabeans.Enum
 
 /**
- * Marks each return row in the result set as the type of row it is in the data store.
+ * Marks each return row in the resultSet as the type of row it is in the data store.
  * 
  * @author Michael Fortin
  */
 class RowType private ()
 object RowType extends Enum[RowType] {
-  val Empty = new RowType
+
+  /**
+   * Standard Column Family.  For rows of this type, the superColumn will be null.
+   */
   val Standard = new RowType
+
+  /**
+   * Standard Column Family with a CounterColumnType default validation class.  For rows of this
+   * type, the superColumn will be null, the timestamp will be null and the value will always be
+   * a long type.
+   */
   val StandardCounter = new RowType
+
+  /**
+   * Super Column Family. Rows of this type will have all fields available.
+   */
   val Super = new RowType
+
+  /**
+   * Super Column Family with a CounterColumnType default validation class. Rows of this type will
+   * have all fields available and the value will be a Long type.
+   */
   val SuperCounter = new RowType
 }

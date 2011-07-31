@@ -117,14 +117,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       val value = ByteBuffer.wrap(cos.getColumn.getValue)
       val timestamp = new Date(cos.getColumn.getTimestamp)
       val rowType = RowType.Standard
-      List(Row(rowType, familyName, key, null, name, value, timestamp))
+      List(new Row(rowType, familyName, key, null, name, value, timestamp))
     }
     else if (cos.getCounter_column != null) {
       val name = ByteBuffer.wrap(cos.getCounter_column.getName)
       val value = Serializers.toBytes(cos.getCounter_column.getValue)
       val timestamp = null
       val rowType = RowType.StandardCounter
-      List(Row(rowType, familyName, key, null, name, value, timestamp))
+      List(new  Row(rowType, familyName, key, null, name, value, timestamp))
     }
     else if (cos.getSuper_column != null ) {
       val rType = RowType.Super
@@ -133,7 +133,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       sCol.getColumns.map(c=>{
         val name = ByteBuffer.wrap(c.getName)
         val value = ByteBuffer.wrap(c.getValue)
-        Row(rType,familyName,key,sColName, name, value, new Date(c.getTimestamp))
+        new Row(rType,familyName,key,sColName, name, value, new Date(c.getTimestamp))
       }).toList
 		}
     else if (cos.getCounter_super_column != null) {
@@ -143,7 +143,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       sCol.getColumns.map(c=>{
         val name = ByteBuffer.wrap(c.getName)
         val value = Serializers.toBytes(c.getValue)
-        Row(rType,familyName,key,sColName, name, value, null)
+        new Row(rType,familyName,key,sColName, name, value, null)
       }).toList
 		}
     else {
