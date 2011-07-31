@@ -20,66 +20,53 @@ import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.UTF8Serializer
 import org.brzy.calista.dsl.Conversions
+import org.brzy.calista.results.ResultSet
 
 
 class RangeTest extends JUnitSuite with EmbeddedTest {
 
   // key ranges are not implemented anymore
-//  @Test def testPredicateOnStandard() {
-//    import Conversions._
-//
-//    sessionManager.doWith { session =>
-//      session.insert("Standard"|"key-range-0"||("column", "value0"))
-//      session.insert("Standard"|"key-range-1"||("column", "value1"))
-//      session.insert("Standard"|"key-range-2"||("column", "value2"))
-//      session.insert("Standard"|"key-range-3"||("column", "value3"))
-//      session.insert("Standard"|"key-range-4"||("column", "value4"))
-//    }
-//
-//    sessionManager.doWith { session =>
-//      val standardKeyRange:KeyRange[String,String] = "Standard" \Array("key-range-4","key-range",List("column"))
-//      val keys = session.keyRange(standardKeyRange)
-//      keys.keySet.foreach(k=>println("##k='%s'".format(k)))
-//      println(keys)
-//      assertNotNull(keys)
-//      assertEquals(1,keys.size)
-//    }
-//  }
+  @Test def testPredicateOnStandard() {
+    import Conversions._
+
+    sessionManager.doWith { session =>
+      session.insert("Standard"|"key-range"|("column1", "value0"))
+      session.insert("Standard"|"key-range"|("column2", "value1"))
+      session.insert("Standard"|"key-range"|("column3", "value2"))
+      session.insert("Standard"|"key-range"|("column4", "value3"))
+      session.insert("Standard"|"key-range"|("column5", "value4"))
+    }
+
+    sessionManager.doWith { session =>
+      val range = {"Standard" | "key-range"}\\("column2","column4",true)
+      val result = range.results
+      result.rows.foreach(k=>println("##column='%s'".format(k)))
+      assertNotNull(result)
+      assertEquals(3,result.size)
+    }
+  }
 
   @Test def testSuperSlice() {
     import Conversions._
     
     sessionManager.doWith { session =>
-      session.insert("Super2"|"key"|"super-col-0"||("column", "value0"))
-      session.insert("Super2"|"key"|"super-col-0"||("column1", "value0"))
-      session.insert("Super2"|"key"|"super-col-1"||("column", "value1"))
-      session.insert("Super2"|"key"|"super-col-1"||("column1", "value1"))
-      session.insert("Super2"|"key"|"super-col-2"||("column", "value2"))
-      session.insert("Super2"|"key"|"super-col-2"||("column1", "value2"))
-      session.insert("Super2"|"key"|"super-col-3"||("column", "value3"))
-      session.insert("Super2"|"key"|"super-col-3"||("column1", "value3"))
-      session.insert("Super2"|"key2"|"super-col-4"||("column", "value4"))
-      session.insert("Super2"|"key2"|"super-col-4"||("column1", "value4"))
+      session.insert("Super2"||"key"|"super-col-0"|("column", "value0"))
+      session.insert("Super2"||"key"|"super-col-0"|("column1", "value0"))
+      session.insert("Super2"||"key"|"super-col-1"|("column", "value1"))
+      session.insert("Super2"||"key"|"super-col-1"|("column1", "value1"))
+      session.insert("Super2"||"key"|"super-col-2"|("column", "value2"))
+      session.insert("Super2"||"key"|"super-col-2"|("column1", "value2"))
+      session.insert("Super2"||"key"|"super-col-3"|("column", "value3"))
+      session.insert("Super2"||"key"|"super-col-3"|("column1", "value3"))
+      session.insert("Super2"||"key2"|"super-col-4"|("column", "value4"))
+      session.insert("Super2"||"key2"|"super-col-4"|("column1", "value4"))
     }
 
     sessionManager.doWith { session =>
-      val slice = "Super2"|"key"\Array("super-col-0","super-col-3")
+      val slice = {"Super2"||"key"}\\("super-col-0","super-col-3")
       val rows = session.sliceRange(slice.asInstanceOf[SliceRange[String]])
-//      rows.foreach(k=>{
-//        val sCol = k.asInstanceOf[RSuperColumn[_]]
-//        val fromBytes = UTF8Serializer.fromBytes(sCol.bytes.array)
-//        println("######")
-//        println("  name: "+fromBytes)
-//        // println("######")
-//        sCol.columns.foreach(c=>{
-//          val name = c.nameAs(UTF8Serializer)
-//          val value = c.valueAs(UTF8Serializer)
-//          println("  column: "+name+"="+value)
-//        })
-//      })
-      // println(rows)
       assertNotNull(rows)
-      assertEquals(4,rows.size)
+      assertEquals(8,rows.size)
 
     }
   }

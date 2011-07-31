@@ -14,20 +14,20 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     import Conversions._
 
     sessionManager.doWith { session =>
-      session.insert("Standard"|"key-range-0"||("column0", "value0"))
-      session.insert("Standard"|"key-range-0"||("column1", "value1"))
-      session.insert("Standard"|"key-range-0"||("column2", "value2"))
-      session.insert("Standard"|"key-range-0"||("column3", "value3"))
-      session.insert("Standard"|"key-range-0"||("column4", "value4"))
-      session.insert("Standard"|"key-range-0"||("column5", "value5"))
-      session.insert("Standard"|"key-range-0"||("column6", "value6"))
-      session.insert("Standard"|"key-range-0"||("column7", "value7"))
-      session.insert("Standard"|"key-range-0"||("column8", "value8"))
-      session.insert("Standard"|"key-range-0"||("column9", "value9"))
+      session.insert("Standard"|"key-range-0"|("column0", "value0"))
+      session.insert("Standard"|"key-range-0"|("column1", "value1"))
+      session.insert("Standard"|"key-range-0"|("column2", "value2"))
+      session.insert("Standard"|"key-range-0"|("column3", "value3"))
+      session.insert("Standard"|"key-range-0"|("column4", "value4"))
+      session.insert("Standard"|"key-range-0"|("column5", "value5"))
+      session.insert("Standard"|"key-range-0"|("column6", "value6"))
+      session.insert("Standard"|"key-range-0"|("column7", "value7"))
+      session.insert("Standard"|"key-range-0"|("column8", "value8"))
+      session.insert("Standard"|"key-range-0"|("column9", "value9"))
     }
 
     sessionManager.doWith { session =>
-      val sliceRange = "Standard"|"key-range-0"\\("column2","column6")
+      val sliceRange = {"Standard"|"key-range-0"}\\("column2","column6")
       val iterator = session.scrollSliceRange(sliceRange.asInstanceOf[SliceRange[String]])
       var count = 0
 
@@ -47,20 +47,20 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     import Conversions._
 
     sessionManager.doWith { session =>
-      session.insert("Standard"|"key-range-0"||("column0", "value0"))
-      session.insert("Standard"|"key-range-0"||("column1", "value1"))
-      session.insert("Standard"|"key-range-0"||("column2", "value2"))
-      session.insert("Standard"|"key-range-0"||("column3", "value3"))
-      session.insert("Standard"|"key-range-0"||("column4", "value4"))
-      session.insert("Standard"|"key-range-0"||("column5", "value5"))
-      session.insert("Standard"|"key-range-0"||("column6", "value6"))
-      session.insert("Standard"|"key-range-0"||("column7", "value7"))
-      session.insert("Standard"|"key-range-0"||("column8", "value8"))
-      session.insert("Standard"|"key-range-0"||("column9", "value9"))
+      session.insert("Standard"|"key-range-0"|("column0", "value0"))
+      session.insert("Standard"|"key-range-0"|("column1", "value1"))
+      session.insert("Standard"|"key-range-0"|("column2", "value2"))
+      session.insert("Standard"|"key-range-0"|("column3", "value3"))
+      session.insert("Standard"|"key-range-0"|("column4", "value4"))
+      session.insert("Standard"|"key-range-0"|("column5", "value5"))
+      session.insert("Standard"|"key-range-0"|("column6", "value6"))
+      session.insert("Standard"|"key-range-0"|("column7", "value7"))
+      session.insert("Standard"|"key-range-0"|("column8", "value8"))
+      session.insert("Standard"|"key-range-0"|("column9", "value9"))
     }
 
     sessionManager.doWith { session =>
-      val sliceRange = "Standard"|"key-range-0"\Array("column2","column8",3)
+      val sliceRange = {"Standard"|"key-range-0"}\\("column2","column8",true,3)
       val iterator = session.scrollSliceRange(sliceRange.asInstanceOf[SliceRange[String]])
       var count = 0
 
@@ -79,16 +79,16 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
     import Conversions._
 
     sessionManager.doWith { session =>
-      session.insert("Standard"|"key-range-0"||("column00", "value0"))
+      session.insert("Standard"|"key-range-0"|("column00", "value0"))
 //      session.insert("Standard"|"key-range-0"|("column01", "value1"))
-      session.insert("Standard"|"key-range-0"||("column02", "value2"))
-      session.insert("Standard"|"key-range-0"||("column03", "value3"))
+      session.insert("Standard"|"key-range-0"|("column02", "value2"))
+      session.insert("Standard"|"key-range-0"|("column03", "value3"))
 //      session.insert("Standard"|"key-range-0"|("column04", "value4"))
-      session.insert("Standard"|"key-range-0"||("column05", "value5"))
-      session.insert("Standard"|"key-range-0"||("column06", "value6"))
+      session.insert("Standard"|"key-range-0"|("column05", "value5"))
+      session.insert("Standard"|"key-range-0"|("column06", "value6"))
 //      session.insert("Standard"|"key-range-0"|("column07", "value7"))
-      session.insert("Standard"|"key-range-0"||("column08", "value8"))
-      session.insert("Standard"|"key-range-0"||("column09", "value9"))
+      session.insert("Standard"|"key-range-0"|("column08", "value8"))
+      session.insert("Standard"|"key-range-0"|("column09", "value9"))
     }
 
     sessionManager.doWith { session =>

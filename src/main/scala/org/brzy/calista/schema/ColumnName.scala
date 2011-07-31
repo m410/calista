@@ -25,8 +25,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends DslNode {
-  def nodePath = parent.nodePath + ":Column("+name+")"
+case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
 
   /**
    * Return the name converted to bytes.
@@ -41,6 +40,10 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends 
     session.insert(Column(name,value,new Date(),parent))
   }
 
+  def <<[V:Manifest](value:V) {
+    set(value)
+  }
+  
   def asColumn = Column(name,null,null, parent)
 
   /**
@@ -64,7 +67,7 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) extends 
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
 
-  override def valueAs[V: Manifest] = {
+  def valueAs[V: Manifest] = {
     val session = Calista.value
     val optionRow = session.get(Column(name,null,new Date(),parent))
     optionRow match {

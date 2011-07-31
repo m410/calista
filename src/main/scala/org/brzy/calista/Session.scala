@@ -289,9 +289,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	/**
 	 * List all the columns by slice range. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange[_]): ResultSet = {
-    sliceRange(range, defaultConsistency)
-  }
+  def sliceRange(range: SliceRange[_]): ResultSet = sliceRange(range, defaultConsistency)
 
 	/**
 	 * List all the columns by slice range and Consistency Level. This uses the default consistency.
@@ -310,13 +308,13 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    */
   def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[Row] = {
     new Iterator[Row] {
-      private[this] var partial = sliceRange(slice).asInstanceOf[List[Row]]
+      private[this] var partial = sliceRange(slice)
       private[this] var index = 0
 
       def hasNext:Boolean = {
         if(partial.size > 0 && index == partial.size) {
           import results.RowType._
-          val lastRow = partial.last
+          val lastRow = partial.rows.last
           val partialLast:Array[Byte] = lastRow.rowType match {
             case Standard => lastRow.column.array()
             case StandardCounter => lastRow.column.array()
@@ -330,7 +328,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
               val pStart = Serializers.fromClassBytes(m.erasure,partialLast)
               val pFin = Serializers.fromClassBytes(m.erasure,sliceLast)
               val sliceCopy = slice.copy(start = pStart, finish = pFin)
-              sliceRange(sliceCopy).asInstanceOf[List[Row]]
+              sliceRange(sliceCopy)
             }
             index = 1 // skip the first, because the slice is inclusive
           }
@@ -340,7 +338,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 
       def next:Row = {
         index = index + 1
-        partial(index -1)
+        partial.rows(index -1)
       }
 
       def remove(){}

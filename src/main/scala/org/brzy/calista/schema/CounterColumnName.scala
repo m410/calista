@@ -22,15 +22,14 @@ import org.brzy.calista.dsl.DslNode
  * 
  * @author Michael Fortin
  */
-case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) extends DslNode {
-  def nodePath = parent.nodePath +":Counter("+name+")"
+case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) {
 
 
-  override def -=(amount: Long) {
+  def -=(amount: Long) {
     set(-amount)
   }
 
-  override def +=(amount: Long) {
+  def +=(amount: Long) {
     set(amount)
   }
 
@@ -39,7 +38,7 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
     session.add(Column(name, amount, new Date(), parent))
   }
 
-  override def countValue = {
+  def countValue = {
     val session = Calista.value
     val optionReturnColumn = session.get(Column(name,null,new Date(),parent))
 

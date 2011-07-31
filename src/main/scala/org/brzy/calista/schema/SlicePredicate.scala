@@ -15,7 +15,6 @@ package org.brzy.calista.schema
 
 import org.brzy.calista.serializer.Serializers
 import org.brzy.calista.Calista
-import org.brzy.calista.Session
 
 /**
  * Used to query the datastore, and only return columns within the provided list.

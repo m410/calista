@@ -23,35 +23,32 @@ import org.brzy.calista.dsl.DslNode
  * @param name the name of the column family.
  * @author Michael Fortin
  */
-case class ColumnFamily(name: String) extends DslNode {
+case class ColumnFamily(name: String) {
 
-  def nodePath = "Family('"+name+"')"
+  def |[T:Manifest](k: T) = standardKey(k)
 
-  override def |[T:Manifest](k: T) = key(k) match {
-    case Left(l) => l
-    case Right(r) => r
-  }
+  def ||[T:Manifest](k: T) = superKey(k)
 
-  /**
-   * Non DSL access to the key under the column family.  This will return either a standard key
-   * or a super key.  The type of key is discovered by the meta data on the datastore.
-   *
-   * @returns
-   * @throws UnknownFamilyException if the family name does not exist in the data store.
-   */
-  def key[T:Manifest](key: T):Either[StandardKey[T],SuperKey[T]] = {
-    val family = Calista.value.ksDef.families.find(_.name == name) match {
-      case Some(f) => f
-      case _ => throw new UnknownFamilyException("No ColumnFamily with name: '" + name +"'")
-    }
-
-    if (family.columnType == "Standard")
-      Left(StandardKey(key, this, family)) // pass along the column family definition
-    else if (family.columnType == "Counter")
-      Left(StandardKey(key, this, family))
-    else
-      Right(SuperKey(key,this, family))
-  }
+//  /**
+//   * Non DSL access to the key under the column family.  This will return either a standard key
+//   * or a super key.  The type of key is discovered by the meta data on the datastore.
+//   *
+//   * @returns
+//   * @throws UnknownFamilyException if the family name does not exist in the data store.
+//   */
+//  def key[T:Manifest](key: T):Either[StandardKey[T],SuperKey[T]] = {
+//    val family = Calista.value.ksDef.families.find(_.name == name) match {
+//      case Some(f) => f
+//      case _ => throw new UnknownFamilyException("No ColumnFamily with name: '" + name +"'")
+//    }
+//
+//    if (family.columnType == "Standard")
+//      Left(StandardKey(key, this, family)) // pass along the column family definition
+//    else if (family.columnType == "Counter")
+//      Left(StandardKey(key, this, family))
+//    else
+//      Right(SuperKey(key,this, family))
+//  }
 
   def superKey[T:Manifest](key: T):SuperKey[T] = {
     val family = Calista.value.ksDef.families.find(_.name == name).get

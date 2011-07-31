@@ -61,8 +61,8 @@ object EmbeddedServer {
   def pause() {
     // try to make sockets until the server opens up - there has to be a better
     // way - just not sure what it is.
-    log.debug("Sleep for 9s")
-    Thread.sleep(9000)
+    log.debug("Sleep for 4s")
+    Thread.sleep(4000)
 
     val socket = new TSocket("localhost", 9160)
     var opened = false

@@ -47,12 +47,12 @@ trait SuperDao[K, S, T <: AnyRef] {
 	/**
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
-  def get[K:Manifest,S:Manifest](key: K, superColumn:Option[S] = None): Option[T] = {
+  def get[K:Manifest,S:Manifest](key: K, superColumn:S): Option[T] = {
     val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
     val columns = session.list(queryCol)
 
     if (columns.size > 0)
-      Option(mapping.newInstance(key, superColumn, columns))
+      Option(mapping.newInstance(key, Option(superColumn), columns))
     else
       None
   }

@@ -38,14 +38,14 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 
 	 	sessionManager.doWith { session =>
        import org.brzy.calista.dsl.Conversions._
-       val key = familyName | personKey | personSuperColumn
+       val key = familyName || personKey | personSuperColumn
        val columns = session.list(key.asInstanceOf[SC[String]])
        assertNotNull(columns)
        assertEquals(3,columns.size)
 		}
 
 		sessionManager.doWith { session =>
-			val person = SPerson.get(personKey, Option(personSuperColumn)) match {
+			val person = SPerson.get(personKey, personSuperColumn) match {
         case Some(p) =>
           assertNotNull(p)
           assertNotNull(p.key)
@@ -58,10 +58,10 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
     sessionManager.doWith { (session:Session) =>
       import Conversions._
-      val sKey = familyName|personKey
+      val sKey = familyName||personKey
       val columns = session.list(sKey.asInstanceOf[SuperKey[String]])
       assertNotNull(columns)
-      assertEquals(1,columns.size)
+      assertEquals(3,columns.size) // returns 3 rows, one foe each value, even though its one key
     }
   }
 }

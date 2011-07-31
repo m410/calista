@@ -21,7 +21,7 @@ import org.brzy.calista.dsl.DslNode
  * 
  * @author Michael Fortin
  */
-trait Key extends DslNode {
+trait Key {
   def keyBytes:ByteBuffer
   def family:ColumnFamily
   def columnPath:ColumnPath

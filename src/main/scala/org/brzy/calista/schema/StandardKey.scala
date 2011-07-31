@@ -24,27 +24,19 @@ import org.brzy.calista.system.FamilyDefinition
  * @author Michael Fortin
  */
 case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily, familyDef:FamilyDefinition)
-        extends Key {
-
-
-  def nodePath = family.nodePath + ":StandardKey("+key+")"
+    extends Key{
 
   def keyBytes = toBytes(key)
 
   def columnPath = ColumnPath(family.name,null,null)
 
-  override def |[N: Manifest](name: N) = {
-    if (familyDef.columnType == "Standard")
-      column(name,this)
-    else
-      counter(name,this)
-  }
+  def |[N: Manifest](name: N) = column(name)
 
   def column[N: Manifest](name: N) = ColumnName(name,this)
 
   def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 
-  override def ||[N:Manifest,V:Manifest](key:N,value:V = null,timestamp:Date = new Date()) =
+  def |[N:Manifest,V:Manifest](key:N,value:V = null,timestamp:Date = new Date()) =
     column(key,value,timestamp)
 
   def column[N:Manifest,V:Manifest](key:N,value:V,timestamp:Date) =
@@ -53,16 +45,16 @@ case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily
 	/**
 	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
 	 */
-  override def \[A:Manifest](columns:A*) = predicate(columns.toArray)
+  def \[A:Manifest](columns:A*) = predicate(columns.toArray)
 
   def predicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
   
 	/**
 	 * Used by the DSL to create a SliceRange from this key, using this key as the parent.
 	 */
-  override def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
+  def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
       sliceRange(start,end,reverse, count)
 
   def sliceRange[T:Manifest](start:T,end:T,reverse:Boolean,count:Int) =
-      SliceRange(start,end,reverse, count,this)
+      SliceRange(start,end,reverse, count, this)
 }

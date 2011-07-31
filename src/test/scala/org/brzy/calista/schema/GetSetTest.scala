@@ -25,31 +25,37 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testSetAndGetStandardColumn() {
     import Conversions._
+    val key = "Standard" | "testKey"
 
     sessionManager.doWith { session =>
-      val key = "Standard" | "testKey"
-      session.insert(key || ("column", "value"))
+      session.insert(key | ("column", "value"))
     }
 
     sessionManager.doWith { session =>
-      val key = "Standard" | "testKey"
-      val result = session.get(key || ("column",null))
+      val result = session.get(key | ("column",null))
       assertNotNull(result)
       assertTrue(result.isDefined)
-      val column = result.get.asInstanceOf[Row]
-      assertEquals("value", column.valueAs[String])
-      assertEquals("column", column.columnAs[String])
+      val row = result.get
+      assertNotNull(row.rowType)
+      assertNotNull(row.family)
+      assertNotNull(row.key)
+      assertNull(row.superColumn)
+      assertNotNull(row.column)
+      assertNotNull(row.value)
+      assertNotNull(row.timestamp)
+      assertEquals("value", row.valueAs[String])
+      assertEquals("column", row.columnAs[String])
     }
   }
 
   // create a single column, save it, and get it out
   @Test def testSetAndGetSuperColumn() {
     import Conversions._
-    val superColumn = "Super" | "superKey" | 12345L
+    val superColumn = "Super" || "superKey" | 12345L
 		val columnName = UUID.randomUUID
 
     sessionManager.doWith { session =>
-      val column = superColumn || (columnName, "value")
+      val column = superColumn | (columnName, "value")
       session.insert(column)
     }
 

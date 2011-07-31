@@ -13,10 +13,7 @@
  */
 package org.brzy.calista.dsl
 
-import org.brzy.calista.schema.{SliceRange, ColumnName, ColumnFamily}
-import java.util.Iterator
-import org.brzy.calista.results.Row
-import org.brzy.calista.{Session, Calista}
+import org.brzy.calista.schema.{ColumnName, ColumnFamily}
 
 /**
  * This needs to be imported so that DSL to create columns can be used.
@@ -36,14 +33,12 @@ object Conversions {
 //      session.get(column)
 //  }
 
-  class ColumnOps[K:Manifest](column:ColumnName[K]) {
-    def <=[T:Manifest](t:T) {
-      column.set(t)
-    }
-  }
-
-  implicit def columnOps[K:Manifest](column:ColumnName[K]) = {
-    new ColumnOps(column)
-  }
+//  class ColumnOps[K:Manifest](column:ColumnName[K]) {
+//    def <=[T:Manifest](t:T) {
+//      column.set(t)
+//    }
+//  }
+//
+//  implicit def columnOps(dn:DslNode) = new ColumnOps(dn.asInstanceOf[ColumnName[_]])
 
 }

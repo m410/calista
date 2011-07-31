@@ -24,9 +24,7 @@ import org.brzy.calista.system.FamilyDefinition
  * @author Michael Fortin
  */
 case class SuperColumn[T:Manifest] protected[schema] (key: T, parent: SuperKey[_],familyDef:FamilyDefinition)
-        extends Key {
-
-  def nodePath = parent.nodePath + ":SuperColumn("+key+")"
+    extends Key{
 
   def keyBytes = Serializers.toBytes(key)
 
@@ -34,37 +32,28 @@ case class SuperColumn[T:Manifest] protected[schema] (key: T, parent: SuperKey[_
 
   def columnPath = ColumnPath(parent.family.name,keyBytes,null)
 
-  override def |[N: Manifest](name: N) = {
-    if (familyDef.columnType == "Standard")
-      column(name,this)
-    else
-      counter(name,this)
-  }
+  def |[N: Manifest](name: N) = column(name)
 
   def column[N: Manifest](name: N) = ColumnName(name,this)
 
   def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 
-  override def ||[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) =
-    column(sKey, value, timestamp)
+  def |[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) = column(sKey, value, timestamp)
 
-  def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) =
-    Column(sKey, value, timestamp, this)
+  def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) = Column(sKey, value, timestamp, this)
 
   /**
 	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
 	 */
-  override def \[A:Manifest](columns:A*) = slicePredicate(columns.toArray)
+  def \[A:Manifest](columns:A*) = slicePredicate(columns.toArray)
 
   def slicePredicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
 
 	/**
 	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
 	 */
-  override def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
-    sliceRange(start,end, reverse, count)
+  def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) = sliceRange(start,end, reverse, count)
 
-  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) =
-    SliceRange(start,end, reverse, count,this)
+  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) = SliceRange(start,end, reverse, count,this)
 
 }
