@@ -15,7 +15,7 @@ package org.brzy.calista.ocm
 
 import org.brzy.calista.serializer.Serializer
 import org.brzy.calista.schema.{ColumnFamily, StandardKey,Column=>SColumn}
-import org.brzy.calista.results.{ResultSet, Row}
+import org.brzy.calista.results.ResultSet
 
 import org.scalastuff.scalabeans.Preamble._
 import org.slf4j.LoggerFactory

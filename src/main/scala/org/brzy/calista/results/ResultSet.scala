@@ -40,6 +40,12 @@ case class ResultSet(rows:List[Row]) {
     map.map(m=> m._1 -> m._2.toList)
   }
 
+  def toKeySuperMap[K:Manifest,S:Manifest]:Map[(K,S),List[Row]] = {
+    val map = rows.map(r=> (r.keyAs[K]->r.superColumnAs[S]) -> ListBuffer.empty[Row]).toMap
+    rows.foreach(r=>map((r.keyAs[K]->r.superColumnAs[S])) += r)
+    map.map(m=> m._1 -> m._2.toList)
+  }
+
   /**
    * Converts the rows to arrays of the supplied data types.  This applies to standard columns
    * only and the values have to be of the same type.
