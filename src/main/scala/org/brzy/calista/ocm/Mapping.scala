@@ -14,12 +14,12 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.serializer.Serializer
-import org.brzy.calista.schema.{ColumnFamily, StandardKey,Column=>SColumn}
 import org.brzy.calista.results.ResultSet
 
 import org.scalastuff.scalabeans.Preamble._
 import org.slf4j.LoggerFactory
 import java.util.Date
+import org.brzy.calista.schema.{SuperKey, ColumnFamily, StandardKey, Column => SColumn}
 
 /**
  * Defines the object to column mapping.
@@ -95,14 +95,18 @@ case class Mapping[T <: AnyRef : Manifest](
 	/**
 	 *
 	 */
-  def toKey(t: T): StandardKey[_] = {
+  def toKey(t: T): Either[StandardKey[_],SuperKey[_]] = {
     val key = attributes.find(_ match {
       case k:Key => true
       case _ => false
     }).get
     val descriptor = descriptorOf[T]
     val keyValue = descriptor.get(t,key.name)
-    ColumnFamily(family).standardKey(keyValue)
+
+    if (attributes.find(_.isInstanceOf[SuperColumn]).isDefined)
+      Either(ColumnFamily(family).superKey(keyValue))
+    else
+      Either(ColumnFamily(family).standardKey(keyValue))
   }
 }
 

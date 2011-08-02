@@ -94,7 +94,7 @@ trait StandardDao[K, T <: AnyRef] {
 		 * remove the entity
 		 */
     def remove() {
-      val key = mapping.toKey(p)
+      val key = mapping.toKey(p).left
       session.remove(key)
     }
   }

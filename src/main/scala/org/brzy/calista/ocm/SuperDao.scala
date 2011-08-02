@@ -94,7 +94,7 @@ trait SuperDao[K, S, T <: AnyRef] {
 		 * remove the entity
 		 */
     def remove() {
-      val key = mapping.toKey(p)
+      val key = mapping.toKey(p).right
       session.remove(key)
     }
   }
