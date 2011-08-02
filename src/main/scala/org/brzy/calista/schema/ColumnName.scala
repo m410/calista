@@ -15,7 +15,6 @@ package org.brzy.calista.schema
 
 import org.brzy.calista.Calista
 import java.util.Date
-import org.brzy.calista.dsl.DslNode
 import org.brzy.calista.serializer.Serializers
 
 

@@ -41,7 +41,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertTrue(col.isInstanceOf[Column[_, _]])
         val stdSliceRange = key \\ ("begin", "finish")
         assertTrue(stdSliceRange.isInstanceOf[SliceRange[_]])
-        val stdSliceRange2 = { key \\ ("begin", "end", false, 10)}.iterate
+        val stdSliceRange2 = { key \\ ("begin", "end", false, 10)}.iterator
         assertTrue(stdSliceRange2.isInstanceOf[java.util.Iterator[Row]])
         val stdSliceRange3 = { key \\ ("begin", "end", false, 10)}.results
         assertTrue(stdSliceRange3.isInstanceOf[ResultSet])

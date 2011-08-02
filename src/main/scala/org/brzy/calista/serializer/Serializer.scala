@@ -126,28 +126,24 @@ case object UUIDSerializer extends Serializer[UUID] {
   val serialType = classOf[UUID]
   val typeManifest = manifest[UUID]
 
-  def fromBytes(bb: ByteBuffer) = {
-    var msb = 0L
-    var lsb = 0L
-    val data = bb.array
-    assert(data.length == 16)
-
-    (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
-    (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
-
-    new UUID(msb, lsb)
-  }
+  def fromBytes(bb: ByteBuffer) = new UUID(bb.getLong, bb.getLong)
 
   def fromBytes(data: Array[Byte]) = {
-    var msb = 0L
-    var lsb = 0L
-    assert(data.length == 16)
-
-    (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
-    (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
-
-    new UUID(msb, lsb)
+    val bb = ByteBuffer.wrap(data)
+    new UUID(bb.getLong,bb.getLong)
   }
+  
+//  def fromBytes(data: Array[Byte]) = {
+//    var msb = 0L
+//    var lsb = 0L
+//
+//    assert(data.length == 16,"data length not 16 bytes: " + data.length)
+//
+//    (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
+//    (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
+//
+//    new UUID(msb, lsb)
+//  }
 
   def toBytes(uuid: UUID) = {
     val msb = uuid.getMostSignificantBits
@@ -174,23 +170,9 @@ case object LongSerializer extends Serializer[Long] {
   val size = 8
   val typeManifest = manifest[Long]
 
-  def toBytes(v: Long) = {
-    val b = ByteBuffer.allocate(size)
-    for (val i <- 0 to 7) {
-      b.put(i, (v >> (size - i - 1 << 3)).asInstanceOf[Byte])
-    }
-    b
-  }
+  def toBytes(v: Long) = ByteBuffer.allocate(size).putLong(0, v)
 
-
-  def fromBytes(bytes: ByteBuffer) = {
-    var lng:Long = 0;
-    val size:Int = bytes.capacity
-    for (val i  <- 0 to size -1) {
-      lng |= ( bytes.get(i) & 0xff) << (size - i - 1 << 3)
-    }
-    lng
-  }
+  def fromBytes(bytes: ByteBuffer) = bytes.getLong
 
   def fromBytes(bytes: Array[Byte]) = ByteBuffer.wrap(bytes).getLong(0)
 
@@ -207,12 +189,10 @@ case object LongSerializer extends Serializer[Long] {
 case object DateSerializer extends Serializer[Date] {
   val typeManifest = manifest[Date]
 
-	def toBytes(v:Date) = {
-		LongSerializer.toBytes(v.getTime)
-	}
-	def fromBytes(v:ByteBuffer) = {
-		new Date(LongSerializer.fromBytes(v))
-	}
+	def toBytes(v:Date) = LongSerializer.toBytes(v.getTime)
+
+	def fromBytes(v:ByteBuffer) = new Date(LongSerializer.fromBytes(v))
+  
 	def fromBytes(bytes: Array[Byte]) = new Date(LongSerializer.fromBytes(bytes))
 
   def unapply(u: AnyRef) =
@@ -230,16 +210,22 @@ case object IntSerializer extends Serializer[Int] {
   val bytesPerInt = java.lang.Integer.SIZE / java.lang.Byte.SIZE
   val typeManifest = manifest[Int]
 
-  def toBytes(v: Int) = ByteBuffer.allocate(8)
-          .put(0, (v >>> 56).asInstanceOf[Byte])
-          .put(1, (v >>> 48).asInstanceOf[Byte])
-          .put(2, (v >>> 40).asInstanceOf[Byte])
-          .put(3, (v >>> 32).asInstanceOf[Byte])
-          .put(4, (v >>> 24).asInstanceOf[Byte])
-          .put(5, (v >>> 16).asInstanceOf[Byte])
-          .put(6, (v >>> 8).asInstanceOf[Byte])
-          .put(7, (v >>> 0).asInstanceOf[Byte])
+//  def toBytes(v: Int) = ByteBuffer.allocate(8)
+//          .put(0, (v >>> 56).asInstanceOf[Byte])
+//          .put(1, (v >>> 48).asInstanceOf[Byte])
+//          .put(2, (v >>> 40).asInstanceOf[Byte])
+//          .put(3, (v >>> 32).asInstanceOf[Byte])
+//          .put(4, (v >>> 24).asInstanceOf[Byte])
+//          .put(5, (v >>> 16).asInstanceOf[Byte])
+//          .put(6, (v >>> 8).asInstanceOf[Byte])
+//          .put(7, (v >>> 0).asInstanceOf[Byte])
 
+  def toBytes(i: Int) = {
+    val b = ByteBuffer.allocate(bytesPerInt);
+    b.putInt(i);
+    b.rewind();
+    b
+  }
   def fromBytes(bytes: ByteBuffer) = bytes.getInt(0)
 
   def fromBytes(bytes: Array[Byte]) = ByteBuffer.wrap(bytes).getInt(0)

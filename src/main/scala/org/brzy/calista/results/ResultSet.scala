@@ -34,13 +34,13 @@ case class ResultSet(rows:List[Row]) {
   /**
    * converts the returned rows to a map where the key in the datastore is the key of the map.
    */
-  def toKeyMap[T:Manifest]:Map[T,List[Row]] = {
+  def toKeyRows[T:Manifest]:Map[T,List[Row]] = {
     val map = rows.map(r=>r.keyAs[T] -> ListBuffer.empty[Row]).toMap
     rows.foreach(r=>map(r.keyAs[T]) += r)
     map.map(m=> m._1 -> m._2.toList)
   }
 
-  def toKeySuperMap[K:Manifest,S:Manifest]:Map[(K,S),List[Row]] = {
+  def toKeySuperRows[K:Manifest,S:Manifest]:Map[(K,S),List[Row]] = {
     val map = rows.map(r=> (r.keyAs[K]->r.superColumnAs[S]) -> ListBuffer.empty[Row]).toMap
     rows.foreach(r=>map((r.keyAs[K]->r.superColumnAs[S])) += r)
     map.map(m=> m._1 -> m._2.toList)

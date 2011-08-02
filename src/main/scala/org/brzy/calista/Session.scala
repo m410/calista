@@ -27,7 +27,11 @@ import org.slf4j.LoggerFactory
 
 import java.util.{Date, Iterator}
 import system.{TokenRange, FamilyDefinition, KeyspaceDefinition}
-import org.apache.cassandra.thrift.{CounterColumn, Compression, CfDef, KsDef, NotFoundException, ConsistencyLevel, Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent, SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate, ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange, TokenRange => CassandraTokenRange}
+import org.apache.cassandra.thrift.{CounterColumn, Compression, NotFoundException, ConsistencyLevel}
+import org.apache.cassandra.thrift.{Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent}
+import org.apache.cassandra.thrift.{SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate}
+import org.apache.cassandra.thrift.{ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange, TokenRange => CassandraTokenRange}
+
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It

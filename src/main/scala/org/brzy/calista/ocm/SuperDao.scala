@@ -41,7 +41,7 @@ trait SuperDao[K, S, T <: AnyRef] {
 	def apply[K:Manifest,S:Manifest](key: K, superColumn:S): T = {
     val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
     val columns = session.list(queryCol)
-    mapping.newInstance(key, superColumn, columns)
+    mapping.newInstance(key, Option(superColumn), columns)
 	}
 
 	/**

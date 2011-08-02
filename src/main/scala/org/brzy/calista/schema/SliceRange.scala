@@ -16,7 +16,6 @@ package org.brzy.calista.schema
 import org.brzy.calista.serializer.Serializers
 import org.brzy.calista.Calista
 import org.brzy.calista.Session
-import org.brzy.calista.dsl.DslNode
 import org.brzy.calista.results.Row
 
 /**
@@ -54,7 +53,7 @@ case class SliceRange[T:Manifest] protected[schema] (start: T, finish: T, revers
     session.sliceRange(this)
   }
 
-  def iterate:java.util.Iterator[Row] = {
+  def iterator:java.util.Iterator[Row] = {
     val session = Calista.value
     session.scrollSliceRange(this)
   }

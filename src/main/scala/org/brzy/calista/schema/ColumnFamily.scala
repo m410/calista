@@ -14,8 +14,6 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.Calista
-import org.brzy.calista.dsl.DslNode
-
 /**
  * Represents a column family to query in the database.  This is the entry point to DSL access
  * to the datastore.
