@@ -38,7 +38,7 @@ trait SuperDao[K, S, T <: AnyRef] {
 	/**
 	 * Get an instance of the mapped class by it's key.
 	 */
-	def apply[K:Manifest,S:Manifest](key: K, superColumn:S): T = {
+	def apply(key: K, superColumn:S)(implicit k:Manifest[K],s:Manifest[S]): T = {
     val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
     val columns = session.list(queryCol)
     mapping.newInstance(key, Option(superColumn), columns)
@@ -47,7 +47,7 @@ trait SuperDao[K, S, T <: AnyRef] {
 	/**
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
-  def get[K:Manifest,S:Manifest](key: K, superColumn:S): Option[T] = {
+  def get(key: K, superColumn:S)(implicit k:Manifest[K],s:Manifest[S]): Option[T] = {
     val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
     val columns = session.list(queryCol)
 
@@ -94,7 +94,7 @@ trait SuperDao[K, S, T <: AnyRef] {
 		 * remove the entity
 		 */
     def remove() {
-      val key = mapping.toKey(p).right
+      val key = mapping.toKey(p).left.get
       session.remove(key)
     }
   }

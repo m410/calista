@@ -63,5 +63,5 @@ class Row(
   def valueAs[T:Manifest]:T = as[T](value)
 
   protected[this] def as[T:Manifest](b:ByteBuffer):T =
-      Serializers.fromClassBytes(manifest[T].erasure, b.array()).asInstanceOf[T]
+      Serializers.fromClassBytes(manifest[T].erasure, b).asInstanceOf[T]
 }

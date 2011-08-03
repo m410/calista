@@ -242,6 +242,9 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 
+  def remove(key: SuperKey[_]) {
+    remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
+  }
 	/**
 	 * Removes a key by the path and timestamp with the given consistency level.
    */
@@ -336,15 +339,15 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         if(partial.size > 0 && index == partial.size) {
           import results.RowType._
           val lastRow = partial.rows.last
-          val partialLast:Array[Byte] = lastRow.rowType match {
-            case Standard => lastRow.column.array()
-            case StandardCounter => lastRow.column.array()
-            case Super => lastRow.superColumn.array()
-            case SuperCounter => lastRow.superColumn.array()
+          val partialLast = lastRow.rowType match {
+            case Standard => lastRow.column
+            case StandardCounter => lastRow.column
+            case Super => lastRow.superColumn
+            case SuperCounter => lastRow.superColumn
           }
-          val sliceLast = slice.finishBytes.array
+          val sliceLast = slice.finishBytes
 
-          if(!java.util.Arrays.equals(partialLast,sliceLast)) {
+          if(partialLast.compareTo(sliceLast) != 0) {
             partial = {
               val pStart = Serializers.fromClassBytes(m.erasure,partialLast)
               val pFin = Serializers.fromClassBytes(m.erasure,sliceLast)

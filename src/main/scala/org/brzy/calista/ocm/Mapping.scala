@@ -95,7 +95,7 @@ case class Mapping[T <: AnyRef : Manifest](
 	/**
 	 *
 	 */
-  def toKey(t: T): Either[StandardKey[_],SuperKey[_]] = {
+  def toKey(t: T): Either[SuperKey[_],StandardKey[_]] = {
     val key = attributes.find(_ match {
       case k:Key => true
       case _ => false
@@ -104,9 +104,9 @@ case class Mapping[T <: AnyRef : Manifest](
     val keyValue = descriptor.get(t,key.name)
 
     if (attributes.find(_.isInstanceOf[SuperColumn]).isDefined)
-      Either(ColumnFamily(family).superKey(keyValue))
+      Left(ColumnFamily(family).superKey(keyValue))
     else
-      Either(ColumnFamily(family).standardKey(keyValue))
+      Right(ColumnFamily(family).standardKey(keyValue))
   }
 }
 
