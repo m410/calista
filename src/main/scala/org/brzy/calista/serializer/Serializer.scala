@@ -50,6 +50,7 @@ object Serializers {
     case UTF8Serializer(s) => UTF8Serializer.toBytes(s)
     case UUIDSerializer(s) => UUIDSerializer.toBytes(s)
     case LongSerializer(s) => LongSerializer.toBytes(s)
+    case DoubleSerializer(s) => DoubleSerializer.toBytes(s)
     case IntSerializer(s) => IntSerializer.toBytes(s)
     case DateSerializer(s) => DateSerializer.toBytes(s)
     case _ => error("No Serializer or type: %s".format(t))
@@ -59,6 +60,7 @@ object Serializers {
     case UTF8Serializer(s) => UTF8Serializer.fromBytes(b).asInstanceOf[T]
     case UUIDSerializer(s) => UUIDSerializer.fromBytes(b).asInstanceOf[T]
     case LongSerializer(s) => LongSerializer.fromBytes(b).asInstanceOf[T]
+    case DoubleSerializer(s) => DoubleSerializer.fromBytes(b).asInstanceOf[T]
     case IntSerializer(s) => IntSerializer.fromBytes(b).asInstanceOf[T]
     case DateSerializer(s) => DateSerializer.fromBytes(b).asInstanceOf[T]
     case BooleanSerializer(s) => BooleanSerializer.fromBytes(b).asInstanceOf[T]
@@ -161,11 +163,30 @@ case object LongSerializer extends Serializer[Long] {
 
   def toBytes(v: Long) = ByteBuffer.allocate(size).putLong(0, v)
 
-  def fromBytes(bytes: ByteBuffer) = bytes.getLong
+  def fromBytes(bytes: ByteBuffer) = bytes.getLong(0)
 
   def unapply(u: AnyRef) =
     if (u.isInstanceOf[Long])
       Some(u.asInstanceOf[Long])
+    else
+      None
+}
+
+/**
+ * Long serializer
+ */
+case object DoubleSerializer extends Serializer[Double] {
+  val serialType = classOf[java.lang.Double]
+  val size = java.lang.Double.SIZE / java.lang.Byte.SIZE
+  val typeManifest = manifest[Double]
+
+  def toBytes(v: Double) = ByteBuffer.allocate(size).putDouble(0, v)
+
+  def fromBytes(bytes: ByteBuffer) = bytes.getDouble(0)
+
+  def unapply(u: AnyRef) =
+    if (u.isInstanceOf[Double])
+      Some(u.asInstanceOf[Double])
     else
       None
 }
