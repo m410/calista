@@ -31,7 +31,7 @@ case class SlicePredicate[T] protected[schema] (columns: Array[T], key: Key) {
 
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
-    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   def results = {
