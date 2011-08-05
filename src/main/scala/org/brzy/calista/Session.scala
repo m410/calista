@@ -321,12 +321,9 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    */
   def sliceRange(range: SliceRange[_], level: Consistency): ResultSet = {
     log.debug("range slice: " + range)
-    val columnParent:CassandraColumnParent = range.columnParent
-    val key = range.keyBytes
-    val predicate:CassandraSlicePredicate = range
-    val results = client.get_slice(key, columnParent, predicate, level)
+    val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     val family = range.columnParent.family
-    ResultSet(results.flatMap(sc => { toRows(sc, family, key)}).toList)
+    ResultSet(results.flatMap(sc => { toRows(sc, family, range.keyBytes)}).toList)
   }
 
   /**

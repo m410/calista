@@ -87,7 +87,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       val results = session.sliceRange(slice)
       assertNotNull(results)
       results.rows.foreach(r=>{
-        println("#### " + r.keyAs[String] +"|"+ r.superColumnAs[String]+"|"+ r.columnAs[String]+"|"+ r.valueAs[String])
+//        println("#### " + r.keyAs[String] +"|"+ r.superColumnAs[String]+"|"+ r.columnAs[String]+"|"+ r.valueAs[String])
         assertEquals("skey1",r.keyAs[String])
       })
       assertEquals(8,results.size)
