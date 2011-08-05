@@ -26,23 +26,23 @@ object RowType extends Enum[RowType] {
   /**
    * Standard Column Family.  For rows of this type, the superColumn will be null.
    */
-  val Standard = new RowType
+  val Standard = new RowType name "Standard"
 
   /**
    * Standard Column Family with a CounterColumnType default validation class.  For rows of this
    * type, the superColumn will be null, the timestamp will be null and the value will always be
    * a long type.
    */
-  val StandardCounter = new RowType
+  val StandardCounter = new RowType name "StandardCounter"
 
   /**
    * Super Column Family. Rows of this type will have all fields available.
    */
-  val Super = new RowType
+  val Super = new RowType name "Super"
 
   /**
    * Super Column Family with a CounterColumnType default validation class. Rows of this type will
    * have all fields available and the value will be a Long type.
    */
-  val SuperCounter = new RowType
+  val SuperCounter = new RowType name "SuperCounter"
 }

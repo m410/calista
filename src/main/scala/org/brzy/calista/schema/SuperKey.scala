@@ -18,33 +18,33 @@ import org.brzy.calista.system.FamilyDefinition
 
 /**
  * A super key has a Column family as a parent.
- * 
+ *
  * @author Michael Fortin
  */
-case class SuperKey[T:Manifest] protected[schema] (key:T,family:ColumnFamily, familyDef:FamilyDefinition)
-    extends Key {
+case class SuperKey[T: Manifest] protected[schema](key: T, family: ColumnFamily, familyDef: FamilyDefinition)
+        extends Key {
 
   def keyBytes = Serializers.toBytes(key)
 
-  def columnPath = ColumnPath(family.name,keyBytes,null)
+  def columnPath = ColumnPath(family.name, null, null)
 
-  def |[N:Manifest](sKey:N) = superColumn(sKey)
+  def |[N: Manifest](sKey: N) = superColumn(sKey)
 
-  def superColumn[N:Manifest](sKey:N) = SuperColumn(sKey,this,familyDef)
+  def superColumn[N: Manifest](sKey: N) = SuperColumn(sKey, this, familyDef)
 
   /**
-	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
-	 */
-  def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
+   * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
+   */
+  def \\[A: Manifest](start: A, end: A, reverse: Boolean = false, count: Int = 100) =
     sliceRange(start, end, reverse, count)
 
-  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) =
-    SliceRange(start, end, reverse, count,this)
+  def sliceRange[A: Manifest](start: A, end: A, reverse: Boolean, count: Int) =
+    SliceRange(start, end, reverse, count, this)
 
-	/**
-	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-	 */
-  def \[A:Manifest](columns:A*) = predicate(columns.toArray)
+  /**
+   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+   */
+  def \[A: Manifest](columns: A*) = predicate(columns.toArray)
 
-  def predicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
+  def predicate[A: Manifest](columns: Array[A]) = SlicePredicate(columns, this)
 }

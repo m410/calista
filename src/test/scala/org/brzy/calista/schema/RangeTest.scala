@@ -18,9 +18,7 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.serializer.UTF8Serializer
 import org.brzy.calista.dsl.Conversions
-import org.brzy.calista.results.ResultSet
 
 
 class RangeTest extends JUnitSuite with EmbeddedTest {
@@ -40,7 +38,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     sessionManager.doWith { session =>
       val range = {"Standard" | "key-range"}\\("column2","column4",true)
       val result = range.results
-      result.rows.foreach(k=>println("##column='%s'".format(k)))
+//      result.rows.foreach(k=>println("##column='%s'".format(k)))
       assertNotNull(result)
       assertEquals(3,result.size)
     }
@@ -50,24 +48,49 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     import Conversions._
     
     sessionManager.doWith { session =>
-      session.insert("Super2"||"key"|"super-col-0"|("column", "value0"))
-      session.insert("Super2"||"key"|"super-col-0"|("column1", "value0"))
-      session.insert("Super2"||"key"|"super-col-1"|("column", "value1"))
-      session.insert("Super2"||"key"|"super-col-1"|("column1", "value1"))
-      session.insert("Super2"||"key"|"super-col-2"|("column", "value2"))
-      session.insert("Super2"||"key"|"super-col-2"|("column1", "value2"))
-      session.insert("Super2"||"key"|"super-col-3"|("column", "value3"))
-      session.insert("Super2"||"key"|"super-col-3"|("column1", "value3"))
-      session.insert("Super2"||"key2"|"super-col-4"|("column", "value4"))
-      session.insert("Super2"||"key2"|"super-col-4"|("column1", "value4"))
+      {"Super2"||"skey1"|"scol0"|"column0"} << "value0";
+      {"Super2"||"skey1"|"scol0"|"column1"} << "value0";
+      {"Super2"||"skey1"|"scol1"|"column0"} << "value1";
+      {"Super2"||"skey1"|"scol1"|"column1"} << "value1";
+      session.insert("Super2"||"skey1"|"scol2"|("column0", "value2"))
+      session.insert("Super2"||"skey1"|"scol2"|("column1", "value2"))
+      session.insert("Super2"||"skey1"|"scol3"|("column0", "value3"))
+      session.insert("Super2"||"skey1"|"scol3"|("column1", "value3"))
+      session.insert("Super2"||"skey2"|"scol4"|("column0", "value4"))
+      session.insert("Super2"||"skey2"|"scol4"|("column1", "value4"))
     }
 
     sessionManager.doWith { session =>
-      val slice = {"Super2"||"key"}\\("super-col-0","super-col-3")
-      val rows = session.sliceRange(slice.asInstanceOf[SliceRange[String]])
-      assertNotNull(rows)
-      assertEquals(8,rows.size)
+      {"Super2"||"skey1"|"scol0"|"none"}.valueAs[String] match {
+        case Some(v) => fail("Should have returned nothing: " + v)
+        case _ =>
+      }
 
+      {"Super2"||"skey1"|"scol0"|"column0"}.valueAs[String] match {
+        case Some(v) =>
+          assertEquals("value0",v)
+        case _ => fail("No value returned")
+      }
+    }
+    sessionManager.doWith { session =>
+      val slice = {"Super2"||"skey1"|"scol0"}\\("a","z")
+      val results = session.sliceRange(slice)
+      assertNotNull(results)
+//      results.rows.foreach(r=>{
+//        println("####### " + r.keyAs[String] +"|"+ r.columnAs[String]+"|"+ r.valueAs[String])
+//      })
+      assertEquals(2,results.size)
+    }
+
+    sessionManager.doWith { session =>
+      val slice = {"Super2"||"skey1"}\\("a","z")
+      val results = session.sliceRange(slice)
+      assertNotNull(results)
+      results.rows.foreach(r=>{
+        println("#### " + r.keyAs[String] +"|"+ r.superColumnAs[String]+"|"+ r.columnAs[String]+"|"+ r.valueAs[String])
+        assertEquals("skey1",r.keyAs[String])
+      })
+      assertEquals(8,results.size)
     }
   }
 }

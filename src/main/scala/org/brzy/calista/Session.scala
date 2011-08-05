@@ -108,11 +108,13 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] def keyFor(c: {def parent:Key}) = c.parent match {
+    case s: SuperKey[_] => s.keyBytes
     case s: StandardKey[_] => s.keyBytes
     case s: SuperColumn[_] => s.parent.keyBytes
   }
 
   private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {
+    log.debug("family:"+familyName+", key:" + key+", column:" + cos)
     if (cos == null) {
       List.empty[Row]
     }
@@ -123,6 +125,15 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       val rowType = RowType.Standard
       List(new Row(rowType, familyName, key, null, name, value, timestamp))
     }
+    else if (cos.getSuper_column != null ) {
+      val rType = RowType.Super
+      val superColumnName = ByteBuffer.wrap(cos.getSuper_column.getName)
+      cos.getSuper_column.getColumns.map(c=>{
+        val name = ByteBuffer.wrap(c.getName)
+        val value = ByteBuffer.wrap(c.getValue)
+        new Row(rType,familyName,key,superColumnName, name, value, new Date(c.getTimestamp))
+      }).toList
+		}
     else if (cos.getCounter_column != null) {
       val name = ByteBuffer.wrap(cos.getCounter_column.getName)
       val value = Serializers.toBytes(cos.getCounter_column.getValue)
@@ -130,16 +141,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       val rowType = RowType.StandardCounter
       List(new  Row(rowType, familyName, key, null, name, value, timestamp))
     }
-    else if (cos.getSuper_column != null ) {
-      val rType = RowType.Super
-			val sCol = cos.getSuper_column
-      val sColName = ByteBuffer.wrap(sCol.getName)
-      sCol.getColumns.map(c=>{
-        val name = ByteBuffer.wrap(c.getName)
-        val value = ByteBuffer.wrap(c.getValue)
-        new Row(rType,familyName,key,sColName, name, value, new Date(c.getTimestamp))
-      }).toList
-		}
     else if (cos.getCounter_super_column != null) {
       val rType = RowType.SuperCounter
 			val sCol = cos.getCounter_super_column
@@ -320,8 +321,10 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    */
   def sliceRange(range: SliceRange[_], level: Consistency): ResultSet = {
     log.debug("range slice: " + range)
-    val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
-    val key = range.key.keyBytes
+    val columnParent:CassandraColumnParent = range.columnParent
+    val key = range.keyBytes
+    val predicate:CassandraSlicePredicate = range
+    val results = client.get_slice(key, columnParent, predicate, level)
     val family = range.columnParent.family
     ResultSet(results.flatMap(sc => { toRows(sc, family, key)}).toList)
   }

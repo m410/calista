@@ -13,7 +13,6 @@
  */
 package org.brzy.calista.schema
 
-import java.nio.ByteBuffer
 import java.util.Date
 import org.brzy.calista.serializer.Serializers
 import org.brzy.calista.system.FamilyDefinition
@@ -23,14 +22,16 @@ import org.brzy.calista.system.FamilyDefinition
  *
  * @author Michael Fortin
  */
-case class SuperColumn[T:Manifest] protected[schema] (key: T, parent: SuperKey[_],familyDef:FamilyDefinition)
+case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[_],familyDef:FamilyDefinition)
     extends Key{
 
-  def keyBytes = Serializers.toBytes(key)
+  def keyBytes = parent.keyBytes
+
+  def nameBytes = Serializers.toBytes(name)
 
   def family = parent.family
 
-  def columnPath = ColumnPath(parent.family.name,keyBytes,null)
+  def columnPath = ColumnPath(parent.family.name, nameBytes,null)
 
   def |[N: Manifest](name: N) = column(name)
 

@@ -124,7 +124,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         val predicate = scol \ ("column", "column1")
         assertTrue(predicate.isInstanceOf[SlicePredicate[_]])
         val results2 = predicate.results
-        assertEquals(0, results2.size) // TODO this should be 2
+        assertEquals(2, results2.size)
     }
   }
 }

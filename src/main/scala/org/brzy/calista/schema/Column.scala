@@ -48,7 +48,7 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
 	 */
   def columnPath = {
     val superCol = parent match {
-      case s: SuperColumn[_] => s.keyBytes
+      case s: SuperColumn[_] => s.nameBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)
@@ -60,7 +60,7 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
 	 */
   def columnParent: ColumnParent = parent match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
-    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   /**
