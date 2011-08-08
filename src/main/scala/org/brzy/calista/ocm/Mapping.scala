@@ -44,6 +44,7 @@ case class Mapping[T <: AnyRef : Manifest](
     val colMap = columns.rows.map(r=>{
       columnNameSerializer.fromBytes(r.column) -> r
     }).toMap
+    log.debug("columns:"+colMap.map(_._1).mkString("[",",","]"))
     val descriptor = descriptorOf[T]
     val builder = descriptor.newBuilder()
     val attributeKey = attributes.find(_.isInstanceOf[Key]).get

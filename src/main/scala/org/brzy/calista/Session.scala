@@ -103,7 +103,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private[this] implicit def toSlicePredicate(sp: SliceRange[_]) = {
-    val r = new CassandraSliceRange(sp.startBytes, sp.finishBytes, false, sp.max)
+    val r = new CassandraSliceRange(sp.startBytes, sp.finishBytes, sp.reverse, sp.max)
     new CassandraSlicePredicate().setSlice_range(r)
   }
 
@@ -114,7 +114,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {
-    log.debug("family:"+familyName+", key:" + key+", column:" + cos)
     if (cos == null) {
       List.empty[Row]
     }
@@ -184,7 +183,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
    * Increments a counter column.
    */
   def add(column: Column[_, _], level: Consistency = defaultConsistency) {
-    log.debug("insert: {}",column)
+    log.trace("insert: {}",column)
     val counter = new CounterColumn()
     counter.setName(column.nameBytes)
     counter.setValue(column.value.asInstanceOf[Long])
@@ -320,7 +319,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 	 * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
   def sliceRange(range: SliceRange[_], level: Consistency): ResultSet = {
-    log.debug("range slice: " + range)
     val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     val family = range.columnParent.family
     ResultSet(results.flatMap(sc => { toRows(sc, family, range.keyBytes)}).toList)

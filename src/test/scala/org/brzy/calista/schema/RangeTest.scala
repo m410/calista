@@ -36,7 +36,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     }
 
     sessionManager.doWith { session =>
-      val range = {"Standard" | "key-range"}\\("column2","column4",true)
+      val range = {"Standard" | "key-range"}\\("column4","column2",true)
       val result = range.results
 //      result.rows.foreach(k=>println("##column='%s'".format(k)))
       assertNotNull(result)
