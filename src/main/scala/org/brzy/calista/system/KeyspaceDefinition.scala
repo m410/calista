@@ -56,6 +56,18 @@ case class KeyspaceDefinition(
     d.setDurable_writes(durableWrites)
     d
   }
+
+  def logString = {
+    val builder = new StringBuilder()
+        .append("\t").append("name=").append(name).append("\n")
+        .append("\t").append("strategyClass=").append(strategyClass).append("\n")
+        .append("\t").append("replicationFactor=").append(replicationFactor).append("\n")
+        .append("\t").append("strategyOptions=").append(strategyOptions).append("\n")
+        .append("\t").append("durableWrites=").append(durableWrites).append("\n")
+
+    families.foreach(f=>builder.append("\t")append(f).append("\n"))
+    builder.toString()
+  }
 }
 
 
