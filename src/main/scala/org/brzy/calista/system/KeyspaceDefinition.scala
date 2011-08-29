@@ -65,7 +65,7 @@ case class KeyspaceDefinition(
         .append("\t").append("strategyOptions=").append(strategyOptions).append("\n")
         .append("\t").append("durableWrites=").append(durableWrites).append("\n")
 
-    families.foreach(f=>builder.append("\t")append(f).append("\n"))
+    families.foreach(f=>builder.append("\t").append(f).append("\n"))
     builder.toString()
   }
 }
