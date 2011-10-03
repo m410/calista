@@ -35,12 +35,12 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
 	/**
 	 * Return the name converted to bytes.
 	 */
-  def nameBytes = Serializers.toBytes(name)
+  def nameBytes = Serializers.toBytes(name) // TODO This doesn't allow for custom serializers
 
 	/**
 	 * Return the value converted to bytes.
 	 */
-  def valueBytes = Serializers.toBytes(value)
+  def valueBytes = Serializers.toBytes(value) // TODO This doesn't allow for custom serializers
 
 	/**
 	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
