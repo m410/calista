@@ -25,6 +25,7 @@ import org.brzy.calista.schema.StandardKey
 
 class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"
+	val personKeyPartial  = "mappingKeyPartial"
 	val personDate = new Date
 	
   @Test def mapEntity() {
@@ -49,6 +50,34 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
           assertNotNull(person.name)
           assertNotNull(person.count)
           assertNotNull(person.created)
+        case _ =>
+          fail("No person by key")
+      }
+		}
+  }
+
+  @Test def mapPartialEntity() {
+	 	sessionManager.doWith { session =>
+			val person = new Person(personKeyPartial,"name",100,null)
+			person.insert()
+		}
+
+	 	sessionManager.doWith { session =>
+       import org.brzy.calista.dsl.Conversions._
+       val key = "Person" | personKeyPartial
+       val columns = session.list(key.asInstanceOf[StandardKey[String]])
+       assertNotNull(columns)
+       assertEquals(2,columns.size)
+		}
+
+		sessionManager.doWith { session =>
+			val person = Person.get(personKeyPartial) match {
+        case Some(person) =>
+          assertNotNull(person)
+          assertNotNull(person.key)
+          assertNotNull(person.name)
+          assertNotNull(person.count)
+          assertNull(person.created)
         case _ =>
           fail("No person by key")
       }

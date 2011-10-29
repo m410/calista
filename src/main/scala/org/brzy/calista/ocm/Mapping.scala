@@ -63,7 +63,12 @@ case class Mapping[T <: AnyRef : Manifest](
 
     attributes.filter(_.isInstanceOf[Column]).foreach(column =>{
       val prop = descriptor.properties.find(_.name == column.name).get
-      val value = column.serializer.fromBytes(colMap(column.name).value)
+
+      val value = colMap.get(column.name) match {
+        case Some(row) => column.serializer.fromBytes(row.value)
+        case _ => null
+      }
+
       log.debug("column:"+prop+":"+value)
       builder.set(prop, value)
     })
@@ -74,18 +79,26 @@ case class Mapping[T <: AnyRef : Manifest](
 	/**
 	 * Creates a list of columns from the persistable object.
 	 */
-  def toColumns(t: T): List[SColumn[_, _]] = {
+  def toColumns(instance: T): List[SColumn[_, _]] = {
     val descriptor = descriptorOf[T]
     val key = attributes.find(_.isInstanceOf[Key]).get
-    val keyValue = descriptor.get(t,key.name)
+    val keyValue = descriptor.get(instance, key.name)
     val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
 
-    attributes.filter(_.isInstanceOf[Column]).map(attr=>{
-      val columnValue = descriptor.get(t,attr.name)
+    attributes.filter(c=>{
+      if (c.isInstanceOf[Column]) {
+        val column = c.asInstanceOf[Column]
+        descriptor.get(instance, column.name) != null
+      }
+      else {
+        false
+      }
+    }).map(attr=>{
+      val columnValue = descriptor.get(instance,attr.name)
 
       superColOption match {
         case Some(s) =>
-          val v = descriptor.get(t,s.name)
+          val v = descriptor.get(instance,s.name)
           ColumnFamily(family).superKey(keyValue).superColumn(v).column(attr.name,columnValue,new Date())
         case _ =>
           ColumnFamily(family).standardKey(keyValue).column(attr.name,columnValue,new Date())
