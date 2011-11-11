@@ -21,11 +21,12 @@ import serializer.Serializers
 import org.apache.thrift.protocol.TBinaryProtocol
 import org.apache.thrift.transport.{TFramedTransport, TSocket}
 import collection.JavaConversions._
+import collection.Iterator
 
 import java.nio.ByteBuffer
 import org.slf4j.LoggerFactory
 
-import java.util.{Date, Iterator}
+import java.util.Date
 import system.{TokenRange, FamilyDefinition, KeyspaceDefinition}
 import org.apache.cassandra.thrift.{CounterColumn, Compression, NotFoundException, ConsistencyLevel}
 import org.apache.cassandra.thrift.{Cassandra, Column => CassandraColumn, ColumnPath => CassandraColumnPath, ColumnParent => CassandraColumnParent}
@@ -327,10 +328,12 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   /**
    *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
    *  iterate over all elements including the start and end columns.
+   *
+   *  @param initSliceRange the slice range to iterate over.
    */
-  def scrollSliceRange[T](slice: SliceRange[T])(implicit m:Manifest[T]):Iterator[Row] = {
+  def scrollSliceRange[T:Manifest](initSliceRange: SliceRange[T]):Iterator[Row] = {
     new Iterator[Row] {
-      private[this] var partial = sliceRange(slice)
+      private[this] var partial = sliceRange(initSliceRange)
       private[this] var index = 0
 
       def hasNext:Boolean = {
@@ -343,13 +346,13 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
             case Super => lastRow.superColumn
             case SuperCounter => lastRow.superColumn
           }
-          val sliceLast = slice.finishBytes
+          val sliceLast = initSliceRange.finishBytes
 
           if(partialLast.compareTo(sliceLast) != 0) {
             partial = {
-              val pStart = Serializers.fromClassBytes(m.erasure,partialLast)
-              val pFin = Serializers.fromClassBytes(m.erasure,sliceLast)
-              val sliceCopy = slice.copy(start = pStart, finish = pFin)
+              val pStart = Serializers.fromClassBytes(manifest[T].erasure,partialLast)
+              val pFin = Serializers.fromClassBytes(manifest[T].erasure,sliceLast)
+              val sliceCopy = initSliceRange.copy(start = pStart, finish = pFin)
               sliceRange(sliceCopy)
             }
             index = 1 // skip the first, because the slice is inclusive
@@ -358,7 +361,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         index < partial.size
       }
 
-      def next:Row = {
+      def next():Row = {
         index = index + 1
         partial.rows(index -1)
       }

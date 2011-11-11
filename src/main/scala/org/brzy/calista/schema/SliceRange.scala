@@ -15,8 +15,8 @@ package org.brzy.calista.schema
 
 import org.brzy.calista.serializer.Serializers
 import org.brzy.calista.Calista
-import org.brzy.calista.Session
 import org.brzy.calista.results.Row
+import collection.Iterator
 
 /**
  * Slice of columns under a key.
@@ -49,7 +49,7 @@ case class SliceRange[T:Manifest] protected[schema] (start: T, finish: T, revers
     session.sliceRange(this)
   }
 
-  def iterator:java.util.Iterator[Row] = {
+  def iterator:Iterator[Row] = {
     val session = Calista.value
     session.scrollSliceRange(this)
   }
