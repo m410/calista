@@ -43,6 +43,7 @@ object Serializers {
   protected[serializer] val UUIDClass = classOf[UUID]
   protected[serializer] val DateClass = classOf[Date]
   protected[serializer] val BooleanClass = classOf[Boolean]
+  protected[serializer] val ByteArrayClass = classOf[Array[Byte]]
 
 
   def toBytes[T](t: T) = t match {
@@ -53,6 +54,7 @@ object Serializers {
     case DoubleSerializer(s) => DoubleSerializer.toBytes(s)
     case IntSerializer(s) => IntSerializer.toBytes(s)
     case DateSerializer(s) => DateSerializer.toBytes(s)
+    case ByteArraySerializer(s) => ByteArraySerializer.toBytes(s)
     case _ => error("No Serializer or type: %s".format(t))
   }
 
@@ -64,6 +66,7 @@ object Serializers {
     case IntSerializer(s) => IntSerializer.fromBytes(b).asInstanceOf[T]
     case DateSerializer(s) => DateSerializer.fromBytes(b).asInstanceOf[T]
     case BooleanSerializer(s) => BooleanSerializer.fromBytes(b).asInstanceOf[T]
+    case ByteArraySerializer(s) => ByteArraySerializer.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 
@@ -74,6 +77,7 @@ object Serializers {
     case IntClass => IntSerializer.fromBytes(b).asInstanceOf[T]
     case DateClass => DateSerializer.fromBytes(b).asInstanceOf[T]
     case BooleanClass => BooleanSerializer.fromBytes(b).asInstanceOf[T]
+    case ByteArrayClass => ByteArraySerializer.fromBytes(b).asInstanceOf[T]
     case _ => error("No Serializer or type: %s".format(t))
   }
 }
@@ -123,18 +127,6 @@ case object UUIDSerializer extends Serializer[UUID] {
   val typeManifest = manifest[UUID]
 
   def fromBytes(bb: ByteBuffer) = new UUID(bb.getLong, bb.getLong)
-
-//  def fromBytes(data: Array[Byte]) = {
-//    var msb = 0L
-//    var lsb = 0L
-//
-//    assert(data.length == 16,"data length not 16 bytes: " + data.length)
-//
-//    (0 until 8).foreach {(i) => msb = (msb << 8) | (data(i) & 0xff)}
-//    (8 until 16).foreach {(i) => lsb = (lsb << 8) | (data(i) & 0xff)}
-//
-//    new UUID(msb, lsb)
-//  }
 
   def toBytes(uuid: UUID) = {
     val msb = uuid.getMostSignificantBits
@@ -216,16 +208,6 @@ case object IntSerializer extends Serializer[Int] {
   val bytesPerInt = java.lang.Integer.SIZE / java.lang.Byte.SIZE
   val typeManifest = manifest[Int]
 
-//  def toBytes(v: Int) = ByteBuffer.allocate(8)
-//          .put(0, (v >>> 56).asInstanceOf[Byte])
-//          .put(1, (v >>> 48).asInstanceOf[Byte])
-//          .put(2, (v >>> 40).asInstanceOf[Byte])
-//          .put(3, (v >>> 32).asInstanceOf[Byte])
-//          .put(4, (v >>> 24).asInstanceOf[Byte])
-//          .put(5, (v >>> 16).asInstanceOf[Byte])
-//          .put(6, (v >>> 8).asInstanceOf[Byte])
-//          .put(7, (v >>> 0).asInstanceOf[Byte])
-
   def toBytes(i: Int) = {
     val b = ByteBuffer.allocate(bytesPerInt);
     b.putInt(i);
@@ -261,4 +243,21 @@ case object BooleanSerializer extends Serializer[Boolean] {
 	    else
 	      None
 	
+}
+
+/**
+ * Long serializer
+ */
+case object ByteArraySerializer extends Serializer[Array[Byte]] {
+  val typeManifest = manifest[Array[Byte]]
+
+  def toBytes(v: Array[Byte]) = ByteBuffer.wrap(v)
+
+  def fromBytes(bytes: ByteBuffer) = bytes.array()
+
+  def unapply(u: AnyRef) =
+    if (u.isInstanceOf[Array[Byte]])
+      Some(u.asInstanceOf[Array[Byte]])
+    else
+      None
 }

@@ -16,6 +16,17 @@
 		<testSourceDirectory>src/test/scala</testSourceDirectory>
 		<plugins>
 			<plugin>
+       <groupId>org.apache.maven.plugins</groupId>
+       <artifactId>maven-source-plugin</artifactId>
+       <executions>
+         <execution>
+          <goals>
+          <goal>jar</goal>
+          </goals>
+          </execution>
+        </executions>
+      </plugin>
+			<plugin>
 				<groupId>org.scala-tools</groupId>
 				<artifactId>maven-scala-plugin</artifactId>
 				<executions>
@@ -108,15 +119,14 @@
 		</dependency>
     <dependency>
       <groupId>org.scalastuff</groupId>
-      <artifactId>scalabeans</artifactId>
-      <version>0.1</version>
+      <artifactId>scalabeans_2.8.1</artifactId>
+      <version>0.2</version>
     </dependency>
 		<dependency>
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
 			<version>${cassandra.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

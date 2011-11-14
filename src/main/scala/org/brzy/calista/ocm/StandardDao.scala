@@ -105,7 +105,8 @@ trait StandardDao[K, T <: AnyRef] {
   implicit def applyCrudOps(p: T): CrudOps = new CrudOps(p)
 
 	/**
-	 * This needs to be implemented for each instance to define the mapping to the cassandra datastore.
+	 * This needs to be implemented for each instance to define the mapping to the
+   * cassandra datastore.
 	 */
   def mapping: Mapping[T]
 
