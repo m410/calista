@@ -71,9 +71,9 @@ class FamilyDefinition(
     val maxCompactionThreshold: Option[Int] = None,
     val rowCacheSavePeriodInSeconds: Option[Int] = None,
     val keyCacheSavePeriodInSeconds: Option[Int] = None,
-    val memtableFlushAfterMins: Option[Int] = None,
-    val memtableThroughputInMb: Option[Int] = None,
-    val memtableOperationsInMillions: Option[Double] = None,
+//    val memtableFlushAfterMins: Option[Int] = None,
+//    val memtableThroughputInMb: Option[Int] = None,
+//    val memtableOperationsInMillions: Option[Double] = None,
     val replicateOnWrite:Option[Boolean] = None,
     val mergeShardsChance: Option[Double] = None,
     val keyValidationClass: Option[String] = None,
@@ -99,9 +99,9 @@ class FamilyDefinition(
     if (maxCompactionThreshold.isDefined) d.setMax_compaction_threshold(maxCompactionThreshold.get)
     if (rowCacheSavePeriodInSeconds.isDefined) d.setRow_cache_save_period_in_seconds(rowCacheSavePeriodInSeconds.get)
     if (keyCacheSavePeriodInSeconds.isDefined) d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds.get)
-    if (memtableFlushAfterMins.isDefined) d.setMemtable_flush_after_mins(memtableFlushAfterMins.get)
-    if (memtableThroughputInMb.isDefined) d.setMemtable_throughput_in_mb(memtableThroughputInMb.get)
-    if (memtableOperationsInMillions.isDefined) d.setMemtable_operations_in_millions(memtableOperationsInMillions.get)
+//    if (memtableFlushAfterMins.isDefined) d.setMemtable_flush_after_mins(memtableFlushAfterMins.get)
+//    if (memtableThroughputInMb.isDefined) d.setMemtable_throughput_in_mb(memtableThroughputInMb.get)
+//    if (memtableOperationsInMillions.isDefined) d.setMemtable_operations_in_millions(memtableOperationsInMillions.get)
     if (replicateOnWrite.isDefined) d.setReplicate_on_write(replicateOnWrite.get)
     if (mergeShardsChance.isDefined) d.setMerge_shards_chance(mergeShardsChance.get)
     if (keyValidationClass.isDefined) d.setKey_validation_class(keyValidationClass.get)
@@ -144,9 +144,9 @@ object FamilyDefinition {
       maxCompactionThreshold = Option(fdef.getMax_compaction_threshold),
       rowCacheSavePeriodInSeconds = Option(fdef.getRow_cache_save_period_in_seconds),
       keyCacheSavePeriodInSeconds = Option(fdef.getKey_cache_save_period_in_seconds),
-      memtableFlushAfterMins = Option(fdef.getMemtable_flush_after_mins),
-      memtableThroughputInMb = Option(fdef.getMemtable_throughput_in_mb),
-      memtableOperationsInMillions = Option(fdef.getMemtable_operations_in_millions),
+//      memtableFlushAfterMins = Option(fdef.getMemtable_flush_after_mins),
+//      memtableThroughputInMb = Option(fdef.getMemtable_throughput_in_mb),
+//      memtableOperationsInMillions = Option(fdef.getMemtable_operations_in_millions),
       mergeShardsChance = Option(fdef.getMerge_shards_chance),
       keyValidationClass = Option(fdef.getKey_validation_class),
       rowCacheProvider = Option(fdef.getRow_cache_provider),

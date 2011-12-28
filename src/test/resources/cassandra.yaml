@@ -1,8 +1,6 @@
-# Cassandra storage config YAML 
-
+# Cassandra storage config YAML version 1.0.6
 cluster_name: 'Test Cluster'
 initial_token:
-auto_bootstrap: false
 hinted_handoff_enabled: true
 max_hint_window_in_ms: 3600000 # one hour
 hinted_handoff_throttle_delay_in_ms: 50
@@ -13,7 +11,7 @@ data_file_directories:
     - target/cassandra/data
 commitlog_directory: target/cassandra/commitlog
 saved_caches_directory: target/cassandra/saved_caches
-commitlog_rotation_threshold_in_mb: 128
+#commitlog_rotation_threshold_in_mb: 128
 commitlog_sync: periodic
 commitlog_sync_period_in_ms: 10000
 seed_provider:
@@ -25,28 +23,29 @@ reduce_cache_sizes_at: 0.85
 reduce_cache_capacity_to: 0.6
 concurrent_reads: 32
 concurrent_writes: 32
-memtable_flush_writers: 1
 memtable_flush_queue_size: 4
 sliced_buffer_size_in_kb: 64
 storage_port: 7000
+ssl_storage_port: 7001
 listen_address: localhost
 rpc_address: localhost
 rpc_port: 9160
 rpc_keepalive: true
+rpc_server_type: sync
 thrift_framed_transport_size_in_mb: 15
 thrift_max_message_length_in_mb: 16
 incremental_backups: false
 snapshot_before_compaction: false
 column_index_size_in_kb: 64
 in_memory_compaction_limit_in_mb: 64
+multithreaded_compaction: false
 compaction_throughput_mb_per_sec: 16
 compaction_preheat_key_cache: true
 rpc_timeout_in_ms: 10000
 endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
-dynamic_snitch: true
 dynamic_snitch_update_interval_in_ms: 100
 dynamic_snitch_reset_interval_in_ms: 600000
-dynamic_snitch_badness_threshold: 0.0
+dynamic_snitch_badness_threshold: 0.1
 request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 index_interval: 128
 encryption_options:
