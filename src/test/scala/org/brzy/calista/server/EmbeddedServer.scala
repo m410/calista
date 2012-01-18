@@ -102,6 +102,17 @@ object EmbeddedServer {
             keyspace = "Test",
             name = "Standard",
             comparatorType = Option("UTF8Type")))
+          log.info("******************** StandardInt")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "StandardInt",
+            comparatorType = Option("LongType")))
+          log.info("******************** StandardLong")
+          session.addColumnFamily(new FamilyDefinition(
+            keyspace = "Test",
+            name = "StandardLong",
+            keyValidationClass = Option("LongType"),
+            comparatorType = Option("LongType")))
           log.info("******************** StandardFamily")
           session.addColumnFamily(new FamilyDefinition(
             keyspace = "Test",

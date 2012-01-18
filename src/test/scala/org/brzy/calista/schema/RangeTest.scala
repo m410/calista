@@ -19,6 +19,7 @@ import org.junit.Test
 import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.dsl.Conversions
+import java.util.Date
 
 
 class RangeTest extends JUnitSuite with EmbeddedTest {
@@ -41,6 +42,75 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
 //      result.rows.foreach(k=>println("##column='%s'".format(k)))
       assertNotNull(result)
       assertEquals(3,result.size)
+    }
+  }
+
+  @Test def testSliceRangeScroll() {
+    sessionManager.doWith { session =>
+      for (i <- 10 to  100) {
+        val columnName = "column-"+i
+        val valueName = "value-"+i
+        val c = ColumnFamily("Standard").standardKey("key-range1").column(columnName, valueName, new Date)
+        session.insert(c)
+      }
+    }
+    sessionManager.doWith { session =>
+      val range = ColumnFamily("Standard").standardKey("key-range1").sliceRange("","",true,32)
+      var count = 0
+      val iterator = range.iterator
+      
+      while(iterator.hasNext) {
+        val nextRow = iterator.next()
+        count = count + 1
+      }
+
+      assertEquals(91,count)
+    }
+  }
+
+  @Test def testSliceRangeScrollWithLong() {
+    sessionManager.doWith { session =>
+      for (i <- 10 to  100) {
+        val columnName = i.longValue()
+        val valueName = "value-"+i
+        val c = ColumnFamily("StandardInt").standardKey("1").column(columnName, valueName, new Date)
+        session.insert(c)
+      }
+    }
+    sessionManager.doWith { session =>
+      val range = ColumnFamily("StandardInt").standardKey("1").sliceRange(Array.empty[Byte],Array.empty[Byte],true,32)
+      var count = 0
+      val iterator = range.iterator
+
+      while(iterator.hasNext) {
+        val nextRow = iterator.next()
+        count = count + 1
+      }
+
+      assertEquals(91,count)
+    }
+  }
+
+  @Test def testSliceRangeScrollWithTwoLongs() {
+    sessionManager.doWith { session =>
+      for (i <- 10 to  100) {
+        val columnName = i.longValue()
+        val valueName = "value-"+i
+        val c = ColumnFamily("StandardLong").standardKey(1L).column(columnName, valueName, new Date)
+        session.insert(c)
+      }
+    }
+    sessionManager.doWith { session =>
+      val range = ColumnFamily("StandardLong").standardKey(1L).sliceRange(Array.empty[Byte],Array.empty[Byte],true,32)
+      var count = 0
+      val iterator = range.iterator
+
+      while(iterator.hasNext) {
+        val nextRow = iterator.next()
+        count = count + 1
+      }
+
+      assertEquals(91,count)
     }
   }
 
@@ -76,9 +146,6 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       val slice = {"Super2"||"skey1"|"scol0"}\\("a","z")
       val results = session.sliceRange(slice)
       assertNotNull(results)
-//      results.rows.foreach(r=>{
-//        println("####### " + r.keyAs[String] +"|"+ r.columnAs[String]+"|"+ r.valueAs[String])
-//      })
       assertEquals(2,results.size)
     }
 
@@ -87,7 +154,6 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       val results = session.sliceRange(slice)
       assertNotNull(results)
       results.rows.foreach(r=>{
-//        println("#### " + r.keyAs[String] +"|"+ r.superColumnAs[String]+"|"+ r.columnAs[String]+"|"+ r.valueAs[String])
         assertEquals("skey1",r.keyAs[String])
       })
       assertEquals(8,results.size)

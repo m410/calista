@@ -340,14 +340,16 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         if(partial.size > 0 && index == partial.size) {
           import results.RowType._
           val lastRow = partial.rows.last
-          val partialLast = lastRow.rowType match {
+          val partialLast:ByteBuffer = lastRow.rowType match {
             case Standard => lastRow.column
             case StandardCounter => lastRow.column
             case Super => lastRow.superColumn
             case SuperCounter => lastRow.superColumn
           }
-          val sliceLast = initSliceRange.finishBytes
+          val sliceLast:ByteBuffer = initSliceRange.finishBytes
 
+          // if doing a slice of the whole table, using empty arrays as the start and finish
+          // of the slice, then this will never be false.  the
           if(partialLast.compareTo(sliceLast) != 0) {
             partial = {
               val pStart = Serializers.fromClassBytes(manifest[T].erasure,partialLast)
@@ -366,8 +368,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
         index = index + 1
         partial.rows(index -1)
       }
-
-      def remove(){}
     }
   }
 

@@ -25,7 +25,7 @@ import collection.Iterator
  * @param start The first entry to return.
  * @param finish The last entry to return.
  * @param reverse Reverse the order, default to false.
- * @param count The max number of results, defaults to 100.
+ * @param max The max number of results
  * @param key The key parent to the columns that are being sliced.
  *
  * @author Michael Fortin
