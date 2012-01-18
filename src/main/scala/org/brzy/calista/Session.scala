@@ -208,7 +208,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     }
     catch {
       case e: NotFoundException =>
-        log.warn("NotFoundException caught, None returned")
+        log.warn("NotFoundException caught, None returned for column: {}",column)
         Option(null)
     }
   }
@@ -353,6 +353,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
               val pStart = Serializers.fromClassBytes(manifest[T].erasure,partialLast)
               val pFin = Serializers.fromClassBytes(manifest[T].erasure,sliceLast)
               val sliceCopy = initSliceRange.copy(start = pStart, finish = pFin)
+              log.debug("partial sliceCopy: {}",sliceCopy)
               sliceRange(sliceCopy)
             }
             index = 1 // skip the first, because the slice is inclusive
