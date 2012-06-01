@@ -61,7 +61,6 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     val c = new Cassandra.Client(protocol, protocol)
     sock.open()
     c.set_keyspace(ksDef.name)
-    openSock = true
     c
   }
 
@@ -172,6 +171,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   def close() {
     if (openSock)
       sock.close()
+    openSock = false
   }
 
 	/**
@@ -412,7 +412,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
 
 
   def addKeyspace(ks:KeyspaceDefinition){
-    log.info("add keyspace: " + ks)
+    log.info("add keyspace: {}", ks)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
     sock.open()
@@ -421,7 +421,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   def updateKeyspace(keyspace:KeyspaceDefinition){
-    log.info("update keyspace: " + keyspace)
+    log.info("update keyspace: {}", keyspace)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
     client.system_update_keyspace(keyspace.toKsDef)
@@ -429,7 +429,7 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   def dropKeyspace(keyspace:String){
-    log.info("drop keyspace: " + keyspace)
+    log.info("drop keyspace: {}", keyspace)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
     client.system_drop_keyspace(keyspace)
@@ -437,16 +437,16 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
   }
 
   def addColumnFamily(family:FamilyDefinition){
-    log.info("add columnFamily: " + family)
+    log.info("add columnFamily: {}", family)
     client.system_add_column_family(family.asCfDef)
   }
   def updateColumnFamily(family:FamilyDefinition){
-    log.info("update columnFamily: " + family)
+    log.info("update columnFamily: {}", family)
     client.system_update_column_family(family.asCfDef)
   }
 
   def dropColumnFamily(family:String){
-    log.info("drop columnFamily: " + family)
+    log.info("drop columnFamily: {}", family)
     client.system_drop_column_family(family)
   }
 

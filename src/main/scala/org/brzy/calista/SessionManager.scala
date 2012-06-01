@@ -38,7 +38,7 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
   /**
    * the host and port for where this session manager connects.
    */
-  val host = Host(url, port, 2500)
+  val host = Host(url, port, 0)
 
   /**
    * Outputs the keyspace definition.  This will output the keyspace, families and their attributes.
