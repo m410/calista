@@ -74,6 +74,11 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     case _ => error("Unknown Level")
   }
 
+  def closeAndMakeNewSession = {
+    close()
+    new Session(host,ksDef,defaultConsistency)
+  }
+
   private[this] implicit def toColumnPath(c: ColumnPath) = {
     if (c.superColumn != null)
       new CassandraColumnPath(c.family).setSuper_column(c.superColumn).setColumn(c.column)
