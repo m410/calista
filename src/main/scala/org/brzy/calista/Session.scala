@@ -122,6 +122,15 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     if (cos == null) {
       List.empty[Row]
     }
+    else if (cos.getSuper_column != null ) {
+      val rType = RowType.Super
+      val superColumnName = ByteBuffer.wrap(cos.getSuper_column.getName)
+      cos.getSuper_column.getColumns.map(c=>{
+        val name = ByteBuffer.wrap(c.getName)
+        val value = ByteBuffer.wrap(c.getValue)
+        new Row(rType, familyName, key, superColumnName, name, value, new Date(c.getTimestamp))
+      }).toList
+		}
     else if (cos.getColumn != null) {
       val name = ByteBuffer.wrap(cos.getColumn.getName)
       val value = ByteBuffer.wrap(cos.getColumn.getValue)
@@ -129,13 +138,14 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       val rowType = RowType.Standard
       List(new Row(rowType, familyName, key, null, name, value, timestamp))
     }
-    else if (cos.getSuper_column != null ) {
-      val rType = RowType.Super
-      val superColumnName = ByteBuffer.wrap(cos.getSuper_column.getName)
-      cos.getSuper_column.getColumns.map(c=>{
+    else if (cos.getCounter_super_column != null) {
+      val rType = RowType.SuperCounter
+			val sCol = cos.getCounter_super_column
+      val sColName = ByteBuffer.wrap(sCol.getName)
+      sCol.getColumns.map(c=>{
         val name = ByteBuffer.wrap(c.getName)
-        val value = ByteBuffer.wrap(c.getValue)
-        new Row(rType,familyName,key,superColumnName, name, value, new Date(c.getTimestamp))
+        val value = Serializers.toBytes(c.getValue)
+        new Row(rType, familyName, key, sColName, name, value, null)
       }).toList
 		}
     else if (cos.getCounter_column != null) {
@@ -145,18 +155,8 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
       val rowType = RowType.StandardCounter
       List(new  Row(rowType, familyName, key, null, name, value, timestamp))
     }
-    else if (cos.getCounter_super_column != null) {
-      val rType = RowType.SuperCounter
-			val sCol = cos.getCounter_super_column
-      val sColName = ByteBuffer.wrap(sCol.getName)
-      sCol.getColumns.map(c=>{
-        val name = ByteBuffer.wrap(c.getName)
-        val value = Serializers.toBytes(c.getValue)
-        new Row(rType,familyName,key,sColName, name, value, null)
-      }).toList
-		}
     else {
-      error("Unknown column return type: '"+cos+"'" )
+      throw new RuntimeException("Unknown column return type: '"+cos+"'" )
     }
   }
 
