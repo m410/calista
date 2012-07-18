@@ -31,6 +31,29 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
    */
   def nameBytes = Serializers.toBytes(name)
 
+  def asColumn = Column(name,null,null, parent)
+
+  /**
+   * Used by the Session object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
+  def columnPath = {
+    val superCol = parent match {
+      case s: SuperColumn[_] => s.keyBytes
+      case _ => null
+    }
+    ColumnPath(parent.family.name, superCol, nameBytes)
+  }
+
+  /**
+   * Used by the Session object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
+  def columnParent: ColumnParent = parent match {
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+  }
+
   /**
    * Set the value of the column and insert it immediately.
    */
@@ -42,30 +65,14 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
   def <<[V:Manifest](value:V) {
     set(value)
   }
-  
-  def asColumn = Column(name,null,null, parent)
+
 
   /**
-	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
-	 * directly.
-	 */
-  def columnPath = {
-    val superCol = parent match {
-      case s: SuperColumn[_] => s.keyBytes
-      case _ => null
-    }
-    ColumnPath(parent.family.name, superCol, nameBytes)
-  }
-
-	/**
-	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
-	 * directly.
-	 */
-  def columnParent: ColumnParent = parent match {
-    case s: StandardKey[_] => ColumnParent(s.family.name, null)
-    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
-  }
-
+   * Get the value of the column
+   *
+   * @tparam V The expected type of the column value
+   * @return Optional value, if the column by that name exists, it returns Some(V) otherwise none.
+   */
   def valueAs[V: Manifest] = {
     val session = Calista.value
     val optionRow = session.get(Column(name,null,new Date(),parent))
@@ -74,4 +81,40 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
       case _ => None
     }
   }
+
+  /**
+   * Get the value of the column
+   *
+   * @tparam V The expected type of the column value
+   * @return Optional value, if the column by that name exists, it returns Some(V) otherwise none.
+   */
+  def getAs[V: Manifest] = {
+    val session = Calista.value
+    val optionRow = session.get(Column(name,null,new Date(),parent))
+    optionRow match {
+      case Some(row) => Option(row.valueAs[V])
+      case _ => None
+    }
+  }
+
+  /**
+   * Removed the column by this name.
+   *
+   * @return false if the row does not exist, and true if
+   * it's removed successfully.
+   */
+  def remove:Boolean = {
+    val session = Calista.value
+    val optionRow = session.get(Column(name,null,new Date(),parent))
+
+    optionRow match {
+      case Some(row) =>
+        session.remove(this)
+        true
+      case _ =>
+        false
+    }
+  }
+
+
 }

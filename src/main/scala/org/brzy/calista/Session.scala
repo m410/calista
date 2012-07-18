@@ -233,8 +233,21 @@ class Session(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency:
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
+  /**
+   * Remove a counter column and it's value.
+   */
+  def remove(column: CounterColumnName[_]) {
+    remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
+  }
 
-	/**
+  /**
+   * Remove a counter column and it's value.
+   */
+  def remove(column: SuperColumn[_]) {
+    remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
+  }
+
+  /**
 	 * Remove a column and it's value.
    */
   def remove(column: Column[_, _]) {
