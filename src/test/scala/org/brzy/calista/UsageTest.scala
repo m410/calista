@@ -20,10 +20,18 @@ import results.{ResultSet, Row}
 import schema._
 import server.EmbeddedTest
 import dsl.Conversions._
-import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
 
 
 class UsageTest extends JUnitSuite with EmbeddedTest {
+
+  @Test def testColumnFamilyStandardCol() {
+    sessionManager.doWith { session =>
+      import dsl.Cassandra._
+      val stdColName = columnName("StandardFamily")("key")("column")
+      assertNotNull(stdColName)
+      assertTrue(stdColName.isInstanceOf[ColumnName[_]])
+    }
+  }
 
   @Test def testStandardCol() {
     sessionManager.doWith { session =>
