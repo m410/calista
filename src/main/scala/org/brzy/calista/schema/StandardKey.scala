@@ -77,4 +77,8 @@ case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily
       true
     }
   }
+
+  // TODO Add these to standard Key, super key and super column
+//  def map
+//  def foreach
 }
