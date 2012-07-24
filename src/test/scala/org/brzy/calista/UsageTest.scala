@@ -29,6 +29,14 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
       val stdColName = dsl.Column("StandardFamily")("key")("column")
       assertNotNull(stdColName)
       assertTrue(stdColName.isInstanceOf[ColumnName[_]])
+
+      dsl.Column("StandardFamily")("key")("column").set("somevalue")
+      val values = dsl.Column.key("StandardFamily")("key").map(_.valueAs[String])
+      assert(values != null)
+//      println("########### values size="+values.size)
+      assert(values.size == 1)
+
+      dsl.Column.key("StandardFamily")("key").foreach(r=>println(r.valueAs[String]))
     }
   }
 
