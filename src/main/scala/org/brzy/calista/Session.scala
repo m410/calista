@@ -28,6 +28,8 @@ trait Session {
    */
   def close()
 
+  def closeAndMakeNewSession:Session
+
   /**
    * get the value of the column.  This assumes the input column does not have a value, this will
    * return a results.Column with the name and value
