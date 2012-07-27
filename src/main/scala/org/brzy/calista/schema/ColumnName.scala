@@ -34,7 +34,7 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
   def asColumn = Column(name,null,null, parent)
 
   /**
-   * Used by the Session object for querying.  Uses of the column class should not have to use this method
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
    * directly.
    */
   def columnPath = {
@@ -46,7 +46,7 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
   }
 
   /**
-   * Used by the Session object for querying.  Uses of the column class should not have to use this method
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
    * directly.
    */
   def columnParent: ColumnParent = parent match {

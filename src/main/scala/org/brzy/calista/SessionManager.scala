@@ -22,7 +22,7 @@ import system.{FamilyDefinition, KeyspaceDefinition}
 import org.slf4j.LoggerFactory
 
 /**
- * Session Manager works in a similar fashion as the Entity Manager Factory  in JPA.  It's 
+ * SessionImpl Manager works in a similar fashion as the Entity Manager Factory  in JPA.  It's
  * partially responsible for the session life cycle.  It it also can provide basic information
  * about the datastore it's configured to connect too.
  *
@@ -105,7 +105,7 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
    * This is used for testing or development to create a keyspace.
    */
   def loadKeyspace(keyspace: KeyspaceDefinition) {
-    val session = new Session(host, null)
+    val session = new SessionImpl(host, null)
     try {
       session.describeKeyspace(keyspace.name)
       session.updateKeyspace(keyspace)
@@ -129,9 +129,9 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
    * host.  Using this factory method required you to manage the life cycle your self. I will lazyly
    * open a connect to cassandra but it will not close it.
    *
-   * @see Session
+   * @see SessionImpl
    */
-  def createSession = new Session(host, keyspaceDefinition)
+  def createSession:Session = new SessionImpl(host, keyspaceDefinition)
 
   /**
    * Manaages the life cycle of a session automatically.
