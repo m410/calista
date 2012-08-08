@@ -27,20 +27,36 @@ class RemoveTest extends JUnitSuite with EmbeddedTest {
     sessionManager.doWith { session =>
       val key = "Standard" | "remover"
         session.insert(key | ("column5", "value0"))
+
+      val key2 = "Standard" | "remover2"
+      session.insert(key2 | ("column5", "value0"))
     }
 
     sessionManager.doWith { session =>
       val key = "Standard" | "remover"
-        val stdKey = key | "column5"
-        session.remove(stdKey.asInstanceOf[ColumnName[String]])
+      val columnName = key | "column5"
+      session.remove(columnName)
+    }
+
+    sessionManager.doWith { session =>
+      val key = "Standard" | "remover2"
+      val columnName = key | "column5"
+      assert(columnName.remove)
     }
 
     sessionManager.doWith { session =>
       val key = "Standard" | "remover"
       val stdKey = key | "column5"
-      val result = session.list(stdKey.asInstanceOf[ColumnName[String]])
+      val result = session.list(stdKey)
       assertNotNull(result)
       assertTrue(result.isEmpty)
+
+
+      val key2 = "Standard" | "remover2"
+      val stdKey2 = key2 | "column5"
+      val result2 = session.list(stdKey2)
+      assertNotNull(result2)
+      assertTrue(result2.isEmpty)
     }
   }
 }

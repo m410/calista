@@ -15,6 +15,7 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.Calista
+import org.brzy.calista.serializer.Serializers
 
 /**
  * This represents the counter column when querying cassandra
@@ -23,6 +24,33 @@ import org.brzy.calista.Calista
  */
 case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) {
 
+  /**
+   * Return the name converted to bytes.
+   */
+  def nameBytes = Serializers.toBytes(name)
+
+  def asColumn = Column(name,null,null, parent)
+
+  /**
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
+  def columnPath = {
+    val superCol = parent match {
+      case s: SuperColumn[_] => s.keyBytes
+      case _ => null
+    }
+    ColumnPath(parent.family.name, superCol, nameBytes)
+  }
+
+  /**
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
+  def columnParent: ColumnParent = parent match {
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+  }
 
   def -=(amount: Long) {
     add(-amount)
@@ -42,6 +70,19 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
     session.get(Column(name,null,new Date(),parent)) match {
       case Some(c) => c.valueAs[Long]
       case _ => throw new NoColumnException("No column for name: " + name)
+    }
+  }
+
+  def remove:Boolean = {
+    val session = Calista.value
+    val optionRow = session.get(Column(name,null,new Date(),parent))
+
+    optionRow match {
+      case Some(row) =>
+        session.remove(this)
+        true
+      case _ =>
+        false
     }
   }
 }

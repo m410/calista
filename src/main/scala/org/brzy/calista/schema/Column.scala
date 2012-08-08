@@ -43,7 +43,7 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
   def valueBytes = Serializers.toBytes(value) // TODO This doesn't allow for custom serializers
 
 	/**
-	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
+	 * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
 	 * directly.
 	 */
   def columnPath = {
@@ -55,7 +55,7 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
   }
 
 	/**
-	 * Used by the Session object for querying.  Uses of the column class should not have to use this method
+	 * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
 	 * directly.
 	 */
   def columnParent: ColumnParent = parent match {

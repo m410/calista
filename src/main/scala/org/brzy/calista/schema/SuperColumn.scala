@@ -16,6 +16,8 @@ package org.brzy.calista.schema
 import java.util.Date
 import org.brzy.calista.serializer.Serializers
 import org.brzy.calista.system.FamilyDefinition
+import org.brzy.calista.Calista
+import org.brzy.calista.results.Row
 
 /**
  * A super column in a cassandra datastore.
@@ -59,4 +61,41 @@ case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[
 
   def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) = SliceRange(start,end, reverse, count,this)
 
+  /**
+   * Removed the super column by this name.
+   *
+   * @return false if the row does not exist, and true if
+   * it's removed successfully.
+   */
+  def remove:Boolean = {
+    val session = Calista.value
+    val results = session.sliceRange(this.sliceRange("","",false,2))
+
+    if (results.isEmpty)
+      false
+    else {
+      session.remove(this)
+      true
+    }
+  }
+
+  def map[B](f:Row => B):Seq[B] = {
+    var seq = collection.mutable.Seq.empty[B]
+    val predicate = SliceRange("","",false, 100, this)
+    val iterator  = predicate.iterator
+
+    while(iterator.hasNext)
+      seq :+ f(iterator.next())
+
+    seq.toSeq
+  }
+
+  def foreach(f:Row =>Unit) {
+    val predicate = SliceRange("","",false, 100, this)
+    val iterator  = predicate.iterator
+
+    while(iterator.hasNext)
+      f(iterator.next())
+
+  }
 }

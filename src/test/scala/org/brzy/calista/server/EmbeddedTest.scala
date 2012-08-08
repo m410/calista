@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.server
 
-import org.brzy.calista.{SessionManager, Session}
+import org.brzy.calista.{Session, SessionManager, SessionImpl}
 
 /**
  * Used to connect to the embedded server in unit tests.

@@ -25,8 +25,8 @@ import org.brzy.calista.schema.{SuperKey, ColumnFamily, StandardKey, Column => S
  * Defines the object to column mapping.
  *
  * @tparam T The type of the object to map to the datastore.
- * @param columnSerializer What serializer to use to read and write the column names.
- * @param overrideFamily Sets the family name is its something other than the name of the class.
+ * @param columnNameSerializer What serializer to use to read and write the column names.
+ * @param family Sets the family name is its something other than the name of the class.
  * @param attributes The fields of the object, mapped to column values.
  *
  * @author Michael Fortin
@@ -73,7 +73,16 @@ case class Mapping[T <: AnyRef : Manifest](
       builder.set(prop, value)
     })
 
-    builder.result().asInstanceOf[T]
+
+    try {
+      builder.result().asInstanceOf[T]
+    }
+    catch {
+      case i:IllegalArgumentException =>
+        val classType = manifest[T].erasure
+        throw new BuilderInstanceException("Could not create instance of " + classType.getName +
+                " with parameters: " + builder.constructorParams.mkString,i)
+    }
   }
 
 	/**

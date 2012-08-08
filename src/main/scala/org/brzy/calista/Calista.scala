@@ -16,7 +16,7 @@ package org.brzy.calista
 import util.DynamicVariable
 
 /**
- * A Thread Local variable used to access the Session instance.  
+ * A Thread Local variable used to access the SessionImpl instance.
  * 
  * @author Michael Fortin
  */

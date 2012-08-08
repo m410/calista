@@ -17,6 +17,7 @@ import java.nio.ByteBuffer
 import org.brzy.calista.serializer.Serializers
 import java.util.Date
 import RowType._
+import org.apache.commons.lang.builder.ToStringBuilder
 
 /**
  * A single row in the data store.
@@ -64,4 +65,6 @@ class Row(
 
   protected[this] def as[T:Manifest](b:ByteBuffer):T =
       Serializers.fromClassBytes(manifest[T].erasure, b).asInstanceOf[T]
+
+  override def toString = new ToStringBuilder(this).append("rowType",rowType.name).toString
 }

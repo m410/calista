@@ -3,7 +3,7 @@
    <modelVersion>4.0.0</modelVersion>
    <groupId>org.brzy</groupId>
    <artifactId>calista</artifactId>
-   <version>0.5.3</version>
+   <version>0.6.0</version>
    <inceptionYear>2011</inceptionYear>
    <properties>
     <!-- works with 2.9, just need to change error to sys.error -->
@@ -136,7 +136,7 @@
       <dependency>
          <groupId>org.scalatest</groupId>
          <artifactId>scalatest_2.8.1</artifactId>
-         <version>1.5.1</version>
+         <version>1.7.2</version>
          <scope>test</scope>
       </dependency>
       <dependency>

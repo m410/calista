@@ -20,10 +20,25 @@ import results.{ResultSet, Row}
 import schema._
 import server.EmbeddedTest
 import dsl.Conversions._
-import com.sun.xml.internal.ws.developer.MemberSubmissionAddressing.Validation
 
 
 class UsageTest extends JUnitSuite with EmbeddedTest {
+
+  @Test def testColumnFamilyStandardCol() {
+    sessionManager.doWith { session =>
+      val stdColName = dsl.Column("StandardFamily")("key")("column")
+      assertNotNull(stdColName)
+      assertTrue(stdColName.isInstanceOf[ColumnName[_]])
+
+      dsl.Column("StandardFamily")("key")("column").set("somevalue")
+      val values = dsl.Column.key("StandardFamily")("key").map(_.valueAs[String])
+      assert(values != null)
+//      println("########### values size="+values.size)
+      assert(values.size == 1)
+
+      dsl.Column.key("StandardFamily")("key").foreach(r=>println(r.valueAs[String]))
+    }
+  }
 
   @Test def testStandardCol() {
     sessionManager.doWith { session =>
