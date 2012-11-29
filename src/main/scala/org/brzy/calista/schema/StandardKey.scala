@@ -77,7 +77,10 @@ case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily
     if (results.isEmpty)
       false
     else {
-      session.remove(this)
+      if (family.familyDef.columnType == "CounterColumnType")
+        session.removeCounter(this)
+      else
+        session.remove(this)
       true
     }
   }
@@ -102,4 +105,6 @@ case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily
       f(iterator.next())
 
   }
+
+  override def toString = "StandardKey(key="+key+",family="+family+")"
 }

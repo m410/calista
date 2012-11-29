@@ -85,9 +85,10 @@ trait StandardDao[K, T <: AnyRef] {
 		/**
 		 * insert the entity
 		 */
-    def insert() {
+    def insert() = {
       val columns = mapping.toColumns(p)
       columns.foreach(c => session.insert(c))
+      p
     }
 
 		/**

@@ -88,4 +88,7 @@ case class SuperKey[T: Manifest] protected[schema](key: T, family: ColumnFamily,
       f(iterator.next())
 
   }
+
+  override def toString = "SuperKey(key="+key+",family="+family+")"
+
 }

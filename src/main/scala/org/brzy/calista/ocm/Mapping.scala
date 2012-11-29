@@ -44,19 +44,27 @@ case class Mapping[T <: AnyRef : Manifest](
     val colMap = columns.rows.map(r=>{
       columnNameSerializer.fromBytes(r.column) -> r
     }).toMap
-    log.debug("columns:"+colMap.map(_._1).mkString("[",",","]"))
+
+    log.debug("column names: {}", colMap.map(_._1).mkString("[",", ","]"))
+
     val descriptor = descriptorOf[T]
     val builder = descriptor.newBuilder()
     val attributeKey = attributes.find(_.isInstanceOf[Key]).get
     val keyProperty = descriptor.properties.find(_.name == attributeKey.name).get
-    log.debug("key:"+keyProperty+":"+key)
+
+    if(log.isDebugEnabled)
+      log.debug("key: " + keyProperty + "='" + key + "'")
+
     builder.set(keyProperty, key)
 
     superColumn match {
       case Some(sc) =>
         val attributeSuCol = attributes.find(_.isInstanceOf[SuperColumn]).get
         val scProperty = descriptor.properties.find(_.name == attributeSuCol.name).get
-        log.debug("super:"+scProperty+":"+sc)
+
+        if(log.isDebugEnabled)
+          log.debug("super: " + scProperty + "='" + sc + "'")
+
         builder.set(scProperty, sc)
       case _ =>
     }
@@ -69,7 +77,9 @@ case class Mapping[T <: AnyRef : Manifest](
         case _ => null
       }
 
-      log.debug("column:"+prop+":"+value)
+      if(log.isDebugEnabled)
+        log.debug("column: " + prop + "='" + value + "'")
+
       builder.set(prop, value)
     })
 
@@ -79,9 +89,10 @@ case class Mapping[T <: AnyRef : Manifest](
     }
     catch {
       case i:IllegalArgumentException =>
-        val classType = manifest[T].erasure
-        throw new BuilderInstanceException("Could not create instance of " + classType.getName +
-                " with parameters: " + builder.constructorParams.mkString,i)
+        throw new BuilderInstanceException("Could not create instance of " +
+                manifest[T].erasure.getName +
+                " with parameters: " +
+                builder.constructorParams.mkString, i)
     }
   }
 

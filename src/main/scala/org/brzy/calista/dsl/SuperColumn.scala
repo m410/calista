@@ -34,7 +34,7 @@ object SuperColumn {
    * @tparam N the type of the name of the column
    * @return a Super Column with name only for a the column family
    */
-  def apply[K:Manifest,S:Manifest,N:Manifest](name:String)(key:K, superKey:S)(columnName:N) = {
+  def apply[K:Manifest,S:Manifest,N:Manifest](name:String)(key:K)(superKey:S, columnName:N) = {
     new ColumnFamily(name).superKey(key).superColumn(superKey).column(columnName)
   }
 
@@ -59,7 +59,7 @@ object SuperColumn {
    * @tparam S the type of the super column name
    * @return a Super Column
    */
-  def superCol[K:Manifest,S:Manifest](name:String)(key:K, superKey:S) = {
+  def superCol[K:Manifest,S:Manifest](name:String)(key:K)(superKey:S) = {
     new ColumnFamily(name).superKey(key).superColumn(superKey)
   }
 }
