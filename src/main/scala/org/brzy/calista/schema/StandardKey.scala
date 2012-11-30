@@ -77,9 +77,9 @@ case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily
     if (results.isEmpty)
       false
     else {
-      if (family.familyDef.columnType == "CounterColumnType")
-        session.removeCounter(this)
-      else
+//      if (family.familyDef.columnType == "CounterColumnType")
+//        session.removeCounter(this)
+//      else
         session.remove(this)
       true
     }
