@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.schema.{ColumnFamily}
+import org.brzy.calista.schema.{StandardColumnFamily, ColumnFamily}
 import org.brzy.calista.Calista
 
 /**
@@ -39,8 +39,7 @@ trait StandardDao[K, T <: AnyRef] {
 	 * Get an instance of the mapped class by it's key.
 	 */
 	def apply(key: K)(implicit t: Manifest[K]): T = {
-    val query = ColumnFamily(mapping.family).standardKey(key)
-    val columns = session.list(query)
+    val columns = StandardColumnFamily(mapping.family)(key).list
     mapping.newInstance(key,None,columns)
 	}
 
@@ -48,8 +47,7 @@ trait StandardDao[K, T <: AnyRef] {
 	 * Optionally get an instance of the mapped class by it's key.
 	 */
   def get(key: K)(implicit t: Manifest[K]): Option[T] = {
-    val query = ColumnFamily(mapping.family).standardKey(key)
-    val columns = session.list(query)
+    val columns = StandardColumnFamily(mapping.family)(key).list
 
     if (columns.size > 0)
       Option(mapping.newInstance(key, None, columns))

@@ -88,8 +88,8 @@ class FamilyDefinition(
     if (comparatorType.isDefined) d.setComparator_type(comparatorType.get)
     if (subcomparatorType.isDefined) d.setSubcomparator_type(subcomparatorType.get)
     if (comment.isDefined) d.setComment(comment.get)
-    if (rowCacheSize.isDefined) d.setRow_cache_size(rowCacheSize.get)
-    if (keyCacheSize.isDefined) d.setKey_cache_size(keyCacheSize.get)
+//    if (rowCacheSize.isDefined) d.setRow_cache_size(rowCacheSize.get)
+//    if (keyCacheSize.isDefined) d.setKey_cache_size(keyCacheSize.get)
     if (readRepairChance.isDefined) d.setRead_repair_chance(readRepairChance.get)
     if (columnMetadata.isDefined) d.setColumn_metadata(columnMetadata.get.map(_.asColumnDef))
     if (gcGraceSeconds.isDefined) d.setGc_grace_seconds(gcGraceSeconds.get)
@@ -97,15 +97,15 @@ class FamilyDefinition(
     if (id.isDefined) d.setId(id.get)
     if (minCompactionThreshold.isDefined) d.setMin_compaction_threshold(minCompactionThreshold.get)
     if (maxCompactionThreshold.isDefined) d.setMax_compaction_threshold(maxCompactionThreshold.get)
-    if (rowCacheSavePeriodInSeconds.isDefined) d.setRow_cache_save_period_in_seconds(rowCacheSavePeriodInSeconds.get)
-    if (keyCacheSavePeriodInSeconds.isDefined) d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds.get)
+//    if (rowCacheSavePeriodInSeconds.isDefined) d.setRow_cache_save_period_in_seconds(rowCacheSavePeriodInSeconds.get)
+//    if (keyCacheSavePeriodInSeconds.isDefined) d.setKey_cache_save_period_in_seconds(keyCacheSavePeriodInSeconds.get)
 //    if (memtableFlushAfterMins.isDefined) d.setMemtable_flush_after_mins(memtableFlushAfterMins.get)
 //    if (memtableThroughputInMb.isDefined) d.setMemtable_throughput_in_mb(memtableThroughputInMb.get)
 //    if (memtableOperationsInMillions.isDefined) d.setMemtable_operations_in_millions(memtableOperationsInMillions.get)
     if (replicateOnWrite.isDefined) d.setReplicate_on_write(replicateOnWrite.get)
-    if (mergeShardsChance.isDefined) d.setMerge_shards_chance(mergeShardsChance.get)
+//    if (mergeShardsChance.isDefined) d.setMerge_shards_chance(mergeShardsChance.get)
     if (keyValidationClass.isDefined) d.setKey_validation_class(keyValidationClass.get)
-    if (rowCacheProvider.isDefined) d.setRow_cache_provider(rowCacheProvider.get)
+//    if (rowCacheProvider.isDefined) d.setRow_cache_provider(rowCacheProvider.get)
     if (keyAlias.isDefined) d.setKey_alias(keyAlias.get)
     d
   }
@@ -133,8 +133,8 @@ object FamilyDefinition {
       comparatorType = Option(fdef.getComparator_type),
       subcomparatorType = Option(fdef.getSubcomparator_type),
       comment = Option(fdef.getComment),
-      rowCacheSize = Option(fdef.getRow_cache_size),
-      keyCacheSize = Option(fdef.getKey_cache_size),
+//      rowCacheSize = Option(fdef.getRow_cache_size),
+//      keyCacheSize = Option(fdef.getKey_cache_size),
       readRepairChance = Option(fdef.getRead_repair_chance),
       columnMetadata = Option(fdef.getColumn_metadata.map(c=>ColumnDefinition(c)).toList),
       gcGraceSeconds = Option(fdef.getGc_grace_seconds),
@@ -142,14 +142,14 @@ object FamilyDefinition {
       id = Option(fdef.getId),
       minCompactionThreshold = Option(fdef.getMin_compaction_threshold),
       maxCompactionThreshold = Option(fdef.getMax_compaction_threshold),
-      rowCacheSavePeriodInSeconds = Option(fdef.getRow_cache_save_period_in_seconds),
-      keyCacheSavePeriodInSeconds = Option(fdef.getKey_cache_save_period_in_seconds),
+//      rowCacheSavePeriodInSeconds = Option(fdef.getRow_cache_save_period_in_seconds),
+//      keyCacheSavePeriodInSeconds = Option(fdef.getKey_cache_save_period_in_seconds),
 //      memtableFlushAfterMins = Option(fdef.getMemtable_flush_after_mins),
 //      memtableThroughputInMb = Option(fdef.getMemtable_throughput_in_mb),
 //      memtableOperationsInMillions = Option(fdef.getMemtable_operations_in_millions),
-      mergeShardsChance = Option(fdef.getMerge_shards_chance),
+//      mergeShardsChance = Option(fdef.getMerge_shards_chance),
       keyValidationClass = Option(fdef.getKey_validation_class),
-      rowCacheProvider = Option(fdef.getRow_cache_provider),
+//      rowCacheProvider = Option(fdef.getRow_cache_provider),
       keyAlias = Option(fdef.getKey_alias))
   }
 }

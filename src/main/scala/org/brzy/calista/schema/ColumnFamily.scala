@@ -18,44 +18,14 @@ import org.brzy.calista.Calista
  * Represents a column family to query in the database.  This is the entry point to DSL access
  * to the datastore.
  *
- * @param name the name of the column family.
  * @author Michael Fortin
  */
-case class ColumnFamily(name: String) {
+trait ColumnFamily {
 
-  def |[T:Manifest](k: T) = standardKey(k)
+  def name:String
 
-  def ||[T:Manifest](k: T) = superKey(k)
 
-//  /**
-//   * Non DSL access to the key under the column family.  This will return either a standard key
-//   * or a super key.  The type of key is discovered by the meta data on the datastore.
-//   *
-//   * @returns
-//   * @throws UnknownFamilyException if the family name does not exist in the data store.
-//   */
-//  def key[T:Manifest](key: T):Either[StandardKey[T],SuperKey[T]] = {
-//    val family = Calista.value.ksDef.families.find(_.name == name) match {
-//      case Some(f) => f
-//      case _ => throw new UnknownFamilyException("No ColumnFamily with name: '" + name +"'")
-//    }
-//
-//    if (family.columnType == "Standard")
-//      Left(StandardKey(key, this, family)) // pass along the column family definition
-//    else if (family.columnType == "Counter")
-//      Left(StandardKey(key, this, family))
-//    else
-//      Right(SuperKey(key,this, family))
-//  }
-
-  def superKey[T:Manifest](key: T):SuperKey[T] = SuperKey(key,this, familyDef)
-
-  def standardKey[T:Manifest](key: T):StandardKey[T] = StandardKey(key,this, familyDef)
-
-  def keyRange[T,C:Manifest](start: T, end: T, columns:List[C], count: Int = 100) =
-			KeyRange(start, end, SlicePredicate(columns.toArray, null), this, count)
-
-  protected[schema] def familyDef = try {
+  def definition = try {
     Calista.value.ksDef.families.find(_.name == name) match {
       case Some(f) => f
       case _ => throw new UnknownFamilyException("No ColumnFamily with name: " + name)
@@ -64,4 +34,50 @@ case class ColumnFamily(name: String) {
   catch {
     case n:NullPointerException => throw new SessionScopeException("Out of session scope",n)
   }
+
+  override def toString = "ColumnFamily("+name+")"
+
+
+  //
+//  def |[T:Manifest](k: T) = standardKey(k)
+//
+//  def ||[T:Manifest](k: T) = superKey(k)
+//
+////  /**
+////   * Non DSL access to the key under the column family.  This will return either a standard key
+////   * or a super key.  The type of key is discovered by the meta data on the datastore.
+////   *
+////   * @returns
+////   * @throws UnknownFamilyException if the family name does not exist in the data store.
+////   */
+////  def key[T:Manifest](key: T):Either[StandardKey[T],SuperKey[T]] = {
+////    val family = Calista.value.ksDef.families.find(_.name == name) match {
+////      case Some(f) => f
+////      case _ => throw new UnknownFamilyException("No ColumnFamily with name: '" + name +"'")
+////    }
+////
+////    if (family.columnType == "Standard")
+////      Left(StandardKey(key, this, family)) // pass along the column family definition
+////    else if (family.columnType == "Counter")
+////      Left(StandardKey(key, this, family))
+////    else
+////      Right(SuperKey(key,this, family))
+////  }
+//
+//  def superKey[T:Manifest](key: T):SuperKey[T] = SuperKey(key,this, familyDef)
+//
+//  def standardKey[T:Manifest](key: T):StandardKey[T] = StandardKey(key,this, familyDef)
+//
+//  def keyRange[T,C:Manifest](start: T, end: T, columns:List[C], count: Int = 100) =
+//			KeyRange(start, end, SlicePredicate(columns.toArray, null), this, count)
+//
+//  protected[schema] def familyDef = try {
+//    Calista.value.ksDef.families.find(_.name == name) match {
+//      case Some(f) => f
+//      case _ => throw new UnknownFamilyException("No ColumnFamily with name: " + name)
+//    }
+//  }
+//  catch {
+//    case n:NullPointerException => throw new SessionScopeException("Out of session scope",n)
+//  }
 }

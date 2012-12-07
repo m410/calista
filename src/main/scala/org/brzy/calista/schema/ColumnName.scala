@@ -24,7 +24,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
+class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
 
   /**
    * Return the name converted to bytes.
@@ -57,28 +57,15 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
   /**
    * Set the value of the column and insert it immediately.
    */
-  def set[V:Manifest](value:V) {
+  def set[V<:Any:Manifest](value:V) {
     val session = Calista.value
     session.insert(Column(name,value,new Date(),parent))
   }
 
-  def <<[V:Manifest](value:V) {
-    set(value)
-  }
-
-
-  /**
-   * Get the value of the column
-   *
-   * @tparam V The expected type of the column value
-   * @return Optional value, if the column by that name exists, it returns Some(V) otherwise none.
-   */
-  def valueAs[V: Manifest] = {
-    val session = Calista.value
-    val optionRow = session.get(Column(name,null,new Date(),parent))
-    optionRow match {
-      case Some(row) => Option(row.valueAs[V])
-      case _ => None
+  def columnExists:Boolean = {
+    Calista.value.get(Column(name, null, new Date(), parent)) match {
+      case Some(row) => true
+      case _ => false
     }
   }
 
@@ -88,10 +75,8 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
    * @tparam V The expected type of the column value
    * @return Optional value, if the column by that name exists, it returns Some(V) otherwise none.
    */
-  def getAs[V: Manifest] = {
-    val session = Calista.value
-    val optionRow = session.get(Column(name,null,new Date(),parent))
-    optionRow match {
+  def getAs[V<:Any: Manifest] = {
+    Calista.value.get(Column(name, null, new Date(), parent)) match {
       case Some(row) => Option(row.valueAs[V])
       case _ => None
     }
@@ -103,17 +88,8 @@ case class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
    * @return false if the row does not exist, and true if
    * it's removed successfully.
    */
-  def remove:Boolean = {
-    val session = Calista.value
-    val optionRow = session.get(Column(name,null,new Date(),parent))
-
-    optionRow match {
-      case Some(row) =>
-        session.remove(this)
-        true
-      case _ =>
-        false
-    }
+  def remove() {
+    Calista.value.remove(this)
   }
 
 

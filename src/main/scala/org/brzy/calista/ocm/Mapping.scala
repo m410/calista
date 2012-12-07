@@ -13,13 +13,14 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.serializer.Serializer
+
+import org.brzy.calista.schema.{Column => SColumn, _}
 import org.brzy.calista.results.ResultSet
+import org.brzy.calista.serializer.Serializer
+
 
 import org.scalastuff.scalabeans.Preamble._
 import org.slf4j.LoggerFactory
-import java.util.Date
-import org.brzy.calista.schema.{SuperKey, ColumnFamily, StandardKey, Column => SColumn}
 
 /**
  * Defines the object to column mapping.
@@ -118,10 +119,10 @@ case class Mapping[T <: AnyRef : Manifest](
 
       superColOption match {
         case Some(s) =>
-          val v = descriptor.get(instance,s.name)
-          ColumnFamily(family).superKey(keyValue).superColumn(v).column(attr.name,columnValue,new Date())
+          val v = descriptor.get(instance, s.name)
+          SuperColumnFamily(family)(keyValue)(v).column(attr.name, columnValue)
         case _ =>
-          ColumnFamily(family).standardKey(keyValue).column(attr.name,columnValue,new Date())
+          StandardColumnFamily(family)(keyValue).column(attr.name, columnValue)
       }
     }).toList
   }
@@ -138,9 +139,9 @@ case class Mapping[T <: AnyRef : Manifest](
     val keyValue = descriptor.get(t,key.name)
 
     if (attributes.find(_.isInstanceOf[SuperColumn]).isDefined)
-      Left(ColumnFamily(family).superKey(keyValue))
+      Left(SuperColumnFamily(family)(keyValue))
     else
-      Right(ColumnFamily(family).standardKey(keyValue))
+      Right(StandardColumnFamily(family)(keyValue))
   }
 }
 

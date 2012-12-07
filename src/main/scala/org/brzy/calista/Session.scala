@@ -79,6 +79,8 @@ trait Session {
 
   def remove(key: SuperKey[_])
 
+  def remove(key: CounterKey[_])
+
   /**
    * Removes a key by the path and timestamp with the given consistency level.
    */
@@ -88,26 +90,6 @@ trait Session {
    * get the count of the number of columns for a key
    */
   def count(key: Key, level: Consistency = defaultConsistency): Long
-
-  /**
-   * List all the columns under the given key.
-   */
-  def list(key: StandardKey[_]): ResultSet
-
-  /**
-   * List all the columns under the given super column.
-   */
-  def list(sc: SuperColumn[_]): ResultSet
-
-  /**
-   * List all the super columns and columns under the key
-   */
-  def list(sc: SuperKey[_]): ResultSet
-
-  /**
-   * List all the super columns and columns under the key
-   */
-  def list[T:Manifest](cn: ColumnName[T]): ResultSet
 
   /**
    * List the columns by slice predicate.  This uses the default consistency.
@@ -122,12 +104,12 @@ trait Session {
   /**
    * List all the columns by slice range. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange[_]): ResultSet
+  def sliceRange(range: SliceRange): ResultSet
 
   /**
    * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange[_], level: Consistency): ResultSet
+  def sliceRange(range: SliceRange, level: Consistency): ResultSet
 
   /**
    *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
@@ -135,7 +117,7 @@ trait Session {
    *
    *  @param initSliceRange the slice range to iterate over.
    */
-  def scrollSliceRange[T:Manifest](initSliceRange: SliceRange[T]):Iterator[Row]
+  def scrollSliceRange[T:Manifest](initSliceRange: SliceRange):Iterator[Row]
 
   /**
    * Queries the data store by returning the key range inclusively.

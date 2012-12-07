@@ -14,6 +14,7 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.serializer.Serializers
+import java.nio.ByteBuffer
 
 /**
  * Used to query the datastore for multiple keys.
@@ -39,13 +40,14 @@ case class KeyRange[T,C] protected[schema] (
     if(start != null)
       Serializers.toBytes(start)
     else
-      null
+      ByteBuffer.wrap(Array.empty[Byte])
 
   def finishBytes =
     if(finish != null)
       Serializers.toBytes(finish)
     else
-      null
+      ByteBuffer.wrap(Array.empty[Byte])
+
 
   def columnParent = ColumnParent(columnFamily.name, null)
 }

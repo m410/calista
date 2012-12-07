@@ -24,7 +24,7 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[_],familyDef:FamilyDefinition)
+case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[_])
     extends Key{
 
   def keyBytes = parent.keyBytes
@@ -35,31 +35,25 @@ case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[
 
   def columnPath = ColumnPath(parent.family.name, nameBytes,null)
 
-  def |[N: Manifest](name: N) = column(name)
+  def apply[C <: Any : Manifest](name: C) = ColumnName(name,this)
 
-  def column[N: Manifest](name: N) = ColumnName(name,this)
+//  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 
-  def |#[N: Manifest](name: N) =  counter(name)
+//  def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) = Column(sKey, value, timestamp, this)
 
-  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
+//
+//  def slicePredicate[A:Manifest](columns:Array[A]) = {
+//    SlicePredicate(columns,this)
+//  }
+//
+//
+//  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) = {
+//    SliceRange(start,end, reverse, count,this)
+//  }
 
-  def |[N:Manifest, V:Manifest](sKey: N, value: V = null, timestamp: Date = new Date()) = column(sKey, value, timestamp)
-
-  def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) = Column(sKey, value, timestamp, this)
-
-  /**
-	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-	 */
-  def \[A:Manifest](columns:A*) = slicePredicate(columns.toArray)
-
-  def slicePredicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
-
-	/**
-	 * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
-	 */
-  def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) = sliceRange(start,end, reverse, count)
-
-  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) = SliceRange(start,end, reverse, count,this)
+  def column[C:Manifest,V:Manifest](column:C, value:V) = {
+    new Column(column,value,new Date(), this)
+  }
 
   /**
    * Removed the super column by this name.
@@ -67,22 +61,18 @@ case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[
    * @return false if the row does not exist, and true if
    * it's removed successfully.
    */
-  def remove:Boolean = {
-    val session = Calista.value
-    val results = session.sliceRange(this.sliceRange("","",false,2))
+  def remove() {
+    Calista.value.remove(this)
+  }
 
-    if (results.isEmpty)
-      false
-    else {
-      session.remove(this)
-      true
-    }
+  def list = {
+    Calista.value.sliceRange(new SliceRange(key=this,max=100))
   }
 
   def map[B](f:Row => B):Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val predicate = SliceRange("","",false, 100, this)
-    val iterator  = predicate.iterator
+    val slice = new SliceRange(key=this,max=2)
+    val iterator  = slice.iterator
 
     while(iterator.hasNext)
       seq :+ f(iterator.next())
@@ -91,8 +81,8 @@ case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[
   }
 
   def foreach(f:Row =>Unit) {
-    val predicate = SliceRange("","",false, 100, this)
-    val iterator  = predicate.iterator
+    val slice = new SliceRange(key=this,max=2)
+    val iterator  = slice.iterator
 
     while(iterator.hasNext)
       f(iterator.next())

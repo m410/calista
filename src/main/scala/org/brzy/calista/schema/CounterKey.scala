@@ -6,37 +6,32 @@
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.system.FamilyDefinition
+import org.brzy.calista.serializer.Serializers._
 import org.brzy.calista.Calista
 import org.brzy.calista.results.Row
+import org.brzy.calista.serializer.Serializers
 
 /**
- * A super key has a Column family as a parent.
- *
+ * A key can have one of two parents, a super column or a column family.  This is a standard
+ * key which has a column family as a parent.
+ * 
  * @author Michael Fortin
  */
-class SuperKey[T: Manifest] protected[schema](val key: T, val family: ColumnFamily) extends Key {
+class CounterKey[T:Manifest] protected[schema] (key:T, val family:ColumnFamily) extends Key{
 
-  def keyBytes = Serializers.toBytes(key)
+  def keyBytes = toBytes(key)
 
-  def columnPath = ColumnPath(family.name, null, null)
+  def columnPath = ColumnPath(family.name,null,null)
 
 
-  def apply[N<:Any: Manifest](sKey: N) = new SuperColumn(sKey, this)
-
-//
-//  def sliceRange[A: Manifest](start: A, end: A, reverse: Boolean, count: Int) =
-//    SliceRange(start, end, reverse, count, this)
-//
-//  def predicate[A: Manifest](columns: Array[A]) = SlicePredicate(columns, this)
+  def apply[N<:Any: Manifest](columnName: N) =  CounterColumnName(columnName,this)
 
 
   def from(columnName: Any)():SliceRange = {
@@ -50,6 +45,15 @@ class SuperKey[T: Manifest] protected[schema](val key: T, val family: ColumnFami
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }
 
+//
+//  /**
+//   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+//   */
+//  def predicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
+//
+//  def sliceRange[T:Manifest](start:T,end:T,reverse:Boolean,count:Int) =
+//      SliceRange(start,end,reverse, count, this)
+//
 
   /**
    * Removed the super column by this name.
@@ -67,8 +71,8 @@ class SuperKey[T: Manifest] protected[schema](val key: T, val family: ColumnFami
 
   def map[B](f:Row => B):Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+    val predicate = new SliceRange(key=this,max=2)
+    val iterator  = predicate.iterator
 
     while(iterator.hasNext)
       seq = seq :+ f(iterator.next())
@@ -87,5 +91,4 @@ class SuperKey[T: Manifest] protected[schema](val key: T, val family: ColumnFami
   }
 
   override def toString = family + "("+key+")"
-
 }
