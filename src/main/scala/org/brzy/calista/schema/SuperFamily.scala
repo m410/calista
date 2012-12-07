@@ -5,7 +5,7 @@ package org.brzy.calista.schema
  * 
  * @author Michael Fortin
  */
-class SuperColumnFamily(val name:String)  extends ColumnFamily{
+class SuperFamily(val name:String)  extends Family{
 
   def apply(key: Any) = new SuperKey(key, this)
 
@@ -24,6 +24,6 @@ class SuperColumnFamily(val name:String)  extends ColumnFamily{
 /**
  *
  */
-object SuperColumnFamily {
-  def apply(name:String) = new SuperColumnFamily(name)
+object SuperFamily {
+  def apply(name:String) = new SuperFamily(name)
 }

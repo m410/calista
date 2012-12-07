@@ -33,7 +33,7 @@ case class KeyRange[T,C] protected[schema] (
         start:T,
         finish:T,
         predicate:SlicePredicate[C],
-        columnFamily:ColumnFamily,
+        columnFamily:Family,
         count:Int = 100) {
 
   def startBytes =

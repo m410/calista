@@ -25,92 +25,90 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testColumnFamilyStandardCol() {
     sessionManager.doWith { session =>
-      val stdColName = dsl.Column("StandardFamily")("key")("column")
+      val stdColName = StandardFamily("StandardFamily")("key")("column")
       assertNotNull(stdColName)
-      assertTrue(stdColName.isInstanceOf[ColumnName[_]])
+      assertTrue(stdColName.isInstanceOf[ColumnName])
 
-      dsl.Column("StandardFamily")("key")("column").set("somevalue")
-      val values = dsl.Column.key("StandardFamily")("key").map(_.valueAs[String])
+      StandardFamily("StandardFamily")("key")("column").set("somevalue")
+      val values = StandardFamily("StandardFamily")("key").map(_.valueAs[String])
       assert(values != null)
-//      println("########### values size="+values.size)
       assert(values.size == 1)
 
-      dsl.Column.key("StandardFamily")("key").foreach(r=>println(r.valueAs[String]))
+      StandardFamily("StandardFamily")("key").foreach(r=>println(r.valueAs[String]))
     }
   }
 
   @Test def testStandardCol() {
     sessionManager.doWith { session =>
-        val key = "StandardFamily" | "key"
-        assertTrue(key.isInstanceOf[StandardKey[_]])
-        val stdColumnName = "StandardFamily" | "key" | "column"
-        assertTrue(stdColumnName.isInstanceOf[ColumnName[_]])
+        val key = StandardFamily("StandardFamily")("key")
+        assertTrue(key.isInstanceOf[StandardKey])
+        val stdColumnName = StandardFamily("StandardFamily")("key")("column")
+        assertTrue(stdColumnName.isInstanceOf[ColumnName])
 
-        { key | "column"} << "New Value"
-        val stdColumnValue = { key | "column"}.valueAs[String]
+        key("column").set("New Value")
+        val stdColumnValue = key("column").getAs[String]
         assertTrue(stdColumnValue.isDefined)
         assertEquals("New Value", stdColumnValue.get)
 
-        val col = key | ("name", "value")
-        assertTrue(col.isInstanceOf[Column[_, _]])
-        val stdSliceRange = key \\ ("begin", "finish")
-        assertTrue(stdSliceRange.isInstanceOf[SliceRange[_]])
-        val stdSliceRange2 = { key \\ ("begin", "end", false, 10)}.iterator
+        val col = key.column("name", "value")
+        assertTrue(col.isInstanceOf[Column])
+        val stdSliceRange = key.from("begin").to("finish")
+        assertTrue(stdSliceRange.isInstanceOf[SliceRange])
+        val stdSliceRange2 = key.from("begin").to("end").reverse.size(10).iterator
         assertTrue(stdSliceRange2.isInstanceOf[collection.Iterator[Row]])
-        val stdSliceRange3 = { key \\ ("begin", "end", false, 10)}.results
+        val stdSliceRange3 = key.from("begin").to("end").reverse.size(10).results
         assertTrue(stdSliceRange3.isInstanceOf[ResultSet])
 
-        val stdPredicate = key \ ("column", "column2", "column3")
+        val stdPredicate = key.predicate(Array("column", "column2", "column3"))
         assertTrue(stdPredicate.isInstanceOf[SlicePredicate[_]])
     }
   }
 
   @Test def testSuperCol() {
     sessionManager.doWith { session =>
-        val key = "SuperFamily" || "key"
-        assertTrue(key.isInstanceOf[SuperKey[_]])
-        val superColumnSCol = "SuperFamily" || "key" | "superColumn"
-        assertTrue(superColumnSCol.isInstanceOf[SuperColumn[_]])
+        val key = SuperFamily("SuperFamily")("key")
+        assertTrue(key.isInstanceOf[SuperKey])
+        val superColumnSCol = SuperFamily("SuperFamily")("key")("superColumn")
+        assertTrue(superColumnSCol.isInstanceOf[SuperColumn])
 
-        {key | "superColumn" | "column" } << "New Value"
-        val superColumnName = { key | "superColumn" | "column"}.valueAs[String]
+        key("superColumn")("column").set("New Value")
+        val superColumnName = key( "superColumn")("column").getAs[String]
         assertTrue(superColumnName.isDefined)
         assertEquals("New Value", superColumnName.get)
 
-        val superColumnPred = key \ ("column", "column2")
+        val superColumnPred = key("column")("column2")
         assertTrue(superColumnPred.isInstanceOf[SlicePredicate[_]])
-        val superColumnSlice = key \\ ("begin", "end")
-        assertTrue(superColumnSlice.isInstanceOf[SliceRange[_]])
+        val superColumnSlice = key.from("begin").to("end")
+        assertTrue(superColumnSlice.isInstanceOf[SliceRange])
 
-        val superColumnPred2 = { key | "superColumn"} \ ("column", "column2")
+        val superColumnPred2 = key("superColumn").column("column", "column2")
         assertTrue(superColumnPred2.isInstanceOf[SlicePredicate[_]])
-        val superColumnSlice2 = { key | "superColumn"} \\ ("begin", "end")
-        assertTrue(superColumnSlice2.isInstanceOf[SliceRange[_]])
+        val superColumnSlice2 = key("superColumn").from("begin").to("end")
+        assertTrue(superColumnSlice2.isInstanceOf[SliceRange])
     }
   }
 
   @Test def testStandardCounterCol() {
     sessionManager.doWith { session =>
-        val key = "CountFamily" | "key"
-        assertTrue(key.isInstanceOf[StandardKey[_]])
-        val countColumnName = "CountFamily" | "key" | "column"
-        assertTrue(countColumnName.isInstanceOf[ColumnName[_]])
+        val key = CounterFamily("CountFamily")("key")
+        assertTrue(key.isInstanceOf[CounterKey])
+        val countColumnName = CounterFamily("CountFamily")("key")("column")
+        assertTrue(countColumnName.isInstanceOf[CounterColumnName])
 
-        val counter1 = key |# "column1"
-        counter1 += 10
-        val counter = key |# "column"
-        assertTrue(counter.isInstanceOf[CounterColumnName[String]])
-        counter += 5
-        counter += 3
-        counter -= 2
+        key("column1").add(10)
+        val counter = key("column")
+        assertTrue(counter.isInstanceOf[CounterColumnName])
+        counter.add(5)
+        counter.add(3)
+        counter.add(2)
         assert(counter.count == 6)
 
-        val range = key \\ ("a", "z")
-        assertTrue(range.isInstanceOf[SliceRange[_]])
+        val range = key.from("a").to("z")
+        assertTrue(range.isInstanceOf[SliceRange])
         val results = range.results
         assertEquals(2, results.size)
 
-        val predicate = key \ ("column", "column1")
+        val predicate = key.predicate(Array("column", "column1"))
         assertTrue(predicate.isInstanceOf[SlicePredicate[_]])
         val results2 = predicate.results
         assertEquals(2, results2.size)
@@ -120,22 +118,21 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   @Test def testSuperCounterCol() {
     sessionManager.doWith {
       session =>
-        val scol = "SuperCountFamily" || "key" | "super"
-        val counter1 = scol |# "column1"
-        counter1 += 10
-        val counter = scol |# "column"
-        assertTrue(counter.isInstanceOf[CounterColumnName[String]])
-        counter += 5
-        counter += 3
-        counter -= 2
-        assert(counter.count == 6)
+        val scol = SuperCounterFamily("SuperCountFamily")("key")("super")
+        val counter1 = scol("column1").count
+        scol("column1").add(10)
+        scol("column").count
+        scol("column").add(5)
+        scol("column").add(3)
+        scol("column").add(-2)
+        assert(scol("column").count == 6)
 
-        val range = scol \\ ("a", "z")
-        assertTrue (range.isInstanceOf[SliceRange[_]])
+        val range = scol.from("a").to("z")
+        assertTrue (range.isInstanceOf[SliceRange])
         val results = range.results
         assertEquals(2, results.size)
 
-        val predicate = scol \ ("column", "column1")
+        val predicate = scol.predicate(Array("column", "column1"))
         assertTrue(predicate.isInstanceOf[SlicePredicate[_]])
         val results2 = predicate.results
         assertEquals(2, results2.size)

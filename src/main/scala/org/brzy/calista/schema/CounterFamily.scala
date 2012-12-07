@@ -5,10 +5,9 @@ package org.brzy.calista.schema
  * 
  * @author Michael Fortin
  */
-class CounterColumnFamily(val name:String)  extends ColumnFamily{
+class CounterFamily(val name:String)  extends Family {
 
   def apply(key: Any) = new CounterKey(key, this)
-
 
   def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {
     null
@@ -19,6 +18,6 @@ class CounterColumnFamily(val name:String)  extends ColumnFamily{
   }
 }
 
-object CounterColumnFamily {
-  def apply(name:String) = new CounterColumnFamily(name)
+object CounterFamily {
+  def apply(name:String) = new CounterFamily(name)
 }

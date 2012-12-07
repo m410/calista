@@ -6,34 +6,31 @@
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.system.FamilyDefinition
+import org.brzy.calista.serializer.Serializers._
 import org.brzy.calista.Calista
 import org.brzy.calista.results.Row
+import org.brzy.calista.serializer.Serializers
 
 /**
- * A super key has a Column family as a parent.
- *
+ * A key can have one of two parents, a super column or a column family.  This is a standard
+ * key which has a column family as a parent.
+ * 
  * @author Michael Fortin
  */
-class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
+class SuperCounterKey protected[schema] (key:Any, val family:Family) extends Key{
 
-  def keyBytes = Serializers.toBytes(key)
+  def keyBytes = toBytes(key)
 
-  def columnPath = ColumnPath(family.name, null, null)
+  def columnPath = ColumnPath(family.name,null,null)
 
-  def apply(sKey: Any) = new SuperColumn(sKey, this)
-
-  def predicate[A](columns: Array[A]) = {
-    new SlicePredicate(columns, this)
-  }
+  def apply(columnName: Any) =  new SuperCounterColumn(columnName, this)
 
   def from(columnName: Any)():SliceRange = {
     def startBytes = Serializers.toBytes(columnName).array()
@@ -45,6 +42,12 @@ class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }
 
+  /**
+   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+   */
+  def predicate[A](columns:Array[A]) = {
+    new SlicePredicate(columns,this)
+  }
 
   /**
    * Removed the super column by this name.
@@ -62,8 +65,8 @@ class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
 
   def map[B](f:Row => B):Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+    val predicate = new SliceRange(key=this,max=2)
+    val iterator  = predicate.iterator
 
     while(iterator.hasNext)
       seq = seq :+ f(iterator.next())
@@ -82,5 +85,4 @@ class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
   }
 
   override def toString = family + "("+key+")"
-
 }

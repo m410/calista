@@ -21,7 +21,7 @@ import org.brzy.calista.Calista
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
-import org.brzy.calista.schema.{StandardColumnFamily, StandardKey}
+import org.brzy.calista.schema.{StandardFamily, StandardKey}
 
 class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"
@@ -35,7 +35,7 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 	 	sessionManager.doWith { session =>
-       val key = StandardColumnFamily("Person")(personKey)
+       val key = StandardFamily("Person")(personKey)
        val columns = key.list
        assertNotNull(columns)
        assertEquals(3,columns.size)
@@ -62,7 +62,7 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 	 	sessionManager.doWith { session =>
-       val key = StandardColumnFamily("Person")(personKeyPartial)
+       val key = StandardFamily("Person")(personKeyPartial)
        val columns = key.list
        assertNotNull(columns)
        assertEquals(2,columns.size)

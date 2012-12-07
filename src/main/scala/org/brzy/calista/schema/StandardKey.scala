@@ -25,7 +25,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-class StandardKey protected[schema] (val key:Any, val family:ColumnFamily) extends Key{
+class StandardKey protected[schema] (val key:Any, val family:Family) extends Key{
 
   def keyBytes = toBytes(key)
 

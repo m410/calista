@@ -81,6 +81,10 @@ trait Session {
 
   def remove(key: CounterKey)
 
+  def remove(key: SuperCounterKey)
+
+  def remove(key: SuperCounterColumn)
+
   /**
    * Removes a key by the path and timestamp with the given consistency level.
    */

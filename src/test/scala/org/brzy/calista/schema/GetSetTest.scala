@@ -24,12 +24,12 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
   @Test def testSetAndGetStandardColumn() {
 
     sessionManager.doWith { session =>
-      val key = StandardColumnFamily("Standard")("testKey")
+      val key = StandardFamily("Standard")("testKey")
       key("column").set("value")
     }
 
     sessionManager.doWith { session =>
-      val key = StandardColumnFamily("Standard")("testKey")
+      val key = StandardFamily("Standard")("testKey")
       val result = session.get(key.column("column",null))
       assertNotNull(result)
       assertTrue(result.isDefined)
@@ -59,13 +59,13 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
     val columnName = UUID.randomUUID
 
     sessionManager.doWith { session =>
-      val superColumn = SuperColumnFamily("Super")("superKey")(12345L)
+      val superColumn = SuperFamily("Super")("superKey")(12345L)
       val column = superColumn.column(columnName, "value")
       session.insert(column)
     }
 
     sessionManager.doWith { session =>
-      val superColumn = SuperColumnFamily("Super")("superKey")(12345L)
+      val superColumn = SuperFamily("Super")("superKey")(12345L)
 			val cName = superColumn(columnName)
       val result = session.get(cName.asColumn)
       assertNotNull(result)

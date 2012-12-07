@@ -120,9 +120,9 @@ case class Mapping[T <: AnyRef : Manifest](
       superColOption match {
         case Some(s) =>
           val v = descriptor.get(instance, s.name)
-          SuperColumnFamily(family)(keyValue)(v).column(attr.name, columnValue)
+          SuperFamily(family)(keyValue)(v).column(attr.name, columnValue)
         case _ =>
-          StandardColumnFamily(family)(keyValue).column(attr.name, columnValue)
+          StandardFamily(family)(keyValue).column(attr.name, columnValue)
       }
     }).toList
   }
@@ -139,9 +139,9 @@ case class Mapping[T <: AnyRef : Manifest](
     val keyValue = descriptor.get(t,key.name)
 
     if (attributes.find(_.isInstanceOf[SuperColumn]).isDefined)
-      Left(SuperColumnFamily(family)(keyValue))
+      Left(SuperFamily(family)(keyValue))
     else
-      Right(StandardColumnFamily(family)(keyValue))
+      Right(StandardFamily(family)(keyValue))
   }
 }
 

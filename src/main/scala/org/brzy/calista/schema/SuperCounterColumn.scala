@@ -6,45 +6,54 @@
  *
  *   http://www.apache.org/licenses/LICENSE-2.0
  *
- * Unless required by applicable law or agreed to in writing, software distributed 
- * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR 
+ * Unless required by applicable law or agreed to in writing, software distributed
+ * under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
 package org.brzy.calista.schema
 
+import java.util.Date
 import org.brzy.calista.serializer.Serializers
-import org.brzy.calista.system.FamilyDefinition
 import org.brzy.calista.Calista
 import org.brzy.calista.results.Row
 
 /**
- * A super key has a Column family as a parent.
+ * A super column in a cassandra datastore.
  *
  * @author Michael Fortin
  */
-class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
+case class SuperCounterColumn protected[schema] (name: Any, parent: SuperCounterKey)
+    extends Key{
 
-  def keyBytes = Serializers.toBytes(key)
+  def keyBytes = parent.keyBytes
 
-  def columnPath = ColumnPath(family.name, null, null)
+  def nameBytes = Serializers.toBytes(name)
 
-  def apply(sKey: Any) = new SuperColumn(sKey, this)
+  def family = parent.family
 
-  def predicate[A](columns: Array[A]) = {
-    new SlicePredicate(columns, this)
-  }
+  def columnPath = ColumnPath(parent.family.name, nameBytes,null)
+
+  def apply(name: Any) = new CounterColumnName(name,this)
 
   def from(columnName: Any)():SliceRange = {
     def startBytes = Serializers.toBytes(columnName).array()
     new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
   }
 
+
   def to(toColumn: Any):SliceRange = {
     def bytes = Serializers.toBytes(toColumn).array()
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }
 
+  def predicate[A](columns:Array[A]) = {
+    new SlicePredicate(columns,this)
+  }
+
+  def column[C:Manifest,V:Manifest](column:C, value:V) = {
+    new Column(column,value,new Date(), this)
+  }
 
   /**
    * Removed the super column by this name.
@@ -66,11 +75,10 @@ class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
     val iterator  = slice.iterator
 
     while(iterator.hasNext)
-      seq = seq :+ f(iterator.next())
+      seq :+ f(iterator.next())
 
     seq.toSeq
   }
-
 
   def foreach(f:Row =>Unit) {
     val slice = new SliceRange(key=this,max=2)
@@ -80,7 +88,4 @@ class SuperKey protected[schema](val key: Any, val family: Family) extends Key {
       f(iterator.next())
 
   }
-
-  override def toString = family + "("+key+")"
-
 }

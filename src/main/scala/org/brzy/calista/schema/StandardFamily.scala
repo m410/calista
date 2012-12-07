@@ -6,7 +6,7 @@ package org.brzy.calista.schema
  * 
  * @author Michael Fortin
  */
-class StandardColumnFamily( val name:String) extends ColumnFamily {
+class StandardFamily( val name:String) extends Family {
 
   def apply(key: Any) = new StandardKey(key, this)
 
@@ -24,6 +24,6 @@ class StandardColumnFamily( val name:String) extends ColumnFamily {
 }
 
 
-object StandardColumnFamily {
-  def apply(name:String) = new StandardColumnFamily(name)
+object StandardFamily {
+  def apply(name:String) = new StandardFamily(name)
 }

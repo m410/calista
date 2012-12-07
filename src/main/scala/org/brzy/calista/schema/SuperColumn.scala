@@ -37,19 +37,20 @@ case class SuperColumn protected[schema] (name: Any, parent: SuperKey)
 
   def apply(name: Any) = new ColumnName(name,this)
 
-//  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
+  def from(columnName: Any)():SliceRange = {
+    def startBytes = Serializers.toBytes(columnName).array()
+    new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
+  }
 
-//  def column[N:Manifest, V:Manifest](sKey: N, value: V, timestamp: Date) = Column(sKey, value, timestamp, this)
 
-//
-//  def slicePredicate[A:Manifest](columns:Array[A]) = {
-//    SlicePredicate(columns,this)
-//  }
-//
-//
-//  def sliceRange[A:Manifest](start:A,end:A,reverse:Boolean,count:Int) = {
-//    SliceRange(start,end, reverse, count,this)
-//  }
+  def to(toColumn: Any):SliceRange = {
+    def bytes = Serializers.toBytes(toColumn).array()
+    new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
+  }
+
+  def predicate[A](columns:Array[A]) = {
+    new SlicePredicate(columns,this)
+  }
 
   def column[C:Manifest,V:Manifest](column:C, value:V) = {
     new Column(column,value,new Date(), this)

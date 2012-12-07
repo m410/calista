@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.schema.{SuperColumnFamily, ColumnFamily}
+import org.brzy.calista.schema.{SuperFamily, Family}
 import org.brzy.calista.Calista
 
 /**
@@ -40,7 +40,7 @@ trait SuperDao[K, S, T <: AnyRef] {
 	 */
 	def apply(key: K, superColumn:S)(implicit k:Manifest[K],s:Manifest[S]): T = {
 //    val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
-    val columns = SuperColumnFamily(mapping.family)(key).apply(superColumn).list
+    val columns = SuperFamily(mapping.family)(key).apply(superColumn).list
 
 //    val columns = session.list(queryCol)
     mapping.newInstance(key, Option(superColumn), columns)
@@ -52,7 +52,7 @@ trait SuperDao[K, S, T <: AnyRef] {
   def get(key: K, superColumn:S)(implicit k:Manifest[K],s:Manifest[S]): Option[T] = {
 //    val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
 //    val columns = session.list(queryCol)
-    val columns = SuperColumnFamily(mapping.family)(key).apply(superColumn).list
+    val columns = SuperFamily(mapping.family)(key).apply(superColumn).list
 
     if (columns.size > 0)
       Option(mapping.newInstance(key, Option(superColumn), columns))

@@ -23,24 +23,24 @@ class RemoveTest extends JUnitSuite with EmbeddedTest {
   @Test def removeTest() {
 
     sessionManager.doWith { session =>
-      StandardColumnFamily("Standard")("remover")("column5").set("value0")
-      StandardColumnFamily("Standard")( "remover2")("column5").set("value0")
+      StandardFamily("Standard")("remover")("column5").set("value0")
+      StandardFamily("Standard")( "remover2")("column5").set("value0")
     }
 
     sessionManager.doWith { session =>
-      StandardColumnFamily("Standard")("remover")("column5").remove()
+      StandardFamily("Standard")("remover")("column5").remove()
     }
 
     sessionManager.doWith { session =>
-      StandardColumnFamily("Standard")( "remover2")("column5").remove()
+      StandardFamily("Standard")( "remover2")("column5").remove()
     }
 
     sessionManager.doWith { session =>
-      val opt = StandardColumnFamily("Standard")("remover")("column5").getAs[String]
+      val opt = StandardFamily("Standard")("remover")("column5").getAs[String]
       assertTrue(opt.isEmpty)
 
 
-      val opt2 = StandardColumnFamily("Standard")( "remover2")("column5").getAs[String]
+      val opt2 = StandardFamily("Standard")( "remover2")("column5").getAs[String]
       assertTrue(opt2.isEmpty)
     }
   }

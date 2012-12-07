@@ -21,7 +21,7 @@ import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
 import org.brzy.calista.Session
-import org.brzy.calista.schema.{SuperKey, SuperColumn=>SC}
+import org.brzy.calista.schema.{SuperColumn => SC, SuperFamily, SuperKey}
 
 class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
   val familyName = "SPerson"
@@ -36,8 +36,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 	 	sessionManager.doWith { session =>
-       val key = familyName || personKey | personSuperColumn
-       val columns = session.list(key.asInstanceOf[SC[String]])
+       val columns = SuperFamily(familyName)(personKey)(personSuperColumn).list
        assertNotNull(columns)
        assertEquals(3,columns.size)
 		}
@@ -55,8 +54,7 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
       }
 		}
     sessionManager.doWith { (session:Session) =>
-      val sKey = familyName||personKey
-      val columns = session.list(sKey.asInstanceOf[SuperKey[String]])
+      val columns = SuperFamily(familyName)(personKey).list
       assertNotNull(columns)
       assertEquals(3,columns.size) // returns 3 rows, one foe each value, even though its one key
     }

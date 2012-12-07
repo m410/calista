@@ -27,15 +27,15 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
   @Test def testPredicateOnStandard() {
 
     sessionManager.doWith { session =>
-      StandardColumnFamily("Standard")("key-range")("column1").set("value0")
-      StandardColumnFamily("Standard")("key-range")("column2").set("value1")
-      StandardColumnFamily("Standard")("key-range")("column3").set("value2")
-      StandardColumnFamily("Standard")("key-range")("column4").set("value3")
-      StandardColumnFamily("Standard")("key-range")("column5").set("value4")
+      StandardFamily("Standard")("key-range")("column1").set("value0")
+      StandardFamily("Standard")("key-range")("column2").set("value1")
+      StandardFamily("Standard")("key-range")("column3").set("value2")
+      StandardFamily("Standard")("key-range")("column4").set("value3")
+      StandardFamily("Standard")("key-range")("column5").set("value4")
     }
 
     sessionManager.doWith { session =>
-      val predicate = StandardColumnFamily("Standard")("key-range").predicate(Array("column4","column2"))
+      val predicate = StandardFamily("Standard")("key-range").predicate(Array("column4","column2"))
       val result = predicate.results
       assertNotNull(result)
       assertEquals(3,result.size)
@@ -47,12 +47,12 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       for (i <- 10 to  100) {
         val columnName = "column-"+i
         val valueName = "value-"+i
-        val c = StandardColumnFamily("Standard")("key-range1").column(columnName, valueName)
+        val c = StandardFamily("Standard")("key-range1").column(columnName, valueName)
         session.insert(c)
       }
     }
     sessionManager.doWith { session =>
-      val range = StandardColumnFamily("Standard")("key-range1").from("").reverse.size(32)
+      val range = StandardFamily("Standard")("key-range1").from("").reverse.size(32)
       var count = 0
       val iterator = range.iterator
       
@@ -70,12 +70,12 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       for (i <- 10 to  100) {
         val columnName = i.longValue()
         val valueName = "value-"+i
-        val c = StandardColumnFamily("StandardInt")("1").column(columnName, valueName)
+        val c = StandardFamily("StandardInt")("1").column(columnName, valueName)
         session.insert(c)
       }
     }
     sessionManager.doWith { session =>
-      val range = StandardColumnFamily("StandardInt")("1").from(0).to(100).size(32)
+      val range = StandardFamily("StandardInt")("1").from(0).to(100).size(32)
       var count = 0
       val iterator = range.iterator
 
@@ -93,12 +93,12 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
       for (i <- 10 to  100) {
         val columnName = i.longValue()
         val valueName = "value-"+i
-        val c = StandardColumnFamily("StandardLong")(1L).column(columnName, valueName)
+        val c = StandardFamily("StandardLong")(1L).column(columnName, valueName)
         session.insert(c)
       }
     }
     sessionManager.doWith { session =>
-      val range = StandardColumnFamily("StandardLong")(1L).from(0).size(32)
+      val range = StandardFamily("StandardLong")(1L).from(0).size(32)
       var count = 0
       val iterator = range.iterator
 
@@ -114,40 +114,40 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
   @Test def testSuperSlice() {
 
     sessionManager.doWith { session =>
-      SuperColumnFamily("Super2")("skey1")("scol0")("column0").set("value0")
-      SuperColumnFamily("Super2")("skey1")("scol0")("column1").set("value0")
-      SuperColumnFamily("Super2")("skey1")("scol1")("column0").set("value1")
-      SuperColumnFamily("Super2")("skey1")("scol1")("column1").set("value1")
+      SuperFamily("Super2")("skey1")("scol0")("column0").set("value0")
+      SuperFamily("Super2")("skey1")("scol0")("column1").set("value0")
+      SuperFamily("Super2")("skey1")("scol1")("column0").set("value1")
+      SuperFamily("Super2")("skey1")("scol1")("column1").set("value1")
 
-      SuperColumnFamily("Super2")("skey1")("scol2")("column0").set("value2")
-      SuperColumnFamily("Super2")("skey1")("scol2")("column1").set("value2")
-      SuperColumnFamily("Super2")("skey1")("scol3")("column0").set("value3")
-      SuperColumnFamily("Super2")("skey1")("scol3")("column1").set("value3")
-      SuperColumnFamily("Super2")("skey2")("scol4")("column0").set("value4")
-      SuperColumnFamily("Super2")("skey2")("scol4")("column1").set("value4")
+      SuperFamily("Super2")("skey1")("scol2")("column0").set("value2")
+      SuperFamily("Super2")("skey1")("scol2")("column1").set("value2")
+      SuperFamily("Super2")("skey1")("scol3")("column0").set("value3")
+      SuperFamily("Super2")("skey1")("scol3")("column1").set("value3")
+      SuperFamily("Super2")("skey2")("scol4")("column0").set("value4")
+      SuperFamily("Super2")("skey2")("scol4")("column1").set("value4")
     }
 
     sessionManager.doWith { session =>
-      SuperColumnFamily("Super2")("skey1")("scol0")("none").getAs[String] match {
+      SuperFamily("Super2")("skey1")("scol0")("none").getAs[String] match {
         case Some(v) => fail("Should have returned nothing: " + v)
         case _ =>
       }
 
-      SuperColumnFamily("Super2")("skey1")("scol0")("column0").getAs[String] match {
+      SuperFamily("Super2")("skey1")("scol0")("column0").getAs[String] match {
         case Some(v) =>
           assertEquals("value0",v)
         case _ => fail("No value returned")
       }
     }
     sessionManager.doWith { session =>
-      val slice = SuperColumnFamily("Super2")("skey1")("scol0").from("a").to("z")
+      val slice = SuperFamily("Super2")("skey1")("scol0").from("a").to("z")
       val results = session.sliceRange(slice)
       assertNotNull(results)
       assertEquals(2,results.size)
     }
 
     sessionManager.doWith { session =>
-      val slice = SuperColumnFamily("Super2")("skey1").from("a").to("z")
+      val slice = SuperFamily("Super2")("skey1").from("a").to("z")
       val results = session.sliceRange(slice)
       assertNotNull(results)
       results.rows.foreach(r=>{

@@ -13,14 +13,27 @@
  */
 package org.brzy.calista.schema
 
-import java.nio.ByteBuffer
+import org.brzy.calista.Calista
 /**
- * Common traits to keys and super columns.  
- * 
+ * Represents a column family to query in the database.  This is the entry point to DSL access
+ * to the datastore.
+ *
  * @author Michael Fortin
  */
-trait Key {
-  def keyBytes:ByteBuffer
-  def family:Family
-  def columnPath:ColumnPath
+trait Family {
+
+  def name:String
+
+  def definition = try {
+    Calista.value.ksDef.families.find(_.name == name) match {
+      case Some(f) => f
+      case _ => throw new UnknownFamilyException("No ColumnFamily with name: " + name)
+    }
+  }
+  catch {
+    case n:NullPointerException => throw new SessionScopeException("Out of session scope",n)
+  }
+
+  override def toString = "ColumnFamily("+name+")"
+
 }
