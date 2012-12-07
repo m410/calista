@@ -19,7 +19,6 @@ import org.junit.Assert._
 import results.{ResultSet, Row}
 import schema._
 import server.EmbeddedTest
-import dsl.Conversions._
 
 
 class UsageTest extends JUnitSuite with EmbeddedTest {

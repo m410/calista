@@ -18,22 +18,19 @@ import org.brzy.calista.server.EmbeddedTest
 import org.junit.Test
 import org.junit.Assert._
 import java.util.UUID
-import org.brzy.calista.dsl.Conversions
-import org.brzy.calista.results.Row
 
 class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testSetAndGetStandardColumn() {
-    import Conversions._
 
     sessionManager.doWith { session =>
-      val key = "Standard" | "testKey"
-      session.insert(key | ("column", "value"))
+      val key = StandardColumnFamily("Standard")("testKey")
+      key("column").set("value")
     }
 
     sessionManager.doWith { session =>
-      val key = "Standard" | "testKey"
-      val result = session.get(key | ("column",null))
+      val key = StandardColumnFamily("Standard")("testKey")
+      val result = session.get(key.column("column",null))
       assertNotNull(result)
       assertTrue(result.isDefined)
       val row = result.get
@@ -59,18 +56,17 @@ class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   // create a single column, save it, and get it out
   @Test def testSetAndGetSuperColumn() {
-    import Conversions._
     val columnName = UUID.randomUUID
 
     sessionManager.doWith { session =>
-      val superColumn = "Super" || "superKey" | 12345L
-      val column = superColumn | (columnName, "value")
+      val superColumn = SuperColumnFamily("Super")("superKey")(12345L)
+      val column = superColumn.column(columnName, "value")
       session.insert(column)
     }
 
     sessionManager.doWith { session =>
-      val superColumn = "Super" || "superKey" | 12345L
-			val cName = superColumn | columnName
+      val superColumn = SuperColumnFamily("Super")("superKey")(12345L)
+			val cName = superColumn(columnName)
       val result = session.get(cName.asColumn)
       assertNotNull(result)
       assertTrue(result.isDefined)

@@ -1,6 +1,5 @@
 package org.brzy.calista.schema
 
-import org.brzy.calista.Calista
 
 /**
  * Document Me..
@@ -9,7 +8,7 @@ import org.brzy.calista.Calista
  */
 class StandardColumnFamily( val name:String) extends ColumnFamily {
 
-  def apply[T<:Any:Manifest](key: T) = new StandardKey(key, this)
+  def apply(key: Any) = new StandardKey(key, this)
 
 
   def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {

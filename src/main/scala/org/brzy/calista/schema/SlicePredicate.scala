@@ -25,7 +25,7 @@ import org.brzy.calista.Calista
  *
  * @author Michael Fortin
  */
-case class SlicePredicate[T] protected[schema] (columns: Array[T], key: Key) {
+class SlicePredicate[T] protected[schema] (val columns: Array[T], val key: Key) {
 
   def toByteList = columns.map(c => Serializers.toBytes(c)).toList
 

@@ -21,7 +21,7 @@ import org.brzy.calista.Calista
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
-import org.brzy.calista.schema.StandardKey
+import org.brzy.calista.schema.{StandardColumnFamily, StandardKey}
 
 class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"
@@ -35,9 +35,8 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 	 	sessionManager.doWith { session =>
-       import org.brzy.calista.dsl.Conversions._
-       val key = "Person" | personKey
-       val columns = session.list(key.asInstanceOf[StandardKey[String]])
+       val key = StandardColumnFamily("Person")(personKey)
+       val columns = key.list
        assertNotNull(columns)
        assertEquals(3,columns.size)
 		}
@@ -63,15 +62,14 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 		}
 
 	 	sessionManager.doWith { session =>
-       import org.brzy.calista.dsl.Conversions._
-       val key = "Person" | personKeyPartial
-       val columns = session.list(key.asInstanceOf[StandardKey[String]])
+       val key = StandardColumnFamily("Person")(personKeyPartial)
+       val columns = key.list
        assertNotNull(columns)
        assertEquals(2,columns.size)
 		}
 
 		sessionManager.doWith { session =>
-			val person = Person.get(personKeyPartial) match {
+			Person.get(personKeyPartial) match {
         case Some(person) =>
           assertNotNull(person)
           assertNotNull(person.key)

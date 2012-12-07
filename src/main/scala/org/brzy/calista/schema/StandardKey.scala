@@ -45,13 +45,10 @@ class StandardKey protected[schema] (val key:Any, val family:ColumnFamily) exten
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }
 
-//  /**
-//   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-//   */
-//  def predicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
-//
-//  def sliceRange[T:Manifest](start:T,end:T,reverse:Boolean,count:Int) =
-//      SliceRange(start,end,reverse, count, this)
+  /**
+   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
+   */
+  def predicate[A](columns:Array[A]) = new SlicePredicate(columns, this)
 
   def column[C:Manifest,V:Manifest](column:C, value:V) = {
     new Column(column,value,new Date(), this)
