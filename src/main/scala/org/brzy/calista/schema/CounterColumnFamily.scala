@@ -7,7 +7,7 @@ package org.brzy.calista.schema
  */
 class CounterColumnFamily(val name:String)  extends ColumnFamily{
 
-  def apply[T<:Any:Manifest](key: T):CounterKey[T] = new CounterKey(key, this)
+  def apply(key: Any) = new CounterKey(key, this)
 
 
   def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {

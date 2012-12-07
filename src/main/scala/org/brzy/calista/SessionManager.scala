@@ -107,12 +107,12 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
   def loadKeyspace(keyspace: KeyspaceDefinition) {
     val session = new SessionImpl(host, null)
     try {
-      session.describeKeyspace(keyspace.name)
-      session.updateKeyspace(keyspace)
+      session.describeKeySpace(keyspace.name)
+      session.updateKeySpace(keyspace)
     }
     catch {
       case e: Exception =>
-        session.addKeyspace(keyspace)
+        session.addKeySpace(keyspace)
     }
   }
 

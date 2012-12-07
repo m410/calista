@@ -15,7 +15,6 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.serializer.Serializers._
-import org.brzy.calista.system.FamilyDefinition
 import org.brzy.calista.Calista
 import org.brzy.calista.results.Row
 import org.brzy.calista.serializer.Serializers
@@ -26,18 +25,17 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-class StandardKey[T:Manifest] protected[schema] (val key:T, val family:ColumnFamily)
-    extends Key{
+class StandardKey protected[schema] (val key:Any, val family:ColumnFamily) extends Key{
 
   def keyBytes = toBytes(key)
 
   def columnPath = ColumnPath(family.name,null,null)
 
-  def apply[N<:Any: Manifest](name: N) = ColumnName(name,this)
+  def apply(name: Any) = new ColumnName(name,this)
 
 
   def from(columnName: Any)():SliceRange = {
-    def startBytes = Serializers.toBytes(columnName).array()
+    def startBytes = toBytes(columnName).array()
     new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
   }
 

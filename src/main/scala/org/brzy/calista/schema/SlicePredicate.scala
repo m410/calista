@@ -30,8 +30,8 @@ case class SlicePredicate[T] protected[schema] (columns: Array[T], key: Key) {
   def toByteList = columns.map(c => Serializers.toBytes(c)).toList
 
   def columnParent: ColumnParent = key match {
-    case s: StandardKey[_] => ColumnParent(s.family.name, null)
-    case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
+    case s: StandardKey => ColumnParent(s.family.name, null)
+    case s: SuperColumn => ColumnParent(s.family.name, s.nameBytes)
   }
 
   def results = {

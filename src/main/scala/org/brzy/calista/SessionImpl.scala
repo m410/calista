@@ -95,7 +95,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     new CassandraKeyRange().setStart_key(kr.startBytes).setEnd_key(kr.finishBytes).setCount(kr.count)
   }
 
-  private[this] implicit def toColumn(c: Column[_, _]) = {
+  private[this] implicit def toColumn(c: Column) = {
     val column = new CassandraColumn()
     column.setName(c.nameBytes)
     column.setValue(c.valueBytes)
@@ -117,9 +117,9 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   private[this] def keyFor(c: {def parent:Key}) = c.parent match {
-    case s: SuperKey[_] => s.keyBytes
-    case s: StandardKey[_] => s.keyBytes
-    case s: SuperColumn[_] => s.parent.keyBytes
+    case s: SuperKey => s.keyBytes
+    case s: StandardKey => s.keyBytes
+    case s: SuperColumn => s.parent.keyBytes
   }
 
   private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {
@@ -187,12 +187,12 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 	 * get the value of the column.  This assumes the input column does not have a value, this will
 	 * return a results.Column with the name and value
    */
-  def get(column: Column[_, _]): Option[Row] = get(column, defaultConsistency)
+  def get(column: Column): Option[Row] = get(column, defaultConsistency)
 
   /**
    * Increments a counter column.
    */
-  def add(column: Column[_, _], level: Consistency = defaultConsistency) {
+  def add(column: Column, level: Consistency = defaultConsistency) {
     log.trace("insert: {}",column)
     val counter = new CounterColumn()
     counter.setName(column.nameBytes)
@@ -205,7 +205,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column[_, _], level: Consistency): Option[Row] = {
+  def get(column: Column, level: Consistency): Option[Row] = {
     try {
       val columnOrSuperColumn = client.get(keyFor(column), toColumnPath(column.columnPath), level)
       val list = toRows(columnOrSuperColumn, column.parent.family.name, column.parent.keyBytes)
@@ -225,7 +225,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column[_, _], level: Consistency = defaultConsistency) {
+  def insert(column: Column, level: Consistency = defaultConsistency) {
     log.trace("insert: {}",column)
     client.insert(keyFor(column), toColumnParent(column.columnParent), column, level)
   }
@@ -233,39 +233,39 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   /**
    * Remove a column and it's value.
    */
-  def remove(column: ColumnName[_]) {
+  def remove(column: ColumnName) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: CounterColumnName[_]) {
+  def remove(column: CounterColumnName) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: SuperColumn[_]) {
+  def remove(column: SuperColumn) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
   /**
 	 * Remove a column and it's value.
    */
-  def remove(column: Column[_, _]) {
+  def remove(column: Column) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
 	/**
 	 * Remove a key and all it's child columns by using the default consistency level.
    */
-	def remove(key: StandardKey[_]) {
+	def remove(key: StandardKey) {
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 
-  def remove(key: SuperKey[_]) {
+  def remove(key: SuperKey) {
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 	/**
@@ -276,7 +276,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
 
-  def remove(key: CounterKey[_]) {
+  def remove(key: CounterKey) {
     client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
   }
 
@@ -322,7 +322,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   /**
-   *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
+   *  Scroll through large slices by grabbing them form the data store in chunks.  This will
    *  iterate over all elements including the start and end columns.
    *
    *  @param initSliceRange the slice range to iterate over.
@@ -407,7 +407,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
 
-  def addKeyspace(ks:KeyspaceDefinition){
+  def addKeySpace(ks:KeyspaceDefinition){
     log.info("add keyspace: {}", ks)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
@@ -416,7 +416,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     sock.close()
   }
 
-  def updateKeyspace(keyspace:KeyspaceDefinition){
+  def updateKeySpace(keyspace:KeyspaceDefinition){
     log.info("update keyspace: {}", keyspace)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
@@ -424,7 +424,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     sock.close()
   }
 
-  def dropKeyspace(keyspace:String){
+  def dropKeySpace(keyspace:String){
     log.info("drop keyspace: {}", keyspace)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
@@ -446,9 +446,9 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     client.system_drop_column_family(family)
   }
 
-  def describeKeyspace(name:String) = KeyspaceDefinition(client.describe_keyspace(name))
+  def describeKeySpace(name:String) = KeyspaceDefinition(client.describe_keyspace(name))
 
-  def describeKeyspaces = client.describe_keyspaces().map(ksDef => {
+  def describeKeySpaces = client.describe_keyspaces().map(ksDef => {
     KeyspaceDefinition(ksDef)
   }).toList
 

@@ -100,7 +100,7 @@ case class Mapping[T <: AnyRef : Manifest](
 	/**
 	 * Creates a list of columns from the persistable object.
 	 */
-  def toColumns(instance: T): List[SColumn[_, _]] = {
+  def toColumns(instance: T): List[SColumn] = {
     val descriptor = descriptorOf[T]
     val key = attributes.find(_.isInstanceOf[Key]).get
     val keyValue = descriptor.get(instance, key.name)
@@ -130,7 +130,7 @@ case class Mapping[T <: AnyRef : Manifest](
 	/**
 	 *
 	 */
-  def toKey(t: T): Either[SuperKey[_],StandardKey[_]] = {
+  def toKey(t: T): Either[SuperKey,StandardKey] = {
     val key = attributes.find(_ match {
       case k:Key => true
       case _ => false

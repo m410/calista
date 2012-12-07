@@ -22,7 +22,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) {
+class CounterColumnName protected[schema] (val name: Any, val parent:Key) {
 
   /**
    * Return the name converted to bytes.
@@ -37,7 +37,7 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
    */
   def columnPath = {
     val superCol = parent match {
-      case s: SuperColumn[_] => s.keyBytes
+      case s: SuperColumn => s.keyBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)
@@ -48,8 +48,8 @@ case class CounterColumnName[K:Manifest] protected[schema] (name: K,parent:Key) 
    * directly.
    */
   def columnParent: ColumnParent = parent match {
-    case s: StandardKey[_] => ColumnParent(s.family.name, null)
-    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+    case s: StandardKey => ColumnParent(s.family.name, null)
+    case s: SuperColumn => ColumnParent(s.family.name, s.keyBytes)
   }
 
   def -=(amount: Long) {

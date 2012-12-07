@@ -24,7 +24,7 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
+class ColumnName protected[schema] (val name:Any, val parent:Key) {
 
   /**
    * Return the name converted to bytes.
@@ -39,7 +39,7 @@ class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
    */
   def columnPath = {
     val superCol = parent match {
-      case s: SuperColumn[_] => s.keyBytes
+      case s: SuperColumn => s.keyBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)
@@ -50,8 +50,8 @@ class ColumnName[N:Manifest] protected[schema] (name:N,parent:Key) {
    * directly.
    */
   def columnParent: ColumnParent = parent match {
-    case s: StandardKey[_] => ColumnParent(s.family.name, null)
-    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
+    case s: StandardKey => ColumnParent(s.family.name, null)
+    case s: SuperColumn => ColumnParent(s.family.name, s.keyBytes)
   }
 
   /**

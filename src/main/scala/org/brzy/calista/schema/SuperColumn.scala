@@ -24,7 +24,7 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[_])
+case class SuperColumn protected[schema] (name: Any, parent: SuperKey)
     extends Key{
 
   def keyBytes = parent.keyBytes
@@ -35,7 +35,7 @@ case class SuperColumn[T:Manifest] protected[schema] (name: T, parent: SuperKey[
 
   def columnPath = ColumnPath(parent.family.name, nameBytes,null)
 
-  def apply[C <: Any : Manifest](name: C) = ColumnName(name,this)
+  def apply(name: Any) = new ColumnName(name,this)
 
 //  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
 

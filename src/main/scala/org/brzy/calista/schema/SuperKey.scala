@@ -23,14 +23,14 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-class SuperKey[T: Manifest] protected[schema](val key: T, val family: ColumnFamily) extends Key {
+class SuperKey protected[schema](val key: Any, val family: ColumnFamily) extends Key {
 
   def keyBytes = Serializers.toBytes(key)
 
   def columnPath = ColumnPath(family.name, null, null)
 
 
-  def apply[N<:Any: Manifest](sKey: N) = new SuperColumn(sKey, this)
+  def apply(sKey: Any) = new SuperColumn(sKey, this)
 
 //
 //  def sliceRange[A: Manifest](start: A, end: A, reverse: Boolean, count: Int) =

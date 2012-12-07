@@ -24,14 +24,14 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-class CounterKey[T:Manifest] protected[schema] (key:T, val family:ColumnFamily) extends Key{
+class CounterKey protected[schema] (key:Any, val family:ColumnFamily) extends Key{
 
   def keyBytes = toBytes(key)
 
   def columnPath = ColumnPath(family.name,null,null)
 
 
-  def apply[N<:Any: Manifest](columnName: N) =  CounterColumnName(columnName,this)
+  def apply(columnName: Any) =  new CounterColumnName(columnName,this)
 
 
   def from(columnName: Any)():SliceRange = {

@@ -34,52 +34,52 @@ trait Session {
    * get the value of the column.  This assumes the input column does not have a value, this will
    * return a results.Column with the name and value
    */
-  def get(column: Column[_, _]): Option[Row]
+  def get(column: Column): Option[Row]
 
   /**
    * Increments a counter column.
    */
-  def add(column: Column[_, _], level: Consistency = defaultConsistency)
+  def add(column: Column, level: Consistency = defaultConsistency)
 
   /**
    * Read the value of a single column, with the given consistency.
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column[_, _], level: Consistency): Option[Row]
+  def get(column: Column, level: Consistency): Option[Row]
 
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column[_, _], level: Consistency = defaultConsistency)
+  def insert(column: Column, level: Consistency = defaultConsistency)
 
   /**
    * Remove a column and it's value.
    */
-  def remove(column: ColumnName[_])
+  def remove(column: ColumnName)
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: CounterColumnName[_])
+  def remove(column: CounterColumnName)
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: SuperColumn[_])
+  def remove(column: SuperColumn)
   /**
    * Remove a column and it's value.
    */
-  def remove(column: Column[_, _])
+  def remove(column: Column)
 
   /**
    * Remove a key and all it's child columns by using the default consistency level.
    */
-  def remove(key: StandardKey[_])
+  def remove(key: StandardKey)
 
-  def remove(key: SuperKey[_])
+  def remove(key: SuperKey)
 
-  def remove(key: CounterKey[_])
+  def remove(key: CounterKey)
 
   /**
    * Removes a key by the path and timestamp with the given consistency level.
@@ -130,11 +130,11 @@ trait Session {
 
   def query(query:String,compression:String = ""):ResultSet
 
-  def addKeyspace(ks:KeyspaceDefinition)
+  def addKeySpace(ks:KeyspaceDefinition)
 
-  def updateKeyspace(keyspace:KeyspaceDefinition)
+  def updateKeySpace(keySpace:KeyspaceDefinition)
 
-  def dropKeyspace(keyspace:String)
+  def dropKeySpace(keySpace:String)
 
   def addColumnFamily(family:FamilyDefinition)
 
@@ -143,9 +143,9 @@ trait Session {
 
   def dropColumnFamily(family:String)
 
-  def describeKeyspace(name:String):KeyspaceDefinition
+  def describeKeySpace(name:String):KeyspaceDefinition
 
-  def describeKeyspaces:List[KeyspaceDefinition]
+  def describeKeySpaces:List[KeyspaceDefinition]
 
   def describeClusterName:String
 

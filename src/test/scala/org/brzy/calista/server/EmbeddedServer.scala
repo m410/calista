@@ -93,7 +93,7 @@ object EmbeddedServer {
         try {
           log.info("******************** Before add keyspace")
           log.info("******************** Test")
-          session.addKeyspace(KeyspaceDefinition(
+          session.addKeySpace(KeyspaceDefinition(
             name = "Test",
             strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
             families = List.empty[FamilyDefinition]))
