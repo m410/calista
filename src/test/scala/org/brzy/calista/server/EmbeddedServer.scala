@@ -47,7 +47,7 @@ object EmbeddedServer {
   logSource copyTo homeDirectory
 
   System.setProperty("storage-config", homeDirectory.getCanonicalPath)
-  log.debug("created data file and log location directories")
+  log.debug("##################### created data file and log location directories")
 
   val daemon = actor {
     val daemon = new CassandraDaemon
@@ -61,8 +61,8 @@ object EmbeddedServer {
   def pause() {
     // try to make sockets until the server opens up - there has to be a better
     // way - just not sure what it is.
-    log.debug("Sleep for 4s")
-    Thread.sleep(4000)
+    log.debug("Sleep for 8s")
+    Thread.sleep(8000)
 
     val socket = new TSocket("localhost", 9160)
     var opened = false
@@ -70,7 +70,7 @@ object EmbeddedServer {
       try {
         socket.open()
         opened = true
-        log.debug("I was able to make a connection")
+        log.debug("******************** I was able to make a connection")
       }
       catch {
         case e: Throwable => log.error("******************** Not started", e)
@@ -87,7 +87,7 @@ object EmbeddedServer {
   def loadSchema() {
     log.info("Setting up the keyspace...")
 
-    val mgr = new SessionManager("Test", "127.0.0.1")
+    val mgr = new SessionManager("default", "127.0.0.1")
     mgr.doWith({
       session =>
         try {

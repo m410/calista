@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Michael Fortin
  */
-class SessionManager(keyspace: String, url: String, port: Int = 9160) {
+class SessionManager(keySpace: String, url: String, port: Int = 9160) {
 
   /**
    * the host and port for where this session manager connects.
@@ -50,13 +50,13 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
     sock.open()
 
     try {
-      KeyspaceDefinition(client.describe_keyspace(keyspace))
+      KeyspaceDefinition(client.describe_keyspace(keySpace))
     }
     catch {
       case e:Exception =>
-        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keyspace,e)
+        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keySpace,e)
         KeyspaceDefinition(
-          name = keyspace,
+          name = keySpace,
           strategyClass = "",
           families = List.empty[FamilyDefinition]
         )
