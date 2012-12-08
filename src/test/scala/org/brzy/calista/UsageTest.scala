@@ -25,6 +25,8 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testColumnFamilyStandardCol() {
     sessionManager.doWith { session =>
+      println("###########  " + session.ksDef)
+
       val stdColName = StandardFamily("StandardFamily")("key")("column")
       assertNotNull(stdColName)
       assertTrue(stdColName.isInstanceOf[ColumnName])

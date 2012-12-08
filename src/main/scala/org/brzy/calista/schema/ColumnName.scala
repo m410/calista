@@ -57,9 +57,8 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
   /**
    * Set the value of the column and insert it immediately.
    */
-  def set[V<:Any:Manifest](value:V) {
-    val session = Calista.value
-    session.insert(Column(name,value,new Date(),parent))
+  def set[V <: Any : Manifest](value: V) {
+    Calista.value.insert(Column(name, value, new Date(), parent))
   }
 
   def columnExists:Boolean = {

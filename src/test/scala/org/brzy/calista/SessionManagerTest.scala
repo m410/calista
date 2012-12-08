@@ -14,7 +14,7 @@
 package org.brzy.calista
 
 import org.scalatest.junit.JUnitSuite
-import org.junit.Test
+import org.junit.{Ignore, Test}
 import org.junit.Assert._
 import server.EmbeddedTest
 import org.slf4j.LoggerFactory
@@ -23,7 +23,7 @@ import system.{FamilyDefinition, KeyspaceDefinition}
 class SessionManagerTest extends JUnitSuite with EmbeddedTest {
   val log = LoggerFactory.getLogger(getClass)
 
-  @Test def testSchema() {
+  @Test @Ignore def testSchema() {
     val mgr = new SessionManager("Test", "127.0.0.1")
     mgr.doWith({
       session =>

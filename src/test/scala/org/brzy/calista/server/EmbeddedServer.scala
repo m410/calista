@@ -56,6 +56,8 @@ object EmbeddedServer {
   }.start()
 
   pause()
+
+  // uncomment to create schema and families
   loadSchema()
 
   def pause() {
@@ -74,8 +76,7 @@ object EmbeddedServer {
       }
       catch {
         case e: Throwable => log.error("******************** Not started", e)
-        opened = true
-        // sys.exit(1)
+        opened = false
       }
       finally {
         socket.close()
@@ -87,16 +88,21 @@ object EmbeddedServer {
   def loadSchema() {
     log.info("Setting up the keyspace...")
 
-    val mgr = new SessionManager("default", "127.0.0.1")
+    val system = new SessionManager("system", "127.0.0.1")
+
+    log.info("******************** Setup keyspace")
+    log.info("******************** Test")
+    system.createSession.addKeySpace(KeyspaceDefinition(
+      name = "Test",
+      strategyClass = "org.apache.cassandra.locator.NetworkTopologyStrategy",
+      families = List.empty[FamilyDefinition]))
+
+    val mgr = new SessionManager("Test", "127.0.0.1")
+
     mgr.doWith({
       session =>
         try {
-          log.info("******************** Before add keyspace")
-          log.info("******************** Test")
-          session.addKeySpace(KeyspaceDefinition(
-            name = "Test",
-            strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
-            families = List.empty[FamilyDefinition]))
+          log.info("******************** In Session")
           log.info("******************** Standard")
           session.addColumnFamily(new FamilyDefinition(
             keyspace = "Test",
