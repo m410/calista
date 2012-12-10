@@ -71,7 +71,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     case EACH_QUORUM => ConsistencyLevel.EACH_QUORUM
     case LOCAL_QUORUM => ConsistencyLevel.LOCAL_QUORUM
     case Consistency.All => ConsistencyLevel.ALL
-    case _ => error("Unknown Level")
+    case _ => sys.error("Unknown Level")
   }
 
   def closeAndMakeNewSession = {
@@ -118,8 +118,11 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 
   private[this] def keyFor(c: {def parent:Key}) = c.parent match {
     case s: SuperKey => s.keyBytes
+    case s: SuperCounterKey => s.keyBytes
     case s: StandardKey => s.keyBytes
+    case s: CounterKey => s.keyBytes
     case s: SuperColumn => s.parent.keyBytes
+    case s: SuperCounterColumn => s.parent.keyBytes
   }
 
   private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {

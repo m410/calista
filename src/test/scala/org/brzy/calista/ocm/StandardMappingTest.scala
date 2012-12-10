@@ -17,11 +17,10 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 
-import org.brzy.calista.Calista
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
-import org.brzy.calista.schema.{StandardFamily, StandardKey}
+import org.brzy.calista.schema.StandardFamily
 
 class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
 	val personKey  = "mappingKey"

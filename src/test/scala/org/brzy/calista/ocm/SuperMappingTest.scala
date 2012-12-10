@@ -21,7 +21,7 @@ import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
 import java.util.Date
 import org.brzy.calista.Session
-import org.brzy.calista.schema.{SuperColumn => SC, SuperFamily, SuperKey}
+import org.brzy.calista.schema.SuperFamily
 
 class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
   val familyName = "SPerson"

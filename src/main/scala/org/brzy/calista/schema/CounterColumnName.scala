@@ -29,7 +29,7 @@ class CounterColumnName protected[schema] (val name: Any, val parent:Key) {
    */
   def nameBytes = Serializers.toBytes(name)
 
-  def asColumn = Column(name,null,null, parent)
+  def asColumn = new Column(name,null,null, parent)
 
   /**
    * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
@@ -62,12 +62,12 @@ class CounterColumnName protected[schema] (val name: Any, val parent:Key) {
 
   def add(amount: Long) {
     val session = Calista.value
-    session.add(Column(name, amount, new Date(), parent))
+    session.add(new Column(name, amount, new Date(), parent))
   }
 
   def count = {
     val session = Calista.value
-    session.get(Column(name,null,new Date(),parent)) match {
+    session.get(new Column(name,null,new Date(),parent)) match {
       case Some(c) => c.valueAs[Long]
       case _ => throw new NoColumnException("No column for name: " + name)
     }
@@ -75,7 +75,7 @@ class CounterColumnName protected[schema] (val name: Any, val parent:Key) {
 
   def remove:Boolean = {
     val session = Calista.value
-    val optionRow = session.get(Column(name,null,new Date(),parent))
+    val optionRow = session.get(new Column(name,null,new Date(),parent))
 
     optionRow match {
       case Some(row) =>

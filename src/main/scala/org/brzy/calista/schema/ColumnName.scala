@@ -31,7 +31,7 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    */
   def nameBytes = Serializers.toBytes(name)
 
-  def asColumn = Column(name,null,null, parent)
+  def asColumn = new Column(name,null,null, parent)
 
   /**
    * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
@@ -58,11 +58,11 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    * Set the value of the column and insert it immediately.
    */
   def set[V <: Any : Manifest](value: V) {
-    Calista.value.insert(Column(name, value, new Date(), parent))
+    Calista.value.insert(new Column(name, value, new Date(), parent))
   }
 
   def columnExists:Boolean = {
-    Calista.value.get(Column(name, null, new Date(), parent)) match {
+    Calista.value.get(new Column(name, null, new Date(), parent)) match {
       case Some(row) => true
       case _ => false
     }
@@ -75,7 +75,7 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    * @return Optional value, if the column by that name exists, it returns Some(V) otherwise none.
    */
   def getAs[V<:Any: Manifest] = {
-    Calista.value.get(Column(name, null, new Date(), parent)) match {
+    Calista.value.get(new Column(name, null, new Date(), parent)) match {
       case Some(row) => Option(row.valueAs[V])
       case _ => None
     }
