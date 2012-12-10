@@ -22,26 +22,30 @@ import org.brzy.calista.server.EmbeddedTest
 class RemoveTest extends JUnitSuite with EmbeddedTest {
   @Test def removeTest() {
 
-    sessionManager.doWith { session =>
-      StandardFamily("Standard")("remover")("column5").set("value0")
-      StandardFamily("Standard")( "remover2")("column5").set("value0")
+    sessionManager.doWith {
+      session =>
+        StandardFamily("Standard")("remover")("column5").set("value0")
+        StandardFamily("Standard")("remover2")("column5").set("value0")
     }
 
-    sessionManager.doWith { session =>
-      StandardFamily("Standard")("remover")("column5").remove()
+    sessionManager.doWith {
+      session =>
+        StandardFamily("Standard")("remover")("column5").remove()
     }
 
-    sessionManager.doWith { session =>
-      StandardFamily("Standard")( "remover2")("column5").remove()
+    sessionManager.doWith {
+      session =>
+        StandardFamily("Standard")("remover2")("column5").remove()
     }
 
-    sessionManager.doWith { session =>
-      val opt = StandardFamily("Standard")("remover")("column5").getAs[String]
-      assertTrue(opt.isEmpty)
+    sessionManager.doWith {
+      session =>
+        val opt = StandardFamily("Standard")("remover")("column5").getAs[String]
+        assertTrue(opt.isEmpty)
 
 
-      val opt2 = StandardFamily("Standard")( "remover2")("column5").getAs[String]
-      assertTrue(opt2.isEmpty)
+        val opt2 = StandardFamily("Standard")("remover2")("column5").getAs[String]
+        assertTrue(opt2.isEmpty)
     }
   }
 }

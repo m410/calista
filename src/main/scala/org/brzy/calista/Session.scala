@@ -28,30 +28,30 @@ trait Session {
    */
   def close()
 
-  def closeAndMakeNewSession:Session
+  def closeAndMakeNewSession: Session
 
   /**
    * get the value of the column.  This assumes the input column does not have a value, this will
    * return a results.Column with the name and value
    */
-  def get(column: Column[_,_]): Option[Row]
+  def get(column: Column[_, _]): Option[Row]
 
   /**
    * Increments a counter column.
    */
-  def add(column: Column[_,_], level: Consistency = defaultConsistency)
+  def add(column: Column[_, _], level: Consistency = defaultConsistency)
 
   /**
    * Read the value of a single column, with the given consistency.
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column[_,_], level: Consistency): Option[Row]
+  def get(column: Column[_, _], level: Consistency): Option[Row]
 
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column[_,_], level: Consistency = defaultConsistency)
+  def insert(column: Column[_, _], level: Consistency = defaultConsistency)
 
   /**
    * Remove a column and it's value.
@@ -67,10 +67,11 @@ trait Session {
    * Remove a counter column and it's value.
    */
   def remove(column: SuperColumn[_])
+
   /**
    * Remove a column and it's value.
    */
-  def remove(column: Column[_,_])
+  def remove(column: Column[_, _])
 
   /**
    * Remove a key and all it's child columns by using the default consistency level.
@@ -110,43 +111,44 @@ trait Session {
   def sliceRange(range: SliceRange, level: Consistency): ResultSet
 
   /**
-   *  Scroll through large slices by grabbing them form the datastore in chunks.  This will
-   *  iterate over all elements including the start and end columns.
+   * Scroll through large slices by grabbing them form the datastore in chunks.  This will
+   * iterate over all elements including the start and end columns.
    *
-   *  @param initSliceRange the slice range to iterate over.
+   * @param initSliceRange the slice range to iterate over.
    */
-  def scrollSliceRange(initSliceRange: SliceRange):Iterator[Row]
+  def scrollSliceRange(initSliceRange: SliceRange): Iterator[Row]
 
   /**
    * Queries the data store by returning the key range inclusively.
    */
   def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): ResultSet
+
   /**
    * List all the columns by Key range using the default consistency.
    */
   def keyRange[T <: AnyRef](range: KeyRange[T]): ResultSet
 
-  def query(query:String,compression:String = ""):ResultSet
+  def query(query: String, compression: String = ""): ResultSet
 
-  def addKeySpace(ks:KeyspaceDefinition)
+  def addKeySpace(ks: KeyspaceDefinition)
 
-  def updateKeySpace(keySpace:KeyspaceDefinition)
+  def updateKeySpace(keySpace: KeyspaceDefinition)
 
-  def dropKeySpace(keySpace:String)
+  def dropKeySpace(keySpace: String)
 
-  def addColumnFamily(family:FamilyDefinition)
+  def addColumnFamily(family: FamilyDefinition)
 
-  def updateColumnFamily(family:FamilyDefinition)
+  def updateColumnFamily(family: FamilyDefinition)
 
 
-  def dropColumnFamily(family:String)
+  def dropColumnFamily(family: String)
 
-  def describeKeySpace(name:String):KeyspaceDefinition
+  def describeKeySpace(name: String): KeyspaceDefinition
 
-  def describeKeySpaces:List[KeyspaceDefinition]
+  def describeKeySpaces: List[KeyspaceDefinition]
 
-  def describeClusterName:String
+  def describeClusterName: String
 
-  def describeVersion:String
+  def describeVersion: String
 
 }

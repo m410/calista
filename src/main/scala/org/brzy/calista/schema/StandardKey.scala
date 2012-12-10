@@ -22,48 +22,47 @@ import org.brzy.calista.serializer.Serializers
 /**
  * A key can have one of two parents, a super column or a column family.  This is a standard
  * key which has a column family as a parent.
- * 
+ *
  * @author Michael Fortin
  */
-class StandardKey[K] protected[schema] (val key:K, val family:Family) extends Key{
+class StandardKey[K] protected[schema](val key: K, val family: Family) extends Key {
 
   def keyBytes = toBytes(key)
 
-  def columnPath = ColumnPath(family.name,null,null)
+  def columnPath = ColumnPath(family.name, null, null)
 
-  def apply[N](name: N) = new ColumnName(name,this)
+  def apply[N](name: N) = new ColumnName(name, this)
 
 
-
-  def column[C:Manifest,V:Manifest](column:C, value:V) = {
-    new Column(column,value,new Date(), this)
+  def column[C: Manifest, V: Manifest](column: C, value: V) = {
+    new Column(column, value, new Date(), this)
   }
 
 
   def list = {
-    Calista.value.sliceRange(new SliceRange(key=this,max=100))
+    Calista.value.sliceRange(new SliceRange(key = this, max = 100))
   }
 
-  def map[B](f:Row => B):Seq[B] = {
+  def map[B](f: Row => B): Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       seq = seq :+ f(iterator.next())
 
     seq.toSeq
   }
 
 
-  def foreach(f:Row =>Unit) {
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+  def foreach(f: Row => Unit) {
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
 
-  override def toString = family + "("+key+")"
+  override def toString = family + "(" + key + ")"
 }

@@ -28,22 +28,22 @@ import org.brzy.calista.Calista
  *
  * @author Michael Fortin
  */
-class Column[N,V] protected[schema] (val name: N, val value: V, val timestamp: Date, val parent: Key) {
-	
-	/**
-	 * Return the name converted to bytes.
-	 */
+class Column[N, V] protected[schema](val name: N, val value: V, val timestamp: Date, val parent: Key) {
+
+  /**
+   * Return the name converted to bytes.
+   */
   def nameBytes = Serializers.toBytes(name) // TODO This doesn't allow for custom serializers
 
-	/**
-	 * Return the value converted to bytes.
-	 */
+  /**
+   * Return the value converted to bytes.
+   */
   def valueBytes = Serializers.toBytes(value) // TODO This doesn't allow for custom serializers
 
-	/**
-	 * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
-	 * directly.
-	 */
+  /**
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
   def columnPath = {
     val superCol = parent match {
       case s: SuperColumn[_] => s.nameBytes
@@ -53,10 +53,10 @@ class Column[N,V] protected[schema] (val name: N, val value: V, val timestamp: D
     ColumnPath(parent.family.name, superCol, nameBytes)
   }
 
-	/**
-	 * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
-	 * directly.
-	 */
+  /**
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
   def columnParent: ColumnParent = parent match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
     case s: CounterKey[_] => ColumnParent(s.family.name, null)
@@ -72,5 +72,5 @@ class Column[N,V] protected[schema] (val name: N, val value: V, val timestamp: D
     session.get(this)
   }
 
-  override def toString = parent.toString + "("+name+","+value+")"
+  override def toString = parent.toString + "(" + name + "," + value + ")"
 }

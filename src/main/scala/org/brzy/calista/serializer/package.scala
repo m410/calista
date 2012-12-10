@@ -16,7 +16,7 @@ package org.brzy.calsta
 
 /**
  * Convert byte arrays used by cassandra to and from their data types.
- * 
+ *
  * @author Michael Fortin
  */
 package object serializer

@@ -29,7 +29,7 @@ import collection.Iterator
  *
  * @author Michael Fortin
  */
-class SliceRange protected[schema] (
+class SliceRange protected[schema](
         val key: Key,
         val startBytes: Array[Byte] = Array.empty[Byte],
         val start: Option[Any] = None,
@@ -37,22 +37,22 @@ class SliceRange protected[schema] (
         val finish: Option[Any] = None,
         val reverseList: Boolean = false,
         val max: Int = 100
-        ){
+        ) {
 
 
-	def keyBytes = key.keyBytes
+  def keyBytes = key.keyBytes
 
-  def copy(start:Array[Byte], finish:Array[Byte]) = {
+  def copy(start: Array[Byte], finish: Array[Byte]) = {
     new SliceRange(key, start, None, finish, None, reverseList, max)
   }
 
-  def from[T<:Any:Manifest](startKey: T)():SliceRange = {
+  def from[T <: Any : Manifest](startKey: T)(): SliceRange = {
     def startKeyBytes = Serializers.toBytes(startKey).array()
     new SliceRange(key, startKeyBytes, Option(startKey), finishBytes, finish, reverseList, max)
   }
 
 
-  def to[T<:Any:Manifest](finishCol: T):SliceRange = {
+  def to[T <: Any : Manifest](finishCol: T): SliceRange = {
     def finishColBytes = Serializers.toBytes(finishCol).array()
     new SliceRange(key, startBytes, start, finishColBytes, Option(finishCol), reverseList, max)
   }
@@ -61,7 +61,7 @@ class SliceRange protected[schema] (
     new SliceRange(key, startBytes, start, finishBytes, finish, true, max)
   }
 
-  def size(maxResults:Int) = {
+  def size(maxResults: Int) = {
     new SliceRange(key, startBytes, start, finishBytes, finish, reverseList, maxResults)
   }
 
@@ -74,19 +74,19 @@ class SliceRange protected[schema] (
     case s: SuperCounterColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
-  def foreach(f:Row =>Unit) {
-    val iterator  = this.iterator
+  def foreach(f: Row => Unit) {
+    val iterator = this.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
 
-  def map[B](f:Row => B):Seq[B] = {
+  def map[B](f: Row => B): Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val iterator  = this.iterator
+    val iterator = this.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       seq :+ f(iterator.next())
 
     seq.toSeq
@@ -97,10 +97,10 @@ class SliceRange protected[schema] (
     session.sliceRange(this)
   }
 
-  def iterator:Iterator[Row] = {
+  def iterator: Iterator[Row] = {
     val session = Calista.value
     session.scrollSliceRange(this)
   }
 
-  override def toString = key + "("+start+":"+finish+")"
+  override def toString = key + "(" + start + ":" + finish + ")"
 }

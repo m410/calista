@@ -21,17 +21,17 @@ import org.apache.commons.lang.builder.ToStringBuilder
 
 /**
  * A single row in the data store.
- * 
+ *
  * @author Michael Fortin
  */
 class Row(
-    _rowType:RowType,
-    _family:String,
-    _key:ByteBuffer,
-    _superColumn:ByteBuffer,
-    _column:ByteBuffer,
-    _value:ByteBuffer,
-    _timestamp:Date) {
+        _rowType: RowType,
+        _family: String,
+        _key: ByteBuffer,
+        _superColumn: ByteBuffer,
+        _column: ByteBuffer,
+        _value: ByteBuffer,
+        _timestamp: Date) {
 
   def rowType = _rowType
 
@@ -40,7 +40,7 @@ class Row(
   def key = _key
 
   def superColumn = _rowType match {
-    case Super =>  _superColumn
+    case Super => _superColumn
     case SuperCounter => _superColumn
     case _ => throw new InvalidRowTypeAccessException("superColumn does not apply to: " + _rowType)
   }
@@ -50,21 +50,21 @@ class Row(
   def value = _value
 
   def timestamp = _rowType match {
-    case Standard =>  _timestamp
+    case Standard => _timestamp
     case Super => _timestamp
     case _ => throw new InvalidRowTypeAccessException("timestamp does not apply to: " + _rowType)
   }
 
-  def keyAs[T:Manifest]:T = as[T](key)
+  def keyAs[T: Manifest]: T = as[T](key)
 
-  def superColumnAs[T:Manifest]:T = as[T](superColumn)
+  def superColumnAs[T: Manifest]: T = as[T](superColumn)
 
-  def columnAs[T:Manifest]:T = as[T](column)
+  def columnAs[T: Manifest]: T = as[T](column)
 
-  def valueAs[T:Manifest]:T = as[T](value)
+  def valueAs[T: Manifest]: T = as[T](value)
 
-  protected[this] def as[T:Manifest](b:ByteBuffer):T =
-      Serializers.fromClassBytes(manifest[T].erasure, b).asInstanceOf[T]
+  protected[this] def as[T: Manifest](b: ByteBuffer): T =
+    Serializers.fromClassBytes(manifest[T].erasure, b).asInstanceOf[T]
 
-  override def toString = new ToStringBuilder(this).append("rowType",rowType.name).toString
+  override def toString = new ToStringBuilder(this).append("rowType", rowType.name).toString
 }

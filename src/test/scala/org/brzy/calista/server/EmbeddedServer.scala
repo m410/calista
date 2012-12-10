@@ -94,7 +94,7 @@ object EmbeddedServer {
     log.info("******************** Test")
     system.createSession.addKeySpace(KeyspaceDefinition(
       name = "Test",
-//      strategyClass = "org.apache.cassandra.locator.NetworkTopologyStrategy",
+      //      strategyClass = "org.apache.cassandra.locator.NetworkTopologyStrategy",
       strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
       families = List.empty[FamilyDefinition]))
 

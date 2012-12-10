@@ -39,21 +39,21 @@ case class Mapping[T <: AnyRef : Manifest](
   protected[this] val log = LoggerFactory.getLogger(classOf[Mapping[_]])
 
   /**
-	 * Creates a new instance from the key and list of columns.
-	 */
-  def newInstance[K:Manifest,S:Manifest](key:K, superColumn:Option[S], columns: ResultSet): T = {
-    val colMap = columns.rows.map(r=>{
+   * Creates a new instance from the key and list of columns.
+   */
+  def newInstance[K: Manifest, S: Manifest](key: K, superColumn: Option[S], columns: ResultSet): T = {
+    val colMap = columns.rows.map(r => {
       columnNameSerializer.fromBytes(r.column) -> r
     }).toMap
 
-    log.debug("column names: {}", colMap.map(_._1).mkString("[",", ","]"))
+    log.debug("column names: {}", colMap.map(_._1).mkString("[", ", ", "]"))
 
     val descriptor = descriptorOf[T]
     val builder = descriptor.newBuilder()
     val attributeKey = attributes.find(_.isInstanceOf[Key]).get
     val keyProperty = descriptor.properties.find(_.name == attributeKey.name).get
 
-    if(log.isDebugEnabled)
+    if (log.isDebugEnabled)
       log.debug("key: " + keyProperty + "='" + key + "'")
 
     builder.set(keyProperty, key)
@@ -63,14 +63,14 @@ case class Mapping[T <: AnyRef : Manifest](
         val attributeSuCol = attributes.find(_.isInstanceOf[SuperColumn]).get
         val scProperty = descriptor.properties.find(_.name == attributeSuCol.name).get
 
-        if(log.isDebugEnabled)
+        if (log.isDebugEnabled)
           log.debug("super: " + scProperty + "='" + sc + "'")
 
         builder.set(scProperty, sc)
       case _ =>
     }
 
-    attributes.filter(_.isInstanceOf[Column]).foreach(column =>{
+    attributes.filter(_.isInstanceOf[Column]).foreach(column => {
       val prop = descriptor.properties.find(_.name == column.name).get
 
       val value = colMap.get(column.name) match {
@@ -78,7 +78,7 @@ case class Mapping[T <: AnyRef : Manifest](
         case _ => null
       }
 
-      if(log.isDebugEnabled)
+      if (log.isDebugEnabled)
         log.debug("column: " + prop + "='" + value + "'")
 
       builder.set(prop, value)
@@ -89,7 +89,7 @@ case class Mapping[T <: AnyRef : Manifest](
       builder.result().asInstanceOf[T]
     }
     catch {
-      case i:IllegalArgumentException =>
+      case i: IllegalArgumentException =>
         throw new BuilderInstanceException("Could not create instance of " +
                 manifest[T].erasure.getName +
                 " with parameters: " +
@@ -97,16 +97,16 @@ case class Mapping[T <: AnyRef : Manifest](
     }
   }
 
-	/**
-	 * Creates a list of columns from the persistable object.
-	 */
-  def toColumns(instance: T): List[SColumn[_,_]] = {
+  /**
+   * Creates a list of columns from the persistable object.
+   */
+  def toColumns(instance: T): List[SColumn[_, _]] = {
     val descriptor = descriptorOf[T]
     val key = attributes.find(_.isInstanceOf[Key]).get
     val keyValue = descriptor.get(instance, key.name)
     val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
 
-    attributes.filter(c=>{
+    attributes.filter(c => {
       if (c.isInstanceOf[Column]) {
         val column = c.asInstanceOf[Column]
         descriptor.get(instance, column.name) != null
@@ -114,8 +114,8 @@ case class Mapping[T <: AnyRef : Manifest](
       else {
         false
       }
-    }).map(attr=>{
-      val columnValue = descriptor.get(instance,attr.name)
+    }).map(attr => {
+      val columnValue = descriptor.get(instance, attr.name)
 
       superColOption match {
         case Some(s) =>
@@ -127,16 +127,16 @@ case class Mapping[T <: AnyRef : Manifest](
     }).toList
   }
 
-	/**
-	 *
-	 */
+  /**
+   *
+   */
   def toKey(t: T): Either[SuperKey[_], StandardKey[_]] = {
     val key = attributes.find(_ match {
-      case k:Key => true
+      case k: Key => true
       case _ => false
     }).get
     val descriptor = descriptorOf[T]
-    val keyValue = descriptor.get(t,key.name)
+    val keyValue = descriptor.get(t, key.name)
 
     if (attributes.find(_.isInstanceOf[SuperColumn]).isDefined)
       Left(SuperFamily(family)(keyValue))

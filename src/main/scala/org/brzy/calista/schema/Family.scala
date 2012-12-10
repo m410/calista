@@ -25,9 +25,9 @@ import org.brzy.calista.serializer.Serializers._
  */
 trait Family {
 
-  def name:String
+  def name: String
 
-  def apply[K](key: K):Key
+  def apply[K](key: K): Key
 
   def to[K](key: K) = {
     def keyBytes = toBytes(key).array()
@@ -36,7 +36,7 @@ trait Family {
 
   def from[K](key: K) = {
     def keyBytes = toBytes(key).array()
-    new KeyRange(start = Option(key), startBytes = keyBytes, columnFamily =  this)
+    new KeyRange(start = Option(key), startBytes = keyBytes, columnFamily = this)
   }
 
   def definition = try {
@@ -46,9 +46,9 @@ trait Family {
     }
   }
   catch {
-    case n:NullPointerException => throw new SessionScopeException("Out of session scope",n)
+    case n: NullPointerException => throw new SessionScopeException("Out of session scope", n)
   }
 
-  override def toString = "ColumnFamily("+name+")"
+  override def toString = "ColumnFamily(" + name + ")"
 
 }

@@ -23,7 +23,7 @@ import server.EmbeddedTest
 
 class UsageTest extends JUnitSuite with EmbeddedTest {
 
-  @Test def keyslice() {
+  @Test def testKeyRange() {
     sessionManager.doWith {
       session =>
         StandardFamily("StandardFamily")("key1")("column").set("v")
@@ -103,11 +103,13 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
 
         val superColumnPred = key.predicate(Array("column", "column2"))
         assertTrue(superColumnPred.isInstanceOf[SlicePredicate[_]])
+
         val superColumnSlice = key.from("begin").to("end")
         assertTrue(superColumnSlice.isInstanceOf[SliceRange])
 
         val superColumnPred2 = key("superColumn").predicate(Array("column", "column2"))
         assertTrue(superColumnPred2.isInstanceOf[SlicePredicate[_]])
+
         val superColumnSlice2 = key("superColumn").from("begin").to("end")
         assertTrue(superColumnSlice2.isInstanceOf[SliceRange])
     }
@@ -127,7 +129,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertTrue(counter.isInstanceOf[CounterColumnName[_]])
         counter.add(5)
         counter.add(3)
-        counter.add(2)
+        counter += 2
         assert(counter.count == 10, "could should be 6 but was " + counter.count)
 
         val range = key.from("a").to("z")

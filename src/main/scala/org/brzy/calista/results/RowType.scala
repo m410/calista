@@ -18,10 +18,10 @@ import org.apache.commons.lang.builder.ToStringBuilder
 
 /**
  * Marks each return row in the resultSet as the type of row it is in the data store.
- * 
+ *
  * @author Michael Fortin
  */
-class RowType private (val name:String) {
+class RowType private(val name: String) {
   override def toString = new ToStringBuilder(this).append(name).toString
 }
 

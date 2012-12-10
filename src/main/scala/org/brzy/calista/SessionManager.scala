@@ -53,8 +53,8 @@ class SessionManager(keySpace: String, url: String, port: Int = 9160) {
       KeyspaceDefinition(client.describe_keyspace(keySpace))
     }
     catch {
-      case e:Exception =>
-        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keySpace,e)
+      case e: Exception =>
+        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keySpace, e)
         KeyspaceDefinition(
           name = keySpace,
           strategyClass = "",
@@ -131,7 +131,7 @@ class SessionManager(keySpace: String, url: String, port: Int = 9160) {
    *
    * @see SessionImpl
    */
-  def createSession:Session = new SessionImpl(host, keyspaceDefinition)
+  def createSession: Session = new SessionImpl(host, keyspaceDefinition)
 
   /**
    * Manaages the life cycle of a session automatically.

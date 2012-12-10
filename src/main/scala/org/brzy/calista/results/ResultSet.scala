@@ -17,46 +17,46 @@ import collection.mutable.ListBuffer
 
 /**
  * A result set for a query on the cassandra data store.
- * 
+ *
  * @author Michael Fortin
  */
-case class ResultSet(rows:List[Row]) {
+case class ResultSet(rows: List[Row]) {
 
   def size = rows.size
 
   def isEmpty = rows.isEmpty
-  
+
   /**
    * Converts the rows returned by the query into a map where the key is the column name.
    */
-  def toColumnMap[T:Manifest]:Map[T,Row] = rows.map(r=>r.columnAs[T] -> r).toMap
+  def toColumnMap[T: Manifest]: Map[T, Row] = rows.map(r => r.columnAs[T] -> r).toMap
 
   /**
    * converts the returned rows to a map where the key in the datastore is the key of the map.
    */
-  def toKeyRows[T:Manifest]:Map[T,List[Row]] = {
-    val map = rows.map(r=>r.keyAs[T] -> ListBuffer.empty[Row]).toMap
-    rows.foreach(r=>map(r.keyAs[T]) += r)
-    map.map(m=> m._1 -> m._2.toList)
+  def toKeyRows[T: Manifest]: Map[T, List[Row]] = {
+    val map = rows.map(r => r.keyAs[T] -> ListBuffer.empty[Row]).toMap
+    rows.foreach(r => map(r.keyAs[T]) += r)
+    map.map(m => m._1 -> m._2.toList)
   }
 
-  def toKeySuperRows[K:Manifest,S:Manifest]:Map[(K,S),List[Row]] = {
-    val map = rows.map(r=> (r.keyAs[K]->r.superColumnAs[S]) -> ListBuffer.empty[Row]).toMap
-    rows.foreach(r=>map((r.keyAs[K]->r.superColumnAs[S])) += r)
-    map.map(m=> m._1 -> m._2.toList)
+  def toKeySuperRows[K: Manifest, S: Manifest]: Map[(K, S), List[Row]] = {
+    val map = rows.map(r => (r.keyAs[K] -> r.superColumnAs[S]) -> ListBuffer.empty[Row]).toMap
+    rows.foreach(r => map((r.keyAs[K] -> r.superColumnAs[S])) += r)
+    map.map(m => m._1 -> m._2.toList)
   }
 
   /**
    * Converts the rows to arrays of the supplied data types.  This applies to standard columns
    * only and the values have to be of the same type.
    */
-  def toArrays[K:Manifest,N:Manifest,V:Manifest] =
-      rows.map(r=> Array(r.keyAs[K],r.columnAs[N],r.valueAs[V]))
+  def toArrays[K: Manifest, N: Manifest, V: Manifest] =
+    rows.map(r => Array(r.keyAs[K], r.columnAs[N], r.valueAs[V]))
 
   /**
    * Converts the rows to arrays of the supplied data types.  This applies to super columns
    * only and the values have to be of the same data type.
    */
-  def toSuperArrays[K:Manifest,S:Manifest,N:Manifest,V:Manifest] =
-      rows.map(r=> Array(r.keyAs[K],r.superColumnAs[S],r.columnAs[N],r.valueAs[V]))
+  def toSuperArrays[K: Manifest, S: Manifest, N: Manifest, V: Manifest] =
+    rows.map(r => Array(r.keyAs[K], r.superColumnAs[S], r.columnAs[N], r.valueAs[V]))
 }

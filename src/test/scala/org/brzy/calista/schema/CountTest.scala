@@ -21,20 +21,22 @@ import org.brzy.calista.server.EmbeddedTest
 
 class CountTest extends JUnitSuite with EmbeddedTest {
   @Test def countTest() {
-    sessionManager.doWith { session =>
-      val key = StandardFamily("Standard")("count")
-      key("column5").set("value0")
-      key("column4").set("value1")
-      key("column3").set("value2")
-      key("column2").set("value3")
-      key("column1").set("value4")
+    sessionManager.doWith {
+      session =>
+        val key = StandardFamily("Standard")("count")
+        key("column5").set("value0")
+        key("column4").set("value1")
+        key("column3").set("value2")
+        key("column2").set("value3")
+        key("column1").set("value4")
     }
 
-    sessionManager.doWith { session =>
-      val key = StandardFamily("Standard")("count")
-      val amount = session.count(key)
-      assertNotNull(amount)
-      assertEquals(5,amount)
+    sessionManager.doWith {
+      session =>
+        val key = StandardFamily("Standard")("count")
+        val amount = session.count(key)
+        assertNotNull(amount)
+        assertEquals(5, amount)
     }
   }
 }

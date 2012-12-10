@@ -5,4 +5,4 @@ package org.brzy.calista.ocm
  *
  * @author Michael Fortin
  */
-class BuilderInstanceException(msg:String, cause:Throwable) extends RuntimeException(msg,cause)
+class BuilderInstanceException(msg: String, cause: Throwable) extends RuntimeException(msg, cause)

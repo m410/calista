@@ -32,33 +32,31 @@ class SuperKey[K] protected[schema](val key: K, val family: Family) extends Key 
   def apply[N](sKey: N) = new SuperColumn(sKey, this)
 
 
-
-
   def list = {
-    Calista.value.sliceRange(new SliceRange(key=this,max=100))
+    Calista.value.sliceRange(new SliceRange(key = this, max = 100))
   }
 
-  def map[B](f:Row => B):Seq[B] = {
+  def map[B](f: Row => B): Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       seq = seq :+ f(iterator.next())
 
     seq.toSeq
   }
 
 
-  def foreach(f:Row =>Unit) {
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+  def foreach(f: Row => Unit) {
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
 
-  override def toString = family + "("+key+")"
+  override def toString = family + "(" + key + ")"
 
 }

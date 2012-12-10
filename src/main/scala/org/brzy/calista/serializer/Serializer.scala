@@ -24,7 +24,8 @@ import java.util.{UUID, Date}
  * @author Michael Fortin
  */
 trait Serializer[T] {
-  val typeManifest:Manifest[T]
+  val typeManifest: Manifest[T]
+
   def serializedClass = typeManifest.erasure
 
   def toBytes(t: T): ByteBuffer
@@ -47,7 +48,7 @@ object Serializers {
 
 
   def toBytes[T](t: T) = t match {
-  	case BooleanSerializer(s) => BooleanSerializer.toBytes(s)
+    case BooleanSerializer(s) => BooleanSerializer.toBytes(s)
     case UTF8Serializer(s) => UTF8Serializer.toBytes(s)
     case UUIDSerializer(s) => UUIDSerializer.toBytes(s)
     case LongSerializer(s) => LongSerializer.toBytes(s)
@@ -58,7 +59,7 @@ object Serializers {
     case _ => throw new NoSerializerException("No Serializer or type: %s".format(t))
   }
 
-  def fromBytes[T](t:T,b:ByteBuffer):T = t match {
+  def fromBytes[T](t: T, b: ByteBuffer): T = t match {
     case UTF8Serializer(s) => UTF8Serializer.fromBytes(b).asInstanceOf[T]
     case UUIDSerializer(s) => UUIDSerializer.fromBytes(b).asInstanceOf[T]
     case LongSerializer(s) => LongSerializer.fromBytes(b).asInstanceOf[T]
@@ -70,7 +71,7 @@ object Serializers {
     case _ => throw new NoSerializerException("No Serializer or type: %s".format(t))
   }
 
-  def fromClassBytes[T](t:Class[T],b:ByteBuffer):T = t match {
+  def fromClassBytes[T](t: Class[T], b: ByteBuffer): T = t match {
     case StringClass => UTF8Serializer.fromBytes(b).asInstanceOf[T]
     case UUIDClass => UUIDSerializer.fromBytes(b).asInstanceOf[T]
     case LongClass => LongSerializer.fromBytes(b).asInstanceOf[T]
@@ -133,9 +134,13 @@ case object UUIDSerializer extends Serializer[UUID] {
     val lsb = uuid.getLeastSignificantBits
     val buffer = new Array[Byte](16)
 
-    (0 until 8).foreach {(i) => buffer(i) = (msb >>> 8 * (7 - i)).asInstanceOf[Byte]}
-    (8 until 16).foreach {(i) => buffer(i) = (lsb >>> 8 * (7 - i)).asInstanceOf[Byte]}
-    ByteBuffer.wrap(buffer,0,16)
+    (0 until 8).foreach {
+      (i) => buffer(i) = (msb >>> 8 * (7 - i)).asInstanceOf[Byte]
+    }
+    (8 until 16).foreach {
+      (i) => buffer(i) = (lsb >>> 8 * (7 - i)).asInstanceOf[Byte]
+    }
+    ByteBuffer.wrap(buffer, 0, 16)
   }
 
   def unapply(u: AnyRef) =
@@ -189,10 +194,10 @@ case object DoubleSerializer extends Serializer[Double] {
 case object DateSerializer extends Serializer[Date] {
   val typeManifest = manifest[Date]
 
-	def toBytes(v:Date) = LongSerializer.toBytes(v.getTime)
+  def toBytes(v: Date) = LongSerializer.toBytes(v.getTime)
 
-	def fromBytes(v:ByteBuffer) = new Date(LongSerializer.fromBytes(v))
-  
+  def fromBytes(v: ByteBuffer) = new Date(LongSerializer.fromBytes(v))
+
   def unapply(u: AnyRef) =
     if (u.isInstanceOf[Date])
       Some(u.asInstanceOf[Date])
@@ -214,6 +219,7 @@ case object IntSerializer extends Serializer[Int] {
     b.rewind();
     b
   }
+
   def fromBytes(bytes: ByteBuffer) = bytes.getInt(0)
 
   def unapply(u: AnyRef) =
@@ -229,20 +235,20 @@ case object IntSerializer extends Serializer[Int] {
 case object BooleanSerializer extends Serializer[Boolean] {
   val typeManifest = manifest[Boolean]
 
-	def toBytes(obj:Boolean):ByteBuffer = {
-    val b:Array[Byte] = Array(1)
-    b(0) =  if(obj == true) 1.asInstanceOf[Byte] else 0.asInstanceOf[Byte]
+  def toBytes(obj: Boolean): ByteBuffer = {
+    val b: Array[Byte] = Array(1)
+    b(0) = if (obj == true) 1.asInstanceOf[Byte] else 0.asInstanceOf[Byte]
     ByteBuffer.wrap(b);
   }
 
-	  def fromBytes(bytes:ByteBuffer):Boolean =  bytes.array()(0) == 1.asInstanceOf[Byte]
+  def fromBytes(bytes: ByteBuffer): Boolean = bytes.array()(0) == 1.asInstanceOf[Byte]
 
-	  def unapply(u: Any) =
-	    if (u.isInstanceOf[java.lang.Boolean]) 
-	      Some(u.asInstanceOf[Boolean])
-	    else
-	      None
-	
+  def unapply(u: Any) =
+    if (u.isInstanceOf[java.lang.Boolean])
+      Some(u.asInstanceOf[Boolean])
+    else
+      None
+
 }
 
 /**

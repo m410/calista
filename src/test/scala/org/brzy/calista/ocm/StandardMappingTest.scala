@@ -18,30 +18,33 @@ import org.junit.Test
 import org.junit.Assert._
 
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
+import org.brzy.calista.serializer.{UTF8Serializer, IntSerializer, DateSerializer}
 import java.util.Date
 import org.brzy.calista.schema.StandardFamily
 
-class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
-	val personKey  = "mappingKey"
-	val personKeyPartial  = "mappingKeyPartial"
-	val personDate = new Date
-	
+class StandardMappingTest extends JUnitSuite with EmbeddedTest {
+  val personKey = "mappingKey"
+  val personKeyPartial = "mappingKeyPartial"
+  val personDate = new Date
+
   @Test def mapEntity() {
-	 	sessionManager.doWith { session =>
-			val person = new Person(personKey,"name",100,personDate)
-			person.insert()
-		}
+    sessionManager.doWith {
+      session =>
+        val person = new Person(personKey, "name", 100, personDate)
+        person.insert()
+    }
 
-	 	sessionManager.doWith { session =>
-       val key = StandardFamily("Person")(personKey)
-       val columns = key.list
-       assertNotNull(columns)
-       assertEquals(3,columns.size)
-		}
+    sessionManager.doWith {
+      session =>
+        val key = StandardFamily("Person")(personKey)
+        val columns = key.list
+        assertNotNull(columns)
+        assertEquals(3, columns.size)
+    }
 
-		sessionManager.doWith { session =>
-			val person = Person.get(personKey) match {
+    sessionManager.doWith {
+      session =>
+      val person = Person.get(personKey) match {
         case Some(person) =>
           assertNotNull(person)
           assertNotNull(person.key)
@@ -51,45 +54,48 @@ class StandardMappingTest extends JUnitSuite  with EmbeddedTest {
         case _ =>
           fail("No person by key")
       }
-		}
+    }
   }
 
   @Test def mapPartialEntity() {
-	 	sessionManager.doWith { session =>
-			val person = new Person(personKeyPartial,"name",100,null)
-			person.insert()
-		}
+    sessionManager.doWith {
+      session =>
+        val person = new Person(personKeyPartial, "name", 100, null)
+        person.insert()
+    }
 
-	 	sessionManager.doWith { session =>
-       val key = StandardFamily("Person")(personKeyPartial)
-       val columns = key.list
-       assertNotNull(columns)
-       assertEquals(2,columns.size)
-		}
+    sessionManager.doWith {
+      session =>
+        val key = StandardFamily("Person")(personKeyPartial)
+        val columns = key.list
+        assertNotNull(columns)
+        assertEquals(2, columns.size)
+    }
 
-		sessionManager.doWith { session =>
-			Person.get(personKeyPartial) match {
-        case Some(person) =>
-          assertNotNull(person)
-          assertNotNull(person.key)
-          assertNotNull(person.name)
-          assertNotNull(person.count)
-          assertNull(person.created)
-        case _ =>
-          fail("No person by key")
-      }
-		}
+    sessionManager.doWith {
+      session =>
+        Person.get(personKeyPartial) match {
+          case Some(person) =>
+            assertNotNull(person)
+            assertNotNull(person.key)
+            assertNotNull(person.name)
+            assertNotNull(person.count)
+            assertNull(person.created)
+          case _ =>
+            fail("No person by key")
+        }
+    }
   }
 }
 
-case class Person(key:String,name:String,count:Int,created:Date)
+case class Person(key: String, name: String, count: Int, created: Date)
 
-object Person extends StandardDao[String,Person] {
+object Person extends StandardDao[String, Person] {
   def mapping = Mapping[Person](
-      "Person",
-      UTF8Serializer,
-			Key("key"),
-      Column("name"),
-      Column("count",IntSerializer),
-      Column("created",DateSerializer))
+    "Person",
+    UTF8Serializer,
+    Key("key"),
+    Column("name"),
+    Column("count", IntSerializer),
+    Column("created", DateSerializer))
 }

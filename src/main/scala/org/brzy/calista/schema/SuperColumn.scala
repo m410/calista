@@ -38,7 +38,6 @@ class SuperColumn[N] protected[schema](val name: N, val parent: SuperKey[_])
   def apply[V](name: V) = new ColumnName(name, this)
 
 
-
   def column[C: Manifest, V: Manifest](column: C, value: V) = {
     new Column(column, value, new Date(), this)
   }

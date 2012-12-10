@@ -23,8 +23,8 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-class SuperCounterColumn[N] protected[schema] (val name: N, val parent: SuperCounterKey[_])
-    extends Key{
+class SuperCounterColumn[N] protected[schema](val name: N, val parent: SuperCounterKey[_])
+        extends Key {
 
   def keyBytes = parent.keyBytes
 
@@ -34,37 +34,37 @@ class SuperCounterColumn[N] protected[schema] (val name: N, val parent: SuperCou
 
   def columnPath = ColumnPath(parent.family.name, nameBytes, null)
 
-  def apply[V](name: V) = new CounterColumnName(name,this)
+  def apply[V](name: V) = new CounterColumnName(name, this)
 
 
-  def column[C:Manifest,V:Manifest](column:C, value:V) = {
-    new Column(column,value,new Date(), this)
+  def column[C: Manifest, V: Manifest](column: C, value: V) = {
+    new Column(column, value, new Date(), this)
   }
 
   def list = {
-    Calista.value.sliceRange(new SliceRange(key=this,max=100))
+    Calista.value.sliceRange(new SliceRange(key = this, max = 100))
   }
 
-  def map[B](f:Row => B):Seq[B] = {
+  def map[B](f: Row => B): Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       seq :+ f(iterator.next())
 
     seq.toSeq
   }
 
-  def foreach(f:Row =>Unit) {
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+  def foreach(f: Row => Unit) {
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
 
-  override def toString = parent.toString + "("+name+")"
+  override def toString = parent.toString + "(" + name + ")"
 
 }

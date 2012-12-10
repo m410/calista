@@ -1,7 +1,7 @@
 package org.brzy.calista.system
 
 import org.scalastuff.scalabeans.Enum
-import org.apache.cassandra.thrift.{ColumnDef,IndexType=>CIndexType}
+import org.apache.cassandra.thrift.{ColumnDef, IndexType => CIndexType}
 
 /**
  * Column Definition
@@ -14,14 +14,14 @@ import org.apache.cassandra.thrift.{ColumnDef,IndexType=>CIndexType}
  *     4: optional string index_name
  * }
  * }}}
- * 
+ *
  * @author Michael Fortin
  */
 case class ColumnDefinition(
-    name:Array[Byte],
-    validationClass:String,
-    indexType:Option[IndexType],
-    indexName:Option[String]) {
+        name: Array[Byte],
+        validationClass: String,
+        indexType: Option[IndexType],
+        indexName: Option[String]) {
 
   def asColumnDef = {
     val cDef = new ColumnDef()
@@ -34,16 +34,17 @@ case class ColumnDefinition(
 }
 
 object ColumnDefinition {
-  def apply(d:ColumnDef) = {
+  def apply(d: ColumnDef) = {
     new ColumnDefinition(
       name = d.getName,
       validationClass = d.getValidation_class,
-      indexType = if(d.getIndex_type == null) None else Option(IndexType.KEYS),
+      indexType = if (d.getIndex_type == null) None else Option(IndexType.KEYS),
       indexName = Option(d.getIndex_name))
   }
 }
 
 class IndexType private()
+
 object IndexType extends Enum[IndexType] {
   val KEYS = new IndexType
 }

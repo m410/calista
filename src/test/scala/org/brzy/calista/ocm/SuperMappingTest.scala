@@ -18,31 +18,34 @@ import org.junit.Test
 import org.junit.Assert._
 
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.serializer.{UTF8Serializer,IntSerializer,DateSerializer}
+import org.brzy.calista.serializer.{UTF8Serializer, IntSerializer, DateSerializer}
 import java.util.Date
 import org.brzy.calista.Session
 import org.brzy.calista.schema.SuperFamily
 
-class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
+class SuperMappingTest extends JUnitSuite with EmbeddedTest {
   val familyName = "SPerson"
-	val personKey  = "super_key"
-	val personSuperColumn = "super_column"
-	val personDate = new Date
-	
+  val personKey = "super_key"
+  val personSuperColumn = "super_column"
+  val personDate = new Date
+
   @Test def mapEntity() {
-	 	sessionManager.doWith { session =>
-			val person = new SPerson(personKey,personSuperColumn,"name",100,personDate)
-			person.insert()
-		}
+    sessionManager.doWith {
+      session =>
+        val person = new SPerson(personKey, personSuperColumn, "name", 100, personDate)
+        person.insert()
+    }
 
-	 	sessionManager.doWith { session =>
-       val columns = SuperFamily(familyName)(personKey)(personSuperColumn).list
-       assertNotNull(columns)
-       assertEquals(3,columns.size)
-		}
+    sessionManager.doWith {
+      session =>
+        val columns = SuperFamily(familyName)(personKey)(personSuperColumn).list
+        assertNotNull(columns)
+        assertEquals(3, columns.size)
+    }
 
-		sessionManager.doWith { session =>
-			val person = SPerson.get(personKey, personSuperColumn) match {
+    sessionManager.doWith {
+      session =>
+      val person = SPerson.get(personKey, personSuperColumn) match {
         case Some(p) =>
           assertNotNull(p)
           assertNotNull(p.key)
@@ -52,28 +55,29 @@ class SuperMappingTest extends JUnitSuite  with EmbeddedTest {
         case _ =>
           fail("No person by key")
       }
-		}
-    sessionManager.doWith { (session:Session) =>
-      val columns = SuperFamily(familyName)(personKey).list
-      assertNotNull(columns)
-      assertEquals(3,columns.size) // returns 3 rows, one foe each value, even though its one key
+    }
+    sessionManager.doWith {
+      (session: Session) =>
+        val columns = SuperFamily(familyName)(personKey).list
+        assertNotNull(columns)
+        assertEquals(3, columns.size) // returns 3 rows, one foe each value, even though its one key
     }
   }
 }
 
-case class SPerson(key:String,
-    superColumn:String,
-    name:String,
-    count:Int,
-    created:Date)
+case class SPerson(key: String,
+        superColumn: String,
+        name: String,
+        count: Int,
+        created: Date)
 
-object SPerson extends SuperDao[String,String,SPerson] {
+object SPerson extends SuperDao[String, String, SPerson] {
   def mapping = new Mapping[SPerson](
-      "SPerson",
-      UTF8Serializer,
-			Key("key"),
-      SuperColumn("superColumn"),
-      Column("name"),
-      Column("count",IntSerializer),
-      Column("created",DateSerializer))
+    "SPerson",
+    UTF8Serializer,
+    Key("key"),
+    SuperColumn("superColumn"),
+    Column("name"),
+    Column("count", IntSerializer),
+    Column("created", DateSerializer))
 }

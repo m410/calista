@@ -47,12 +47,12 @@ import org.apache.cassandra.thrift.{ColumnOrSuperColumn => CassandraColumnOrSupe
  * @param host the host to connect too.
  * @param ksDef The KeySpace Definition used as a reference to map requests to the data store.
  * @param defaultConsistency The Default consistency to use when connecting to the data store.  It
- * 				defaults to Consistency.ONE.
+ *                           defaults to Consistency.ONE.
  *
  * @author Michael Fortin
  */
-class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency: Consistency = Consistency.ONE) extends Session{
-	private[this] val log = LoggerFactory.getLogger(classOf[SessionImpl])
+class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency: Consistency = Consistency.ONE) extends Session {
+  private[this] val log = LoggerFactory.getLogger(classOf[SessionImpl])
   private[this] var openSock = false
   private[this] lazy val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))
 
@@ -71,12 +71,12 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     case EACH_QUORUM => ConsistencyLevel.EACH_QUORUM
     case LOCAL_QUORUM => ConsistencyLevel.LOCAL_QUORUM
     case Consistency.All => ConsistencyLevel.ALL
-    case _ => throw new RuntimeException("Unknown Consistency level: "+c.toString)
+    case _ => throw new RuntimeException("Unknown Consistency level: " + c.toString)
   }
 
   def closeAndMakeNewSession = {
     close()
-    new SessionImpl(host,ksDef,defaultConsistency)
+    new SessionImpl(host, ksDef, defaultConsistency)
   }
 
   private[this] implicit def toColumnPath(c: ColumnPath) = {
@@ -95,7 +95,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     new CassandraKeyRange().setStart_key(kr.startBytes).setEnd_key(kr.finishBytes).setCount(kr.count)
   }
 
-  private[this] implicit def toColumn(c: Column[_,_]) = {
+  private[this] implicit def toColumn(c: Column[_, _]) = {
     val column = new CassandraColumn()
     column.setName(c.nameBytes)
     column.setValue(c.valueBytes)
@@ -112,11 +112,11 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
             .setFinish(sp.finishBytes)
             .setReversed(sp.reverseList)
             .setCount(sp.max)
-//    val r = new CassandraSliceRange(sp.startBytes, sp.finishBytes, sp.reverse, sp.max)
+    //    val r = new CassandraSliceRange(sp.startBytes, sp.finishBytes, sp.reverse, sp.max)
     new CassandraSlicePredicate().setSlice_range(r)
   }
 
-  private[this] def keyFor(c: {def parent:Key}) = c.parent match {
+  private[this] def keyFor(c: {def parent: Key}) = c.parent match {
     case s: SuperKey[_] => s.keyBytes
     case s: SuperCounterKey[_] => s.keyBytes
     case s: StandardKey[_] => s.keyBytes
@@ -125,19 +125,19 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     case s: SuperCounterColumn[_] => s.parent.keyBytes
   }
 
-  private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {
+  private def toRows(cos: CassandraColumnOrSuperColumn, familyName: String, key: ByteBuffer): List[Row] = {
     if (cos == null) {
       List.empty[Row]
     }
-    else if (cos.getSuper_column != null ) {
+    else if (cos.getSuper_column != null) {
       val rType = RowType.Super
       val superColumnName = ByteBuffer.wrap(cos.getSuper_column.getName)
-      cos.getSuper_column.getColumns.map(c=>{
+      cos.getSuper_column.getColumns.map(c => {
         val name = ByteBuffer.wrap(c.getName)
         val value = ByteBuffer.wrap(c.getValue)
         new Row(rType, familyName, key, superColumnName, name, value, new Date(c.getTimestamp))
       }).toList
-		}
+    }
     else if (cos.getColumn != null) {
       val name = ByteBuffer.wrap(cos.getColumn.getName)
       val value = ByteBuffer.wrap(cos.getColumn.getValue)
@@ -147,23 +147,23 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     }
     else if (cos.getCounter_super_column != null) {
       val rType = RowType.SuperCounter
-			val sCol = cos.getCounter_super_column
+      val sCol = cos.getCounter_super_column
       val sColName = ByteBuffer.wrap(sCol.getName)
-      sCol.getColumns.map(c=>{
+      sCol.getColumns.map(c => {
         val name = ByteBuffer.wrap(c.getName)
         val value = Serializers.toBytes(c.getValue)
         new Row(rType, familyName, key, sColName, name, value, null)
       }).toList
-		}
+    }
     else if (cos.getCounter_column != null) {
       val name = ByteBuffer.wrap(cos.getCounter_column.getName)
       val value = Serializers.toBytes(cos.getCounter_column.getValue)
       val timestamp = null
       val rowType = RowType.StandardCounter
-      List(new  Row(rowType, familyName, key, null, name, value, timestamp))
+      List(new Row(rowType, familyName, key, null, name, value, timestamp))
     }
     else {
-      throw new RuntimeException("Unknown column return type: '"+cos+"'" )
+      throw new RuntimeException("Unknown column return type: '" + cos + "'")
     }
   }
 
@@ -176,27 +176,27 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     d
   }
 
-	/**
-	 * socket connections are lazily and implicitly opened, but must be explicitly closed.  To end
+  /**
+   * socket connections are lazily and implicitly opened, but must be explicitly closed.  To end
    * a session this must be called.
-	 */
+   */
   def close() {
     if (openSock)
       sock.close()
     openSock = false
   }
 
-	/**
-	 * get the value of the column.  This assumes the input column does not have a value, this will
-	 * return a results.Column with the name and value
+  /**
+   * get the value of the column.  This assumes the input column does not have a value, this will
+   * return a results.Column with the name and value
    */
-  def get(column: Column[_,_]): Option[Row] = get(column, defaultConsistency)
+  def get(column: Column[_, _]): Option[Row] = get(column, defaultConsistency)
 
   /**
    * Increments a counter column.
    */
-  def add(column: Column[_,_], level: Consistency = defaultConsistency) {
-    log.trace("insert: {}",column)
+  def add(column: Column[_, _], level: Consistency = defaultConsistency) {
+    log.trace("insert: {}", column)
     val counter = new CounterColumn()
     counter.setName(column.nameBytes)
     counter.setValue(column.value.asInstanceOf[Long])
@@ -208,7 +208,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column[_,_], level: Consistency): Option[Row] = {
+  def get(column: Column[_, _], level: Consistency): Option[Row] = {
     try {
       val columnOrSuperColumn = client.get(keyFor(column), toColumnPath(column.columnPath), level)
       val list = toRows(columnOrSuperColumn, column.parent.family.name, column.parent.keyBytes)
@@ -220,7 +220,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     }
     catch {
       case e: NotFoundException =>
-        log.warn("NotFoundException caught, None returned for column: {}",column)
+        log.warn("NotFoundException caught, None returned for column: {}", column)
         Option(null)
     }
   }
@@ -228,8 +228,8 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column[_,_], level: Consistency = defaultConsistency) {
-    log.debug("################# insert: {}",column)
+  def insert(column: Column[_, _], level: Consistency = defaultConsistency) {
+    log.debug("################# insert: {}", column)
     client.insert(keyFor(column), column.columnParent, column, level)
   }
 
@@ -255,9 +255,9 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   /**
-	 * Remove a column and it's value.
+   * Remove a column and it's value.
    */
-  def remove(column: Column[_,_]) {
+  def remove(column: Column[_, _]) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
@@ -275,18 +275,18 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   /**
-	 * Removes a key by the path and timestamp with the given consistency level.
+   * Removes a key by the path and timestamp with the given consistency level.
    */
   def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency) {
     client.remove(k, path, timestamp, level)
   }
 
   def remove(key: SuperCounterColumn[_]) {
-    client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
+    client.remove_counter(key.keyBytes, ColumnPath(key.family.name, null, null), defaultConsistency)
   }
 
   /**
-	 * get the count of the number of columns for a key
+   * get the count of the number of columns for a key
    */
   def count(key: Key, level: Consistency = defaultConsistency): Long = {
     val columnParent = new CassandraColumnParent(key.family.name)
@@ -295,66 +295,70 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     client.get_count(key.keyBytes, columnParent, predicate, level)
   }
 
-	/**
-	 * List the columns by slice predicate.  This uses the default consistency.
+  /**
+   * List the columns by slice predicate.  This uses the default consistency.
    */
   def slice(predicate: SlicePredicate[_]): ResultSet = {
     slice(predicate, defaultConsistency)
   }
 
-	/**
-	 * List all the columns by slice predicate and consistency level.
+  /**
+   * List all the columns by slice predicate and consistency level.
    */
   def slice(predicate: SlicePredicate[_], level: Consistency): ResultSet = {
     val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
     val family = predicate.columnParent.family
     val key = predicate.key.keyBytes
-    ResultSet(results.flatMap(sc => { toRows(sc, family, key)}).toList)
+    ResultSet(results.flatMap(sc => {
+      toRows(sc, family, key)
+    }).toList)
   }
 
-	/**
-	 * List all the columns by slice range. This uses the default consistency.
+  /**
+   * List all the columns by slice range. This uses the default consistency.
    */
   def sliceRange(range: SliceRange): ResultSet = sliceRange(range, defaultConsistency)
 
-	/**
-	 * List all the columns by slice range and Consistency Level. This uses the default consistency.
+  /**
+   * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
   def sliceRange(range: SliceRange, level: Consistency): ResultSet = {
     val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     val family = range.columnParent.family
-    ResultSet(results.flatMap(sc => { toRows(sc, family, range.keyBytes)}).toList)
+    ResultSet(results.flatMap(sc => {
+      toRows(sc, family, range.keyBytes)
+    }).toList)
   }
 
   /**
-   *  Scroll through large slices by grabbing them form the data store in chunks.  This will
-   *  iterate over all elements including the start and end columns.
+   * Scroll through large slices by grabbing them form the data store in chunks.  This will
+   * iterate over all elements including the start and end columns.
    *
-   *  @param initSliceRange the slice range to iterate over.
+   * @param initSliceRange the slice range to iterate over.
    */
-  def scrollSliceRange(initSliceRange: SliceRange):Iterator[Row] = {
+  def scrollSliceRange(initSliceRange: SliceRange): Iterator[Row] = {
     new Iterator[Row] {
       private[this] var partial = sliceRange(initSliceRange)
       private[this] var index = 0
 
-      def hasNext:Boolean = {
-        if(partial.size > 0 && index == partial.size) {
+      def hasNext: Boolean = {
+        if (partial.size > 0 && index == partial.size) {
           import results.RowType._
           val lastRow = partial.rows.last
-          val partialLast:ByteBuffer = lastRow.rowType match {
+          val partialLast: ByteBuffer = lastRow.rowType match {
             case Standard => lastRow.column
             case StandardCounter => lastRow.column
             case Super => lastRow.superColumn
             case SuperCounter => lastRow.superColumn
           }
-          val sliceLast:ByteBuffer = ByteBuffer.wrap(initSliceRange.finishBytes)
+          val sliceLast: ByteBuffer = ByteBuffer.wrap(initSliceRange.finishBytes)
 
           // if doing a slice of the whole table, using empty arrays as the start and finish
           // of the slice, then this will never be false.  the
-          if(partialLast.compareTo(sliceLast) != 0) {
+          if (partialLast.compareTo(sliceLast) != 0) {
             partial = {
               val sliceCopy = initSliceRange.copy(start = partialLast.array(), finish = sliceLast.array())
-              log.debug("partial sliceCopy: {}",sliceCopy)
+              log.debug("partial sliceCopy: {}", sliceCopy)
               sliceRange(sliceCopy)
             }
             index = 1 // skip the first, because the slice is inclusive
@@ -363,9 +367,9 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
         index < partial.size
       }
 
-      def next():Row = {
+      def next(): Row = {
         index = index + 1
-        partial.rows(index -1)
+        partial.rows(index - 1)
       }
     }
   }
@@ -376,42 +380,45 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    */
   def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): ResultSet = {
     val columnParent = range.columnParent
-    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte],null))
+    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte], null))
     val slice = client.get_range_slices(columnParent, predicate, range, level)
     val family = range.columnParent.family
-    val list = slice.toList.flatMap(k=>{
-      k.getColumns.toList.flatMap(c=>{
+    val list = slice.toList.flatMap(k => {
+      k.getColumns.toList.flatMap(c => {
         val key = ByteBuffer.wrap(k.getKey)
-        toRows(c, family, key)})
+        toRows(c, family, key)
+      })
     })
     ResultSet(list)
   }
 
-	/**
-	 * List all the columns by Key range using the default consistency.
+  /**
+   * List all the columns by Key range using the default consistency.
    */
   def keyRange[T <: AnyRef](range: KeyRange[T]): ResultSet = {
-    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte],null))
+    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte], null))
     val results = client.get_range_slices(range.columnParent, predicate, range, defaultConsistency)
     val list = results.toList.flatMap(keyslice => {
       val key = ByteBuffer.wrap(keyslice.getKey)
       val family = range.columnParent.family
-      keyslice.getColumns.toList.flatMap(c => { toRows(c, family, key)})
+      keyslice.getColumns.toList.flatMap(c => {
+        toRows(c, family, key)
+      })
     })
     ResultSet(list)
   }
 
-  def query(query:String,compression:String = ""):ResultSet = {
-    val result = client.execute_cql_query(ByteBuffer.wrap(query.getBytes),Compression.NONE)
-  // todo finish me
-//    if (result.rows.size() > 0)
-//      ResultSet(result.rows.map(r=>toRows()).toList)
-//    else
-      ResultSet(List.empty[Row])
+  def query(query: String, compression: String = ""): ResultSet = {
+    val result = client.execute_cql_query(ByteBuffer.wrap(query.getBytes), Compression.NONE)
+    // todo finish me
+    //    if (result.rows.size() > 0)
+    //      ResultSet(result.rows.map(r=>toRows()).toList)
+    //    else
+    ResultSet(List.empty[Row])
   }
 
 
-  def addKeySpace(ks:KeyspaceDefinition){
+  def addKeySpace(ks: KeyspaceDefinition) {
     log.info("add keyspace: {}", ks)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
@@ -420,7 +427,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     sock.close()
   }
 
-  def updateKeySpace(keyspace:KeyspaceDefinition){
+  def updateKeySpace(keyspace: KeyspaceDefinition) {
     log.info("update keyspace: {}", keyspace)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
@@ -428,7 +435,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     sock.close()
   }
 
-  def dropKeySpace(keyspace:String){
+  def dropKeySpace(keyspace: String) {
     log.info("drop keyspace: {}", keyspace)
     val protocol = new TBinaryProtocol(sock)
     val c = new Cassandra.Client(protocol, protocol)
@@ -436,21 +443,22 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     sock.close()
   }
 
-  def addColumnFamily(family:FamilyDefinition){
+  def addColumnFamily(family: FamilyDefinition) {
     log.info("add columnFamily: {}", family)
     client.system_add_column_family(family.asCfDef)
   }
-  def updateColumnFamily(family:FamilyDefinition){
+
+  def updateColumnFamily(family: FamilyDefinition) {
     log.info("update columnFamily: {}", family)
     client.system_update_column_family(family.asCfDef)
   }
 
-  def dropColumnFamily(family:String){
+  def dropColumnFamily(family: String) {
     log.info("drop columnFamily: {}", family)
     client.system_drop_column_family(family)
   }
 
-  def describeKeySpace(name:String) = KeyspaceDefinition(client.describe_keyspace(name))
+  def describeKeySpace(name: String) = KeyspaceDefinition(client.describe_keyspace(name))
 
   def describeKeySpaces = client.describe_keyspaces().map(ksDef => {
     KeyspaceDefinition(ksDef)
@@ -460,7 +468,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 
   def describeVersion = client.describe_version()
 
-  def describeRing(keyspace:String) = client.describe_ring(keyspace).map(t=>TokenRange(t))
+  def describeRing(keyspace: String) = client.describe_ring(keyspace).map(t => TokenRange(t))
 
 
 }

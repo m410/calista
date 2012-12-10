@@ -23,7 +23,8 @@ import system.{FamilyDefinition, KeyspaceDefinition}
 class SessionManagerTest extends JUnitSuite with EmbeddedTest {
   val log = LoggerFactory.getLogger(getClass)
 
-  @Test @Ignore def testSchema() {
+  @Test
+  @Ignore def testSchema() {
     val mgr = new SessionManager("Test", "127.0.0.1")
     mgr.doWith({
       session =>

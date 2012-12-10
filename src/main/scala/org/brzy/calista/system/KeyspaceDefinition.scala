@@ -33,18 +33,18 @@ import collection.JavaConversions._
  *     6: optional bool durable_writes=1,
  * }
  * }}}
- * 
+ *
  * @see SessionManager.keyspaceDefinition
  * @author Michael Fortin
  */
 case class KeyspaceDefinition(
-    name:String,
-    strategyClass:String,
-    replicationFactor:Int = 1,
-    strategyOptions:Option[Map[String,String]] = None,
-    families:List[FamilyDefinition],
-    durableWrites:Boolean = true) {
-  
+        name: String,
+        strategyClass: String,
+        replicationFactor: Int = 1,
+        strategyOptions: Option[Map[String, String]] = None,
+        families: List[FamilyDefinition],
+        durableWrites: Boolean = true) {
+
   def toKsDef = {
     val d = new KsDef()
     d.setName(name)
@@ -59,24 +59,24 @@ case class KeyspaceDefinition(
 
   def logString = {
     val builder = new StringBuilder()
-        .append("\t").append("name=").append(name).append("\n")
-        .append("\t").append("strategyClass=").append(strategyClass).append("\n")
-        .append("\t").append("replicationFactor=").append(replicationFactor).append("\n")
-        .append("\t").append("strategyOptions=").append(strategyOptions).append("\n")
-        .append("\t").append("durableWrites=").append(durableWrites).append("\n")
+            .append("\t").append("name=").append(name).append("\n")
+            .append("\t").append("strategyClass=").append(strategyClass).append("\n")
+            .append("\t").append("replicationFactor=").append(replicationFactor).append("\n")
+            .append("\t").append("strategyOptions=").append(strategyOptions).append("\n")
+            .append("\t").append("durableWrites=").append(durableWrites).append("\n")
 
-    families.foreach(f=>builder.append("\t").append(f).append("\n"))
+    families.foreach(f => builder.append("\t").append(f).append("\n"))
     builder.toString()
   }
 }
 
 
 object KeyspaceDefinition {
-  def apply(kdef:KsDef) = {
+  def apply(kdef: KsDef) = {
     new KeyspaceDefinition(
-      name= kdef.getName,
+      name = kdef.getName,
       strategyClass = kdef.getStrategy_class,
       replicationFactor = kdef.getReplication_factor,
-      families = kdef.getCf_defs.map(c=>FamilyDefinition(c)).toList)
+      families = kdef.getCf_defs.map(c => FamilyDefinition(c)).toList)
   }
 }

@@ -4,15 +4,15 @@ import org.brzy.calista.serializer.Serializers._
 
 /**
  * Document Me..
- * 
+ *
  * @author Michael Fortin
  */
-class SuperCounterFamily(val name:String)  extends Family{
+class SuperCounterFamily(val name: String) extends Family {
 
   def apply[K](key: K) = new SuperCounterKey(key, this)
 
 
-  override def toString =  "SuperCounterFamily("+name+")"
+  override def toString = "SuperCounterFamily(" + name + ")"
 
 }
 
@@ -21,5 +21,5 @@ class SuperCounterFamily(val name:String)  extends Family{
  *
  */
 object SuperCounterFamily {
-  def apply(name:String) = new SuperCounterFamily(name)
+  def apply(name: String) = new SuperCounterFamily(name)
 }

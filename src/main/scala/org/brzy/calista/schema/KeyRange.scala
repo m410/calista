@@ -31,9 +31,9 @@ import org.brzy.calista.Calista
  */
 class KeyRange[T] protected[schema](
         val start: Option[T] = None,
-        val startBytes:Array[Byte] = Array.empty[Byte],
+        val startBytes: Array[Byte] = Array.empty[Byte],
         val finish: Option[T] = None,
-        val finishBytes:Array[Byte] = Array.empty[Byte],
+        val finishBytes: Array[Byte] = Array.empty[Byte],
         val predicate: Option[SlicePredicate[_]] = None,
         val columnFamily: Family,
         val count: Int = 100) {

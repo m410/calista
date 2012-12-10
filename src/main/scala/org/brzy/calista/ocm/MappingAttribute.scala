@@ -22,6 +22,7 @@ import org.brzy.calista.serializer.UTF8Serializer
  */
 sealed abstract class MappingAttribute {
   def name: String
+
   def serializer: Serializer[_]
 }
 

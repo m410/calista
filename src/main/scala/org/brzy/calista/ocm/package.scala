@@ -22,7 +22,7 @@ package org.brzy.calsta
  *   def mapping = ColumnMapping[Entity]...
  * }
  *
- *}}}
+ * }}}
  *
  * @author Michael Fortin
  */

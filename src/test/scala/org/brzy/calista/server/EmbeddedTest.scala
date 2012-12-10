@@ -17,13 +17,13 @@ import org.brzy.calista.{Session, SessionManager, SessionImpl}
 
 /**
  * Used to connect to the embedded server in unit tests.
- * 
+ *
  * @author Michael Fortin
  */
 trait EmbeddedTest {
   val server = EmbeddedServer
 
-  val sessionManager = new SessionManager("Test","localhost")
+  val sessionManager = new SessionManager("Test", "localhost")
 
   def doWith(f: (Session) => Unit) {
     val session = sessionManager.createSession
