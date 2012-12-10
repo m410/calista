@@ -96,6 +96,7 @@ object EmbeddedServer {
       name = "Test",
       //      strategyClass = "org.apache.cassandra.locator.NetworkTopologyStrategy",
       strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
+      strategyOptions = Option(Map("replication_factor" -> "1")),
       families = List.empty[FamilyDefinition]))
 
     val mgr = new SessionManager("Test", "127.0.0.1")
