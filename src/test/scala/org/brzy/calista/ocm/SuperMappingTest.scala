@@ -72,7 +72,7 @@ case class SPerson(key: String,
         created: Date)
 
 object SPerson extends SuperDao[String, String, SPerson] {
-  def mapping = new Mapping[SPerson](
+  def mapping = new BeanMapping[SPerson](
     "SPerson",
     UTF8Serializer,
     Key("key"),

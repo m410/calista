@@ -55,24 +55,6 @@ trait StandardDao[K, T <: AnyRef] {
       None
   }
 
-  //	/**
-  //	 * List instances of this type by providing a start key and an end key. Note that this may not return
-  //	 * the order that you would expect, depending on the partitioner you are using.
-  //	 *
-  //	 * @param start The first key to return.
-  //	 * @param end The last key to return
-  //	 * @param count The maximum number of results to return.
-  //	 */
-  //  def list(start: K, end: K, count: Int = 100):List[T] = {
-  //    val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
-  //    val range = ColumnFamily(mapping.family).keyRange((start, end, names, count))
-  //
-  //    session.keyRange(range).toKeyMap[K].map(ks => {
-  //      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.serializer
-  //      val resultSet = ResultSet(ks._2)
-  //      mapping.newInstance(keySerializer.fromBytes(ks._1), None, resultSet)
-  //    })
-  //  }
 
   /**
    * This holds implicit function on the entity.  The functions can be called directly on the entity
@@ -107,6 +89,6 @@ trait StandardDao[K, T <: AnyRef] {
    * This needs to be implemented for each instance to define the mapping to the
    * cassandra datastore.
    */
-  def mapping: Mapping[T]
+  def mapping: BeanMapping[T]
 
 }

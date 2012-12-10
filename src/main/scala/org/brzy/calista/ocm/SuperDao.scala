@@ -111,6 +111,6 @@ trait SuperDao[K, S, T <: AnyRef] {
   /**
    * This needs to be implemented for each instance to define the mapping to the cassandra datastore.
    */
-  def mapping: Mapping[T]
+  def mapping: BeanMapping[T]
 
 }

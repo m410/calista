@@ -91,7 +91,7 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
 case class Person(key: String, name: String, count: Int, created: Date)
 
 object Person extends StandardDao[String, Person] {
-  def mapping = Mapping[Person](
+  def mapping = BeanMapping[Person](
     "Person",
     UTF8Serializer,
     Key("key"),
