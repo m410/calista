@@ -24,7 +24,7 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-class SuperColumn protected[schema] (val name: Any, val parent: SuperKey)
+class SuperColumn[N] protected[schema] (val name: N, val parent: SuperKey[_])
     extends Key{
 
   def keyBytes = parent.keyBytes
@@ -35,7 +35,7 @@ class SuperColumn protected[schema] (val name: Any, val parent: SuperKey)
 
   def columnPath = ColumnPath(parent.family.name, nameBytes,null)
 
-  def apply(name: Any) = new ColumnName(name,this)
+  def apply[V](name: V) = new ColumnName(name,this)
 
   def from(columnName: Any)():SliceRange = {
     def startBytes = Serializers.toBytes(columnName).array()

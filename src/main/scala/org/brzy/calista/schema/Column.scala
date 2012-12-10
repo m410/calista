@@ -28,7 +28,7 @@ import org.brzy.calista.Calista
  *
  * @author Michael Fortin
  */
-class Column protected[schema] (val name: Any, val value: Any, val timestamp: Date, val parent: Key) {
+class Column[N,V] protected[schema] (val name: N, val value: V, val timestamp: Date, val parent: Key) {
 	
 	/**
 	 * Return the name converted to bytes.
@@ -46,7 +46,7 @@ class Column protected[schema] (val name: Any, val value: Any, val timestamp: Da
 	 */
   def columnPath = {
     val superCol = parent match {
-      case s: SuperColumn => s.nameBytes
+      case s: SuperColumn[_] => s.nameBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)
@@ -57,8 +57,8 @@ class Column protected[schema] (val name: Any, val value: Any, val timestamp: Da
 	 * directly.
 	 */
   def columnParent: ColumnParent = parent match {
-    case s: StandardKey => ColumnParent(s.family.name, null)
-    case s: SuperColumn => ColumnParent(s.family.name, s.nameBytes)
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   /**

@@ -34,56 +34,56 @@ trait Session {
    * get the value of the column.  This assumes the input column does not have a value, this will
    * return a results.Column with the name and value
    */
-  def get(column: Column): Option[Row]
+  def get(column: Column[_,_]): Option[Row]
 
   /**
    * Increments a counter column.
    */
-  def add(column: Column, level: Consistency = defaultConsistency)
+  def add(column: Column[_,_], level: Consistency = defaultConsistency)
 
   /**
    * Read the value of a single column, with the given consistency.
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column, level: Consistency): Option[Row]
+  def get(column: Column[_,_], level: Consistency): Option[Row]
 
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column, level: Consistency = defaultConsistency)
+  def insert(column: Column[_,_], level: Consistency = defaultConsistency)
 
   /**
    * Remove a column and it's value.
    */
-  def remove(column: ColumnName)
+  def remove(column: ColumnName[_])
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: CounterColumnName)
+  def remove(column: CounterColumnName[_])
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: SuperColumn)
+  def remove(column: SuperColumn[_])
   /**
    * Remove a column and it's value.
    */
-  def remove(column: Column)
+  def remove(column: Column[_,_])
 
   /**
    * Remove a key and all it's child columns by using the default consistency level.
    */
-  def remove(key: StandardKey)
+  def remove(key: StandardKey[_])
 
-  def remove(key: SuperKey)
+  def remove(key: SuperKey[_])
 
-  def remove(key: CounterKey)
+  def remove(key: CounterKey[_])
 
-  def remove(key: SuperCounterKey)
+  def remove(key: SuperCounterKey[_])
 
-  def remove(key: SuperCounterColumn)
+  def remove(key: SuperCounterColumn[_])
 
   /**
    * Removes a key by the path and timestamp with the given consistency level.

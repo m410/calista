@@ -25,22 +25,20 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-class StandardKey protected[schema] (val key:Any, val family:Family) extends Key{
+class StandardKey[K] protected[schema] (val key:K, val family:Family) extends Key{
 
   def keyBytes = toBytes(key)
 
   def columnPath = ColumnPath(family.name,null,null)
 
-  def apply(name: Any) = new ColumnName(name,this)
+  def apply[N](name: N) = new ColumnName(name,this)
 
-
-  def from(columnName: Any)():SliceRange = {
+  def from[N](columnName: N)():SliceRange = {
     def startBytes = toBytes(columnName).array()
     new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
   }
 
-
-  def to(toColumn: Any):SliceRange = {
+  def to[N](toColumn: N):SliceRange = {
     def bytes = Serializers.toBytes(toColumn).array()
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }

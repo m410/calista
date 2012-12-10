@@ -71,7 +71,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     case EACH_QUORUM => ConsistencyLevel.EACH_QUORUM
     case LOCAL_QUORUM => ConsistencyLevel.LOCAL_QUORUM
     case Consistency.All => ConsistencyLevel.ALL
-    case _ => sys.error("Unknown Level")
+    case _ => throw new RuntimeException("Unknown Consistency level: "+c.toString)
   }
 
   def closeAndMakeNewSession = {
@@ -95,7 +95,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     new CassandraKeyRange().setStart_key(kr.startBytes).setEnd_key(kr.finishBytes).setCount(kr.count)
   }
 
-  private[this] implicit def toColumn(c: Column) = {
+  private[this] implicit def toColumn(c: Column[_,_]) = {
     val column = new CassandraColumn()
     column.setName(c.nameBytes)
     column.setValue(c.valueBytes)
@@ -117,12 +117,12 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   private[this] def keyFor(c: {def parent:Key}) = c.parent match {
-    case s: SuperKey => s.keyBytes
-    case s: SuperCounterKey => s.keyBytes
-    case s: StandardKey => s.keyBytes
-    case s: CounterKey => s.keyBytes
-    case s: SuperColumn => s.parent.keyBytes
-    case s: SuperCounterColumn => s.parent.keyBytes
+    case s: SuperKey[_] => s.keyBytes
+    case s: SuperCounterKey[_] => s.keyBytes
+    case s: StandardKey[_] => s.keyBytes
+    case s: CounterKey[_] => s.keyBytes
+    case s: SuperColumn[_] => s.parent.keyBytes
+    case s: SuperCounterColumn[_] => s.parent.keyBytes
   }
 
   private def toRows(cos: CassandraColumnOrSuperColumn, familyName:String, key:ByteBuffer):List[Row] = {
@@ -190,17 +190,17 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 	 * get the value of the column.  This assumes the input column does not have a value, this will
 	 * return a results.Column with the name and value
    */
-  def get(column: Column): Option[Row] = get(column, defaultConsistency)
+  def get(column: Column[_,_]): Option[Row] = get(column, defaultConsistency)
 
   /**
    * Increments a counter column.
    */
-  def add(column: Column, level: Consistency = defaultConsistency) {
+  def add(column: Column[_,_], level: Consistency = defaultConsistency) {
     log.trace("insert: {}",column)
     val counter = new CounterColumn()
     counter.setName(column.nameBytes)
     counter.setValue(column.value.asInstanceOf[Long])
-    client.add(keyFor(column), toColumnParent(column.columnParent), counter, level)
+    client.add(keyFor(column), column.columnParent, counter, level)
   }
 
   /**
@@ -208,7 +208,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column, level: Consistency): Option[Row] = {
+  def get(column: Column[_,_], level: Consistency): Option[Row] = {
     try {
       val columnOrSuperColumn = client.get(keyFor(column), toColumnPath(column.columnPath), level)
       val list = toRows(columnOrSuperColumn, column.parent.family.name, column.parent.keyBytes)
@@ -228,47 +228,47 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   /**
    * Set the value on an single Column
    */
-  def insert(column: Column, level: Consistency = defaultConsistency) {
+  def insert(column: Column[_,_], level: Consistency = defaultConsistency) {
     log.debug("################# insert: {}",column)
-    client.insert(keyFor(column), toColumnParent(column.columnParent), column, level)
+    client.insert(keyFor(column), column.columnParent, column, level)
   }
 
   /**
    * Remove a column and it's value.
    */
-  def remove(column: ColumnName) {
+  def remove(column: ColumnName[_]) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: CounterColumnName) {
+  def remove(column: CounterColumnName[_]) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
   /**
    * Remove a counter column and it's value.
    */
-  def remove(column: SuperColumn) {
+  def remove(column: SuperColumn[_]) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
   /**
 	 * Remove a column and it's value.
    */
-  def remove(column: Column) {
+  def remove(column: Column[_,_]) {
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
 	/**
 	 * Remove a key and all it's child columns by using the default consistency level.
    */
-	def remove(key: StandardKey) {
+	def remove(key: StandardKey[_]) {
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 
-  def remove(key: SuperKey) {
+  def remove(key: SuperKey[_]) {
     remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
   }
 	/**
@@ -278,15 +278,15 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     client.remove(k, path, timestamp, level)
   }
 
-  def remove(key: SuperCounterKey) {
+  def remove(key: SuperCounterKey[_]) {
     client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
   }
 
-  def remove(key: SuperCounterColumn) {
+  def remove(key: SuperCounterColumn[_]) {
     client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
   }
 
-  def remove(key: CounterKey) {
+  def remove(key: CounterKey[_]) {
     client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
   }
 
@@ -311,7 +311,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 	 * List all the columns by slice predicate and consistency level.
    */
   def slice(predicate: SlicePredicate[_], level: Consistency): ResultSet = {
-    val results = client.get_slice(predicate.key.keyBytes, toColumnParent(predicate.columnParent), predicate, level)
+    val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
     val family = predicate.columnParent.family
     val key = predicate.key.keyBytes
     ResultSet(results.flatMap(sc => { toRows(sc, family, key)}).toList)
@@ -326,7 +326,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 	 * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
   def sliceRange(range: SliceRange, level: Consistency): ResultSet = {
-    val results = client.get_slice(range.keyBytes, toColumnParent(range.columnParent), range, level)
+    val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     val family = range.columnParent.family
     ResultSet(results.flatMap(sc => { toRows(sc, family, range.keyBytes)}).toList)
   }
@@ -337,7 +337,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    *
    *  @param initSliceRange the slice range to iterate over.
    */
-  def scrollSliceRange[T:Manifest](initSliceRange: SliceRange):Iterator[Row] = {
+  def scrollSliceRange(initSliceRange: SliceRange):Iterator[Row] = {
     new Iterator[Row] {
       private[this] var partial = sliceRange(initSliceRange)
       private[this] var index = 0
@@ -358,9 +358,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
           // of the slice, then this will never be false.  the
           if(partialLast.compareTo(sliceLast) != 0) {
             partial = {
-              val pStart = Serializers.fromClassBytes(manifest[T].erasure,partialLast)
-              val pFin = Serializers.fromClassBytes(manifest[T].erasure,sliceLast)
-              val sliceCopy = initSliceRange.copy(start = pStart, finish = pFin)
+              val sliceCopy = initSliceRange.copy(start = partialLast.array(), finish = sliceLast.array())
               log.debug("partial sliceCopy: {}",sliceCopy)
               sliceRange(sliceCopy)
             }
@@ -398,7 +396,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 	 * List all the columns by Key range using the default consistency.
    */
   def keyRange[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): ResultSet = {
-    val results = client.get_range_slices(toColumnParent(range.columnParent), toSlicePredicate(range.predicate), range, defaultConsistency)
+    val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
     val list = results.toList.flatMap(keyslice => {
       val key = ByteBuffer.wrap(keyslice.getKey)
       val family = range.columnParent.family

@@ -8,7 +8,7 @@ package org.brzy.calista.schema
  */
 class StandardFamily( val name:String) extends Family {
 
-  def apply(key: Any) = new StandardKey(key, this)
+  def apply[K](key: K) = new StandardKey(key, this)
 
 
   def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {

@@ -7,7 +7,7 @@ package org.brzy.calista.schema
  */
 class SuperCounterFamily(val name:String)  extends Family{
 
-  def apply(key: Any) = new SuperCounterKey(key, this)
+  def apply[K](key: K) = new SuperCounterKey(key, this)
 
 
   def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {

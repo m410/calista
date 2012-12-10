@@ -29,7 +29,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
 
       val stdColName = StandardFamily("StandardFamily")("key")("column")
       assertNotNull(stdColName)
-      assertTrue(stdColName.isInstanceOf[ColumnName])
+      assertTrue(stdColName.isInstanceOf[ColumnName[_]])
 
       StandardFamily("StandardFamily")("key")("column").set("somevalue")
       val values = StandardFamily("StandardFamily")("key").map(_.valueAs[String])
@@ -43,9 +43,9 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   @Test def testStandardCol() {
     sessionManager.doWith { session =>
         val key = StandardFamily("StandardFamily")("key")
-        assertTrue(key.isInstanceOf[StandardKey])
+        assertTrue(key.isInstanceOf[StandardKey[_]])
         val stdColumnName = StandardFamily("StandardFamily")("key")("column")
-        assertTrue(stdColumnName.isInstanceOf[ColumnName])
+        assertTrue(stdColumnName.isInstanceOf[ColumnName[_]])
 
         key("column").set("New Value")
         val stdColumnValue = key("column").getAs[String]
@@ -53,11 +53,11 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertEquals("New Value", stdColumnValue.get)
 
         val col = key.column("name", "value")
-        assertTrue(col.isInstanceOf[Column])
+        assertTrue(col.isInstanceOf[Column[_,_]])
         val stdSliceRange = key.from("begin").to("finish")
         assertTrue(stdSliceRange.isInstanceOf[SliceRange])
         val stdSliceRange2 = key.from("begin").to("end").reverse.size(10).iterator
-        assertTrue(stdSliceRange2.isInstanceOf[collection.Iterator[Row]])
+        assertTrue(stdSliceRange2.isInstanceOf[collection.Iterator[_]])
         val stdSliceRange3 = key.from("begin").to("end").reverse.size(10).results
         assertTrue(stdSliceRange3.isInstanceOf[ResultSet])
 
@@ -69,9 +69,9 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   @Test def testSuperCol() {
     sessionManager.doWith { session =>
         val key = SuperFamily("SuperFamily")("key")
-        assertTrue(key.isInstanceOf[SuperKey])
+        assertTrue(key.isInstanceOf[SuperKey[_]])
         val superColumnSCol = SuperFamily("SuperFamily")("key")("superColumn")
-        assertTrue(superColumnSCol.isInstanceOf[SuperColumn])
+        assertTrue(superColumnSCol.isInstanceOf[SuperColumn[_]])
 
         key("superColumn")("column").set("New Value")
         val superColumnName = key( "superColumn")("column").getAs[String]
@@ -93,13 +93,13 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   @Test def testStandardCounterCol() {
     sessionManager.doWith { session =>
         val key = CounterFamily("CountFamily")("key")
-        assertTrue(key.isInstanceOf[CounterKey])
+        assertTrue(key.isInstanceOf[CounterKey[_]])
         val countColumnName = CounterFamily("CountFamily")("key")("column")
-        assertTrue(countColumnName.isInstanceOf[CounterColumnName])
+        assertTrue(countColumnName.isInstanceOf[CounterColumnName[_]])
 
         key("column1").add(10)
         val counter = key("column")
-        assertTrue(counter.isInstanceOf[CounterColumnName])
+        assertTrue(counter.isInstanceOf[CounterColumnName[_]])
         counter.add(5)
         counter.add(3)
         counter.add(2)

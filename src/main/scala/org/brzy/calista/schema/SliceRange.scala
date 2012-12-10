@@ -42,10 +42,8 @@ class SliceRange protected[schema] (
 
 	def keyBytes = key.keyBytes
 
-  def copy[T<:Any:Manifest](start:T,finish:T) = {
-    def toBytes = Serializers.toBytes(start).array()
-    def finBytes = Serializers.toBytes(finish).array()
-    new SliceRange(key, toBytes, Option(start), finBytes, Option(finish), reverseList, max)
+  def copy(start:Array[Byte], finish:Array[Byte]) = {
+    new SliceRange(key, start, None, finish, None, reverseList, max)
   }
 
   def from[T<:Any:Manifest](startKey: T)():SliceRange = {
@@ -68,9 +66,9 @@ class SliceRange protected[schema] (
   }
 
   def columnParent: ColumnParent = key match {
-    case s: StandardKey => ColumnParent(s.family.name, null)
-    case s: SuperKey => ColumnParent(s.family.name, null)
-    case s: SuperColumn => ColumnParent(s.family.name, s.nameBytes)
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   def foreach(f:Row =>Unit) {

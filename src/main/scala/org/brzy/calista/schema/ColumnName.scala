@@ -21,17 +21,17 @@ import org.brzy.calista.serializer.Serializers
 /**
  * Represents only the name part of a column, not the value or timestamp.  It's used to query
  * the datastore.
- * 
+ *
  * @author Michael Fortin
  */
-class ColumnName protected[schema] (val name:Any, val parent:Key) {
+class ColumnName[N] protected[schema](val name: N, val parent: Key) {
 
   /**
    * Return the name converted to bytes.
    */
   def nameBytes = Serializers.toBytes(name)
 
-  def asColumn = new Column(name,null,null, parent)
+  def asColumn = new Column(name, null, null, parent)
 
   /**
    * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
@@ -39,7 +39,7 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    */
   def columnPath = {
     val superCol = parent match {
-      case s: SuperColumn => s.keyBytes
+      case s: SuperColumn[_] => s.keyBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)
@@ -50,8 +50,8 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    * directly.
    */
   def columnParent: ColumnParent = parent match {
-    case s: StandardKey => ColumnParent(s.family.name, null)
-    case s: SuperColumn => ColumnParent(s.family.name, s.keyBytes)
+    case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperColumn[_] => ColumnParent(s.family.name, s.keyBytes)
   }
 
   /**
@@ -61,7 +61,7 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
     Calista.value.insert(new Column(name, value, new Date(), parent))
   }
 
-  def columnExists:Boolean = {
+  def columnExists: Boolean = {
     Calista.value.get(new Column(name, null, new Date(), parent)) match {
       case Some(row) => true
       case _ => false
@@ -74,7 +74,7 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    * @tparam V The expected type of the column value
    * @return Optional value, if the column by that name exists, it returns Some(V) otherwise none.
    */
-  def getAs[V<:Any: Manifest] = {
+  def getAs[V <: Any : Manifest] = {
     Calista.value.get(new Column(name, null, new Date(), parent)) match {
       case Some(row) => Option(row.valueAs[V])
       case _ => None
@@ -85,7 +85,7 @@ class ColumnName protected[schema] (val name:Any, val parent:Key) {
    * Removed the column by this name.
    *
    * @return false if the row does not exist, and true if
-   * it's removed successfully.
+   *         it's removed successfully.
    */
   def remove() {
     Calista.value.remove(this)

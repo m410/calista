@@ -24,21 +24,21 @@ import org.brzy.calista.serializer.Serializers
  * 
  * @author Michael Fortin
  */
-class CounterKey protected[schema] (key:Any, val family:Family) extends Key{
+class CounterKey[K] protected[schema] (key:K, val family:Family) extends Key{
 
   def keyBytes = toBytes(key)
 
   def columnPath = ColumnPath(family.name,null,null)
 
-  def apply(columnName: Any) =  new CounterColumnName(columnName,this)
+  def apply[N](columnName: N) =  new CounterColumnName(columnName,this)
 
-  def from(columnName: Any)():SliceRange = {
+  def from[N](columnName: N)():SliceRange = {
     def startBytes = Serializers.toBytes(columnName).array()
     new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
   }
 
 
-  def to(toColumn: Any):SliceRange = {
+  def to[N](toColumn: N):SliceRange = {
     def bytes = Serializers.toBytes(toColumn).array()
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }

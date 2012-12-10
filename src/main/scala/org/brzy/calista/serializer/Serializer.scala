@@ -55,7 +55,7 @@ object Serializers {
     case IntSerializer(s) => IntSerializer.toBytes(s)
     case DateSerializer(s) => DateSerializer.toBytes(s)
     case ByteArraySerializer(s) => ByteArraySerializer.toBytes(s)
-    case _ => error("No Serializer or type: %s".format(t))
+    case _ => throw new NoSerializerException("No Serializer or type: %s".format(t))
   }
 
   def fromBytes[T](t:T,b:ByteBuffer):T = t match {
@@ -67,7 +67,7 @@ object Serializers {
     case DateSerializer(s) => DateSerializer.fromBytes(b).asInstanceOf[T]
     case BooleanSerializer(s) => BooleanSerializer.fromBytes(b).asInstanceOf[T]
     case ByteArraySerializer(s) => ByteArraySerializer.fromBytes(b).asInstanceOf[T]
-    case _ => error("No Serializer or type: %s".format(t))
+    case _ => throw new NoSerializerException("No Serializer or type: %s".format(t))
   }
 
   def fromClassBytes[T](t:Class[T],b:ByteBuffer):T = t match {
@@ -78,7 +78,7 @@ object Serializers {
     case DateClass => DateSerializer.fromBytes(b).asInstanceOf[T]
     case BooleanClass => BooleanSerializer.fromBytes(b).asInstanceOf[T]
     case ByteArrayClass => ByteArraySerializer.fromBytes(b).asInstanceOf[T]
-    case _ => error("No Serializer or type: %s".format(t))
+    case _ => throw new NoSerializerException("No Serializer or type: %s".format(t))
   }
 }
 

@@ -23,7 +23,7 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-class SuperCounterColumn protected[schema] (val name: Any, val parent: SuperCounterKey)
+class SuperCounterColumn[N] protected[schema] (val name: N, val parent: SuperCounterKey[_])
     extends Key{
 
   def keyBytes = parent.keyBytes
@@ -34,7 +34,7 @@ class SuperCounterColumn protected[schema] (val name: Any, val parent: SuperCoun
 
   def columnPath = ColumnPath(parent.family.name, nameBytes,null)
 
-  def apply(name: Any) = new CounterColumnName(name,this)
+  def apply[V](name: V) = new CounterColumnName(name,this)
 
   def from(columnName: Any)():SliceRange = {
     def startBytes = Serializers.toBytes(columnName).array()
