@@ -226,7 +226,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    * Set the value on an single Column
    */
   def insert(column: Column, level: Consistency = defaultConsistency) {
-    log.trace("insert: {}",column)
+    log.debug("################# insert: {}",column)
     client.insert(keyFor(column), toColumnParent(column.columnParent), column, level)
   }
 

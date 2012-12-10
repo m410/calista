@@ -18,6 +18,7 @@ class SuperFamily(val name:String)  extends Family{
     null
   }
 
+  override def toString =  "SuperFamily("+name+")"
 }
 
 

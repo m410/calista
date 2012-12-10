@@ -28,7 +28,7 @@ import org.brzy.calista.Calista
  *
  * @author Michael Fortin
  */
-case class Column protected[schema] (name: Any, value: Any, timestamp: Date, parent: Key) {
+class Column protected[schema] (val name: Any, val value: Any, val timestamp: Date, val parent: Key) {
 	
 	/**
 	 * Return the name converted to bytes.
@@ -68,4 +68,6 @@ case class Column protected[schema] (name: Any, value: Any, timestamp: Date, par
     val session = Calista.value
     session.get(this)
   }
+
+  override def toString = parent.toString + "("+name+","+value+")"
 }

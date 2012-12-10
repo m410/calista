@@ -23,4 +23,5 @@ trait Key {
   def keyBytes:ByteBuffer
   def family:Family
   def columnPath:ColumnPath
+
 }

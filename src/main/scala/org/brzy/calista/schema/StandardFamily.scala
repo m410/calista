@@ -20,7 +20,7 @@ class StandardFamily( val name:String) extends Family {
     null
   }
 
-
+  override def toString =  "StandardFamily("+name+")"
 }
 
 

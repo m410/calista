@@ -18,6 +18,8 @@ class SuperCounterFamily(val name:String)  extends Family{
     null
   }
 
+  override def toString =  "SuperCounterFamily("+name+")"
+
 }
 
 

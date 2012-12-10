@@ -23,7 +23,7 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-case class SuperCounterColumn protected[schema] (name: Any, parent: SuperCounterKey)
+class SuperCounterColumn protected[schema] (val name: Any, val parent: SuperCounterKey)
     extends Key{
 
   def keyBytes = parent.keyBytes
@@ -88,4 +88,7 @@ case class SuperCounterColumn protected[schema] (name: Any, parent: SuperCounter
       f(iterator.next())
 
   }
+
+  override def toString = parent.toString + "("+name+")"
+
 }
