@@ -47,6 +47,7 @@ class Column[N,V] protected[schema] (val name: N, val value: V, val timestamp: D
   def columnPath = {
     val superCol = parent match {
       case s: SuperColumn[_] => s.nameBytes
+      case s: SuperCounterColumn[_] => s.nameBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)

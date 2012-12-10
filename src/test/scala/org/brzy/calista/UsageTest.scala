@@ -54,11 +54,14 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
 
         val col = key.column("name", "value")
         assertTrue(col.isInstanceOf[Column[_,_]])
-        val stdSliceRange = key.from("begin").to("finish")
+
+        val stdSliceRange = key.from("begin").to("finish").reverse
         assertTrue(stdSliceRange.isInstanceOf[SliceRange])
-        val stdSliceRange2 = key.from("begin").to("end").reverse.size(10).iterator
+
+        val stdSliceRange2 = key.from("begin").to("end").size(10).iterator
         assertTrue(stdSliceRange2.isInstanceOf[collection.Iterator[_]])
-        val stdSliceRange3 = key.from("begin").to("end").reverse.size(10).results
+
+        val stdSliceRange3 = key.from("begin").to("end").size(10).results
         assertTrue(stdSliceRange3.isInstanceOf[ResultSet])
 
         val stdPredicate = key.predicate(Array("column", "column2", "column3"))
@@ -121,12 +124,18 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   @Test def testSuperCounterCol() {
     sessionManager.doWith {
       session =>
+        SuperCounterFamily("SuperCountFamily")("key")("super")("column1").add(0L)
+        SuperCounterFamily("SuperCountFamily")("key")("super")("column").add(0L)
+    }
+
+    sessionManager.doWith {
+      session =>
         val scol = SuperCounterFamily("SuperCountFamily")("key")("super")
         val counter1 = scol("column1").count
         assert(counter1 == 0)
-
         scol("column1").add(10)
-        scol("column").count
+
+        assert(scol("column").count == 0)
         scol("column").add(5)
         scol("column").add(3)
         scol("column").add(-2)

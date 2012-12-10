@@ -32,7 +32,7 @@ class SuperCounterColumn[N] protected[schema] (val name: N, val parent: SuperCou
 
   def family = parent.family
 
-  def columnPath = ColumnPath(parent.family.name, nameBytes,null)
+  def columnPath = ColumnPath(parent.family.name, nameBytes, null)
 
   def apply[V](name: V) = new CounterColumnName(name,this)
 

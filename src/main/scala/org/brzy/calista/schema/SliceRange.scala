@@ -47,14 +47,14 @@ class SliceRange protected[schema] (
   }
 
   def from[T<:Any:Manifest](startKey: T)():SliceRange = {
-    def startBytes = Serializers.toBytes(startKey).array()
-    new SliceRange(key, startBytes, Option(startKey), finishBytes, finish, reverseList, max)
+    def startKeyBytes = Serializers.toBytes(startKey).array()
+    new SliceRange(key, startKeyBytes, Option(startKey), finishBytes, finish, reverseList, max)
   }
 
 
-  def to[T<:Any:Manifest](toKey: T):SliceRange = {
-    def toBytes = Serializers.toBytes(toKey).array()
-    new SliceRange(key, startBytes, start, toBytes, Option(toKey), reverseList, max)
+  def to[T<:Any:Manifest](finishCol: T):SliceRange = {
+    def finishColBytes = Serializers.toBytes(finishCol).array()
+    new SliceRange(key, startBytes, start, finishColBytes, Option(finishCol), reverseList, max)
   }
 
   def reverse = {

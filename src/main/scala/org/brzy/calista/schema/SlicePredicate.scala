@@ -33,6 +33,7 @@ class SlicePredicate[T] protected[schema] (val columns: Array[T], val key: Key) 
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
     case s: CounterKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
+    case s: SuperCounterColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   def results = {

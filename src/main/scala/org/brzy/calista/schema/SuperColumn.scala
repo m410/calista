@@ -24,8 +24,8 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-class SuperColumn[N] protected[schema] (val name: N, val parent: SuperKey[_])
-    extends Key{
+class SuperColumn[N] protected[schema](val name: N, val parent: SuperKey[_])
+        extends Key {
 
   def keyBytes = parent.keyBytes
 
@@ -33,63 +33,63 @@ class SuperColumn[N] protected[schema] (val name: N, val parent: SuperKey[_])
 
   def family = parent.family
 
-  def columnPath = ColumnPath(parent.family.name, nameBytes,null)
+  def columnPath = ColumnPath(parent.family.name, nameBytes, null)
 
-  def apply[V](name: V) = new ColumnName(name,this)
+  def apply[V](name: V) = new ColumnName(name, this)
 
-  def from(columnName: Any)():SliceRange = {
+  def from(columnName: Any)(): SliceRange = {
     def startBytes = Serializers.toBytes(columnName).array()
     new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
   }
 
 
-  def to(toColumn: Any):SliceRange = {
+  def to(toColumn: Any): SliceRange = {
     def bytes = Serializers.toBytes(toColumn).array()
     new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
   }
 
-  def predicate[A](columns:Array[A]) = {
-    new SlicePredicate(columns,this)
+  def predicate[A](columns: Array[A]) = {
+    new SlicePredicate(columns, this)
   }
 
-  def column[C:Manifest,V:Manifest](column:C, value:V) = {
-    new Column(column,value,new Date(), this)
+  def column[C: Manifest, V: Manifest](column: C, value: V) = {
+    new Column(column, value, new Date(), this)
   }
 
   /**
    * Removed the super column by this name.
    *
    * @return false if the row does not exist, and true if
-   * it's removed successfully.
+   *         it's removed successfully.
    */
   def remove() {
     Calista.value.remove(this)
   }
 
   def list = {
-    Calista.value.sliceRange(new SliceRange(key=this,max=100))
+    Calista.value.sliceRange(new SliceRange(key = this, max = 100))
   }
 
-  def map[B](f:Row => B):Seq[B] = {
+  def map[B](f: Row => B): Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       seq :+ f(iterator.next())
 
     seq.toSeq
   }
 
-  def foreach(f:Row =>Unit) {
-    val slice = new SliceRange(key=this,max=2)
-    val iterator  = slice.iterator
+  def foreach(f: Row => Unit) {
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
 
-  override def toString = parent.toString + "("+name+")"
+  override def toString = parent.toString + "(" + name + ")"
 
 }

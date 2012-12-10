@@ -25,11 +25,14 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
 
     sessionManager.doWith { session =>
       val sliceRange = StandardFamily("Standard")("key-range-0").from("column2").to("column6")
+      assertEquals(sliceRange.finish.get ,"column6")
+      assertEquals(sliceRange.start.get , "column2")
       val iterator = sliceRange.iterator
       var count = 0
 
       while(iterator.hasNext) {
         val next = iterator.next()
+        println("##column value="+next.valueAs[String])
         assertNotNull(next)
         count = count + 1
       }
