@@ -31,6 +31,7 @@ class SlicePredicate[T] protected[schema] (val columns: Array[T], val key: Key) 
 
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: CounterKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 

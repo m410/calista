@@ -121,7 +121,7 @@ trait Session {
    *
    *  @param initSliceRange the slice range to iterate over.
    */
-  def scrollSliceRange[T:Manifest](initSliceRange: SliceRange):Iterator[Row]
+  def scrollSliceRange(initSliceRange: SliceRange):Iterator[Row]
 
   /**
    * Queries the data store by returning the key range inclusively.

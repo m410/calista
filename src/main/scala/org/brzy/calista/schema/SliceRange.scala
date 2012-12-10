@@ -67,8 +67,11 @@ class SliceRange protected[schema] (
 
   def columnParent: ColumnParent = key match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: CounterKey[_] => ColumnParent(s.family.name, null)
     case s: SuperKey[_] => ColumnParent(s.family.name, null)
+    case s: SuperCounterKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
+    case s: SuperCounterColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   def foreach(f:Row =>Unit) {

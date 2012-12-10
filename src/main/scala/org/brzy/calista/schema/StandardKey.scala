@@ -35,12 +35,12 @@ class StandardKey[K] protected[schema] (val key:K, val family:Family) extends Ke
 
   def from[N](columnName: N)():SliceRange = {
     def startBytes = toBytes(columnName).array()
-    new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
+    new SliceRange(key = this, finishBytes = startBytes, finish = Option(columnName))
   }
 
   def to[N](toColumn: N):SliceRange = {
     def bytes = Serializers.toBytes(toColumn).array()
-    new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
+    new SliceRange(key = this, startBytes = bytes, start= Option(toColumn))
   }
 
   /**

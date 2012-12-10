@@ -58,7 +58,9 @@ class Column[N,V] protected[schema] (val name: N, val value: V, val timestamp: D
 	 */
   def columnParent: ColumnParent = parent match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: CounterKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
+    case s: SuperCounterColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   /**

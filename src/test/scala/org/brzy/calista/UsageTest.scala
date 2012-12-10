@@ -16,7 +16,7 @@ package org.brzy.calista
 import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
-import results.{ResultSet, Row}
+import results.ResultSet
 import schema._
 import server.EmbeddedTest
 
@@ -78,12 +78,12 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertTrue(superColumnName.isDefined)
         assertEquals("New Value", superColumnName.get)
 
-        val superColumnPred = key("column")("column2")
+        val superColumnPred = key.predicate(Array("column","column2"))
         assertTrue(superColumnPred.isInstanceOf[SlicePredicate[_]])
         val superColumnSlice = key.from("begin").to("end")
         assertTrue(superColumnSlice.isInstanceOf[SliceRange])
 
-        val superColumnPred2 = key("superColumn").column("column", "column2")
+        val superColumnPred2 = key("superColumn").predicate(Array("column", "column2"))
         assertTrue(superColumnPred2.isInstanceOf[SlicePredicate[_]])
         val superColumnSlice2 = key("superColumn").from("begin").to("end")
         assertTrue(superColumnSlice2.isInstanceOf[SliceRange])
@@ -94,16 +94,17 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
     sessionManager.doWith { session =>
         val key = CounterFamily("CountFamily")("key")
         assertTrue(key.isInstanceOf[CounterKey[_]])
+
         val countColumnName = CounterFamily("CountFamily")("key")("column")
         assertTrue(countColumnName.isInstanceOf[CounterColumnName[_]])
-
         key("column1").add(10)
+
         val counter = key("column")
         assertTrue(counter.isInstanceOf[CounterColumnName[_]])
         counter.add(5)
         counter.add(3)
         counter.add(2)
-        assert(counter.count == 6)
+        assert(counter.count == 10, "could should be 6 but was " + counter.count)
 
         val range = key.from("a").to("z")
         assertTrue(range.isInstanceOf[SliceRange])
@@ -122,6 +123,8 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
       session =>
         val scol = SuperCounterFamily("SuperCountFamily")("key")("super")
         val counter1 = scol("column1").count
+        assert(counter1 == 0)
+
         scol("column1").add(10)
         scol("column").count
         scol("column").add(5)
