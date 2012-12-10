@@ -74,16 +74,7 @@ class CounterColumnName[N] protected[schema](val name: N, val parent: Key) {
     }
   }
 
-  def remove: Boolean = {
-    val session = Calista.value
-    val optionRow = session.get(new Column(name, null, new Date(), parent))
-
-    optionRow match {
-      case Some(row) =>
-        session.remove(this)
-        true
-      case _ =>
-        false
-    }
+  def remove() {
+    Calista.value.remove(this)
   }
 }

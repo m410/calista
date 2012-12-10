@@ -37,34 +37,12 @@ class SuperColumn[N] protected[schema](val name: N, val parent: SuperKey[_])
 
   def apply[V](name: V) = new ColumnName(name, this)
 
-  def from(columnName: Any)(): SliceRange = {
-    def startBytes = Serializers.toBytes(columnName).array()
-    new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
-  }
 
-
-  def to(toColumn: Any): SliceRange = {
-    def bytes = Serializers.toBytes(toColumn).array()
-    new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
-  }
-
-  def predicate[A](columns: Array[A]) = {
-    new SlicePredicate(columns, this)
-  }
 
   def column[C: Manifest, V: Manifest](column: C, value: V) = {
     new Column(column, value, new Date(), this)
   }
 
-  /**
-   * Removed the super column by this name.
-   *
-   * @return false if the row does not exist, and true if
-   *         it's removed successfully.
-   */
-  def remove() {
-    Calista.value.remove(this)
-  }
 
   def list = {
     Calista.value.sliceRange(new SliceRange(key = this, max = 100))

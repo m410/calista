@@ -75,13 +75,7 @@ trait Session {
   /**
    * Remove a key and all it's child columns by using the default consistency level.
    */
-  def remove(key: StandardKey[_])
-
-  def remove(key: SuperKey[_])
-
-  def remove(key: CounterKey[_])
-
-  def remove(key: SuperCounterKey[_])
+  def remove(key: Key)
 
   def remove(key: SuperCounterColumn[_])
 
@@ -126,11 +120,11 @@ trait Session {
   /**
    * Queries the data store by returning the key range inclusively.
    */
-  def keyRange(range: KeyRange[_,_], level: Consistency = defaultConsistency): ResultSet
+  def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): ResultSet
   /**
    * List all the columns by Key range using the default consistency.
    */
-  def keyRange[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): ResultSet
+  def keyRange[T <: AnyRef](range: KeyRange[T]): ResultSet
 
   def query(query:String,compression:String = ""):ResultSet
 

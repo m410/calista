@@ -23,25 +23,44 @@ import server.EmbeddedTest
 
 class UsageTest extends JUnitSuite with EmbeddedTest {
 
+  @Test def keyslice() {
+    sessionManager.doWith {
+      session =>
+        StandardFamily("StandardFamily")("key1")("column").set("v")
+        StandardFamily("StandardFamily")("key2")("column").set("v")
+        StandardFamily("StandardFamily")("key3")("column").set("v")
+    }
+    sessionManager.doWith {
+      session =>
+        val keyRange = StandardFamily("StandardFamily").from("key").predicate(Array("column")).size(10)
+        assertNotNull(keyRange)
+        val results = keyRange.list
+        assertNotNull(results)
+        assertEquals(2, results.size)
+    }
+  }
+
   @Test def testColumnFamilyStandardCol() {
-    sessionManager.doWith { session =>
-      println("###########  " + session.ksDef)
+    sessionManager.doWith {
+      session =>
+        println("###########  " + session.ksDef)
 
-      val stdColName = StandardFamily("StandardFamily")("key")("column")
-      assertNotNull(stdColName)
-      assertTrue(stdColName.isInstanceOf[ColumnName[_]])
+        val stdColName = StandardFamily("StandardFamily")("key")("column")
+        assertNotNull(stdColName)
+        assertTrue(stdColName.isInstanceOf[ColumnName[_]])
 
-      StandardFamily("StandardFamily")("key")("column").set("somevalue")
-      val values = StandardFamily("StandardFamily")("key").map(_.valueAs[String])
-      assert(values != null)
-      assert(values.size == 1)
+        StandardFamily("StandardFamily")("key")("column").set("somevalue")
+        val values = StandardFamily("StandardFamily")("key").map(_.valueAs[String])
+        assert(values != null)
+        assert(values.size == 1)
 
-      StandardFamily("StandardFamily")("key").foreach(r=>println(r.valueAs[String]))
+        StandardFamily("StandardFamily")("key").foreach(r => println(r.valueAs[String]))
     }
   }
 
   @Test def testStandardCol() {
-    sessionManager.doWith { session =>
+    sessionManager.doWith {
+      session =>
         val key = StandardFamily("StandardFamily")("key")
         assertTrue(key.isInstanceOf[StandardKey[_]])
         val stdColumnName = StandardFamily("StandardFamily")("key")("column")
@@ -53,7 +72,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertEquals("New Value", stdColumnValue.get)
 
         val col = key.column("name", "value")
-        assertTrue(col.isInstanceOf[Column[_,_]])
+        assertTrue(col.isInstanceOf[Column[_, _]])
 
         val stdSliceRange = key.from("begin").to("finish").reverse
         assertTrue(stdSliceRange.isInstanceOf[SliceRange])
@@ -70,18 +89,19 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   }
 
   @Test def testSuperCol() {
-    sessionManager.doWith { session =>
+    sessionManager.doWith {
+      session =>
         val key = SuperFamily("SuperFamily")("key")
         assertTrue(key.isInstanceOf[SuperKey[_]])
         val superColumnSCol = SuperFamily("SuperFamily")("key")("superColumn")
         assertTrue(superColumnSCol.isInstanceOf[SuperColumn[_]])
 
         key("superColumn")("column").set("New Value")
-        val superColumnName = key( "superColumn")("column").getAs[String]
+        val superColumnName = key("superColumn")("column").getAs[String]
         assertTrue(superColumnName.isDefined)
         assertEquals("New Value", superColumnName.get)
 
-        val superColumnPred = key.predicate(Array("column","column2"))
+        val superColumnPred = key.predicate(Array("column", "column2"))
         assertTrue(superColumnPred.isInstanceOf[SlicePredicate[_]])
         val superColumnSlice = key.from("begin").to("end")
         assertTrue(superColumnSlice.isInstanceOf[SliceRange])
@@ -94,7 +114,8 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
   }
 
   @Test def testStandardCounterCol() {
-    sessionManager.doWith { session =>
+    sessionManager.doWith {
+      session =>
         val key = CounterFamily("CountFamily")("key")
         assertTrue(key.isInstanceOf[CounterKey[_]])
 
@@ -142,7 +163,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assert(scol("column").count == 6)
 
         val range = scol.from("a").to("z")
-        assertTrue (range.isInstanceOf[SliceRange])
+        assertTrue(range.isInstanceOf[SliceRange])
         val results = range.results
         assertEquals(2, results.size)
 

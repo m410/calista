@@ -91,7 +91,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     new CassandraColumnParent(c.family).setSuper_column(buffer)
   }
 
-  private[this] implicit def toKeyRange(kr: KeyRange[_, _]) = {
+  private[this] implicit def toKeyRange(kr: KeyRange[_]) = {
     new CassandraKeyRange().setStart_key(kr.startBytes).setEnd_key(kr.finishBytes).setCount(kr.count)
   }
 
@@ -261,32 +261,27 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     remove(keyFor(column), column.columnPath, new Date().getTime, defaultConsistency)
   }
 
-	/**
-	 * Remove a key and all it's child columns by using the default consistency level.
-   */
-	def remove(key: StandardKey[_]) {
-    remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
+  def remove(key: Key) {
+    key match {
+      case s: StandardKey[_] =>
+        remove(s.keyBytes, ColumnPath(s.family.name, null, null), new Date().getTime, defaultConsistency)
+      case s: SuperKey[_] =>
+        remove(s.keyBytes, ColumnPath(s.family.name, null, null), new Date().getTime, defaultConsistency)
+      case s: CounterKey[_] =>
+        client.remove_counter(s.keyBytes, ColumnPath(s.family.name, null, null), defaultConsistency)
+      case s: SuperCounterKey[_] =>
+        client.remove_counter(s.keyBytes, ColumnPath(s.family.name, null, null), defaultConsistency)
+    }
   }
 
-  def remove(key: SuperKey[_]) {
-    remove(key.keyBytes, ColumnPath(key.family.name,null,null), new Date().getTime, defaultConsistency)
-  }
-	/**
+  /**
 	 * Removes a key by the path and timestamp with the given consistency level.
    */
   def remove(k: ByteBuffer, path: ColumnPath, timestamp: Long, level: Consistency) {
     client.remove(k, path, timestamp, level)
   }
 
-  def remove(key: SuperCounterKey[_]) {
-    client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
-  }
-
   def remove(key: SuperCounterColumn[_]) {
-    client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
-  }
-
-  def remove(key: CounterKey[_]) {
     client.remove_counter(key.keyBytes, ColumnPath(key.family.name,null,null),defaultConsistency)
   }
 
@@ -379,9 +374,9 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   /**
    * Queries the data store by returning the key range inclusively.
    */
-  def keyRange(range: KeyRange[_,_], level: Consistency = defaultConsistency): ResultSet = {
+  def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): ResultSet = {
     val columnParent = range.columnParent
-    val predicate = range.predicate
+    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte],null))
     val slice = client.get_range_slices(columnParent, predicate, range, level)
     val family = range.columnParent.family
     val list = slice.toList.flatMap(k=>{
@@ -395,8 +390,9 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 	/**
 	 * List all the columns by Key range using the default consistency.
    */
-  def keyRange[T <: AnyRef, C <: AnyRef](range: KeyRange[T, C]): ResultSet = {
-    val results = client.get_range_slices(range.columnParent, range.predicate, range, defaultConsistency)
+  def keyRange[T <: AnyRef](range: KeyRange[T]): ResultSet = {
+    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte],null))
+    val results = client.get_range_slices(range.columnParent, predicate, range, defaultConsistency)
     val list = results.toList.flatMap(keyslice => {
       val key = ByteBuffer.wrap(keyslice.getKey)
       val family = range.columnParent.family

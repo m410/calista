@@ -31,30 +31,8 @@ class SuperKey[K] protected[schema](val key: K, val family: Family) extends Key 
 
   def apply[N](sKey: N) = new SuperColumn(sKey, this)
 
-  def predicate[A](columns: Array[A]) = {
-    new SlicePredicate(columns, this)
-  }
-
-  def from[N](columnName: N)():SliceRange = {
-    def startBytes = Serializers.toBytes(columnName).array()
-    new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
-  }
-
-  def to[N](toColumn: N):SliceRange = {
-    def bytes = Serializers.toBytes(toColumn).array()
-    new SliceRange(key = this, finishBytes = bytes, finish = Option(toColumn))
-  }
 
 
-  /**
-   * Removed the super column by this name.
-   *
-   * @return false if the row does not exist, and true if
-   * it's removed successfully.
-   */
-  def remove() {
-    Calista.value.remove(this)
-  }
 
   def list = {
     Calista.value.sliceRange(new SliceRange(key=this,max=100))

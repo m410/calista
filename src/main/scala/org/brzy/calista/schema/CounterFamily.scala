@@ -9,13 +9,6 @@ class CounterFamily(val name:String)  extends Family {
 
   def apply[K](key: K) = new CounterKey(key, this)
 
-  def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {
-    null
-  }
-
-  def to[T<:Any:Manifest](key: T):KeyRange[_,_] = {
-    null
-  }
 
   override def toString =  "CounterFamily("+name+")"
 }

@@ -33,34 +33,12 @@ class StandardKey[K] protected[schema] (val key:K, val family:Family) extends Ke
 
   def apply[N](name: N) = new ColumnName(name,this)
 
-  def from[N](columnName: N)():SliceRange = {
-    def startBytes = toBytes(columnName).array()
-    new SliceRange(key = this, startBytes = startBytes, start = Option(columnName))
-  }
 
-  def to[N](toColumn: N):SliceRange = {
-    def bytes = Serializers.toBytes(toColumn).array()
-    new SliceRange(key = this, finishBytes = bytes, finish= Option(toColumn))
-  }
-
-  /**
-   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-   */
-  def predicate[A](columns:Array[A]) = new SlicePredicate(columns, this)
 
   def column[C:Manifest,V:Manifest](column:C, value:V) = {
     new Column(column,value,new Date(), this)
   }
 
-  /**
-   * Removed the super column by this name.
-   *
-   * @return false if the row does not exist, and true if
-   * it's removed successfully.
-   */
-  def remove() {
-    Calista.value.remove(this)
-  }
 
   def list = {
     Calista.value.sliceRange(new SliceRange(key=this,max=100))

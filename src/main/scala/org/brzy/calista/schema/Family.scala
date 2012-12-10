@@ -14,6 +14,9 @@
 package org.brzy.calista.schema
 
 import org.brzy.calista.Calista
+import org.brzy.calista.serializer.Serializers._
+
+
 /**
  * Represents a column family to query in the database.  This is the entry point to DSL access
  * to the datastore.
@@ -23,6 +26,18 @@ import org.brzy.calista.Calista
 trait Family {
 
   def name:String
+
+  def apply[K](key: K):Key
+
+  def to[K](key: K) = {
+    def keyBytes = toBytes(key).array()
+    new KeyRange(finish = Option(key), finishBytes = keyBytes, columnFamily = this)
+  }
+
+  def from[K](key: K) = {
+    def keyBytes = toBytes(key).array()
+    new KeyRange(start = Option(key), startBytes = keyBytes, columnFamily =  this)
+  }
 
   def definition = try {
     Calista.value.ksDef.families.find(_.name == name) match {

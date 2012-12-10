@@ -1,5 +1,7 @@
 package org.brzy.calista.schema
 
+import org.brzy.calista.serializer.Serializers._
+
 
 /**
  * Document Me..
@@ -9,16 +11,6 @@ package org.brzy.calista.schema
 class StandardFamily( val name:String) extends Family {
 
   def apply[K](key: K) = new StandardKey(key, this)
-
-
-  def from[T<:Any:Manifest](key: T)():KeyRange[_,_] = {
-    null
-  }
-
-
-  def to[T<:Any:Manifest](key: T):KeyRange[_,_] = {
-    null
-  }
 
   override def toString =  "StandardFamily("+name+")"
 }
