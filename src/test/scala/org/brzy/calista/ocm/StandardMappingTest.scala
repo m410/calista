@@ -18,9 +18,12 @@ import org.junit.Test
 import org.junit.Assert._
 
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.serializer.{UTF8Serializer, IntSerializer, DateSerializer}
-import java.util.Date
 import org.brzy.calista.schema.StandardFamily
+import org.brzy.calista.results.Row
+
+import java.util.Date
+
+
 
 class StandardMappingTest extends JUnitSuite with EmbeddedTest {
   val personKey = "mappingKey"
@@ -91,11 +94,47 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
 case class Person(key: String, name: String, count: Int, created: Date)
 
 object Person extends StandardDao[String, Person] {
-  def mapping = BeanMapping[Person](
-    "Person",
-    UTF8Serializer,
-    Key("key"),
-    Column("name"),
-    Column("count", IntSerializer),
-    Column("created", DateSerializer))
+//  def mapping = BeanMapping[Person](
+//    "Person",
+//    UTF8Serializer,
+//    Key("key"),
+//    Column("name"),
+//    Column("count", IntSerializer),
+//    Column("created", DateSerializer))
+  /**
+   * This needs to be implemented for each instance to define the mapping to the
+   * cassandra datastore.
+   */
+  val mapping = new Mapping[Person,String] {
+    val family = "Person"
+    def keyFor(t: Person) = t.key
+
+    def newInstance(k: String) = {
+      val rows = StandardFamily(family)(k).list.rows
+
+      Person(
+        key = k,
+        name = rows.find(_.columnAs[String] == "name") match {
+          case r:Row => r.valueAs[String]
+          case _ => null
+        },
+        count = rows.find(_.columnAs[String] == "count") match {
+          case r:Row => r.valueAs[Int]
+          case _ => 0
+        },
+        created = rows.find(_.columnAs[String] == "created") match {
+          case r:Row => new Date(r.valueAs[Long])
+          case _ => null
+        }
+      )
+    }
+
+    def toColumns(instance: Person) = {
+      List(
+        StandardFamily("Person")(instance.key).column("name",instance.name),
+        StandardFamily("Person")(instance.key).column("count",instance.count),
+        StandardFamily("Person")(instance.key).column("created",instance.created.getTime)
+      )
+    }
+  }
 }

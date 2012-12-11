@@ -45,6 +45,6 @@ case class SuperColumn(name: String, serializer: Serializer[_] = UTF8Serializer)
  *
  * @param serializer How to read and write the datatype to the database.
  */
-case class Column(name: String, serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
+case class ColumnNameValue(name: String, serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 

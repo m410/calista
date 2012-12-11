@@ -39,8 +39,7 @@ trait StandardDao[K, T <: AnyRef] {
    * Get an instance of the mapped class by it's key.
    */
   def apply(key: K)(implicit t: Manifest[K]): T = {
-    val columns = StandardFamily(mapping.family)(key).list
-    mapping.newInstance(key, None, columns)
+    mapping.newInstance(key)
   }
 
   /**
@@ -50,7 +49,7 @@ trait StandardDao[K, T <: AnyRef] {
     val columns = StandardFamily(mapping.family)(key).list
 
     if (columns.size > 0)
-      Option(mapping.newInstance(key, None, columns))
+      Option(mapping.newInstance(key))
     else
       None
   }
@@ -66,8 +65,7 @@ trait StandardDao[K, T <: AnyRef] {
      * insert the entity
      */
     def insert() = {
-      val columns = mapping.toColumns(p)
-      columns.foreach(c => session.insert(c))
+      mapping.toColumns(p).foreach(c => session.insert(c))
       p
     }
 
@@ -75,8 +73,7 @@ trait StandardDao[K, T <: AnyRef] {
      * remove the entity
      */
     def remove() {
-      val key = mapping.toKey(p).right.get
-      session.remove(key)
+      StandardFamily(mapping.family)(mapping.keyFor(p)).remove()
     }
   }
 
@@ -89,6 +86,6 @@ trait StandardDao[K, T <: AnyRef] {
    * This needs to be implemented for each instance to define the mapping to the
    * cassandra datastore.
    */
-  def mapping: BeanMapping[T]
+  def mapping: Mapping[T,K]
 
 }

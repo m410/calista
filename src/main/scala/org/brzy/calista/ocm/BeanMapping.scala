@@ -32,16 +32,39 @@ import org.slf4j.LoggerFactory
  *
  * @author Michael Fortin
  */
-case class BeanMapping[T <: AnyRef : Manifest](
+case class BeanMapping[T <: AnyRef : Manifest,K] (
         family: String,
         columnNameSerializer: Serializer[_],
-        attributes: MappingAttribute*) {
-  protected[this] val log = LoggerFactory.getLogger(classOf[BeanMapping[_]])
+        attributes: MappingAttribute*)
+    extends Mapping[T,K]{
+
+  protected[this] val log = LoggerFactory.getLogger(classOf[BeanMapping[_,_]])
+
+
+  def newInstance(key: K) = {
+
+    attributes.find(_.isInstanceOf[SuperColumn])  match {
+      case Some(x) =>
+        val columns = SuperFamily(family)(key)(x).list
+        newInstance(key, Option(x), columns)
+      case None =>
+        val columns = StandardFamily(family)(key).list
+        newInstance(key, Option(null), columns)
+    }
+  }
+
+
+  def keyFor(t: T) = {
+    val descriptor = descriptorOf[T]
+    val attributeKey = attributes.find(_.isInstanceOf[Key]).get
+    val keyProperty = descriptor.properties.find(_.name == attributeKey.name).get
+    keyProperty.get(t)
+  }
 
   /**
    * Creates a new instance from the key and list of columns.
    */
-  def newInstance[K: Manifest, S: Manifest](key: K, superColumn: Option[S], columns: ResultSet): T = {
+  def newInstance[S](key: K, superColumn: Option[S], columns: ResultSet): T = {
     val colMap = columns.rows.map(r => {
       columnNameSerializer.fromBytes(r.column) -> r
     }).toMap
@@ -70,7 +93,7 @@ case class BeanMapping[T <: AnyRef : Manifest](
       case _ =>
     }
 
-    attributes.filter(_.isInstanceOf[Column]).foreach(column => {
+    attributes.filter(_.isInstanceOf[ColumnNameValue]).foreach(column => {
       val prop = descriptor.properties.find(_.name == column.name).get
 
       val value = colMap.get(column.name) match {
@@ -107,8 +130,8 @@ case class BeanMapping[T <: AnyRef : Manifest](
     val superColOption = attributes.find(_.isInstanceOf[SuperColumn])
 
     attributes.filter(c => {
-      if (c.isInstanceOf[Column]) {
-        val column = c.asInstanceOf[Column]
+      if (c.isInstanceOf[ColumnNameValue]) {
+        val column = c.asInstanceOf[ColumnNameValue]
         descriptor.get(instance, column.name) != null
       }
       else {

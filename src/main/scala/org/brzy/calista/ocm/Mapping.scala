@@ -1,8 +1,6 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.schema._
-import org.scalastuff.scalabeans.Preamble._
-import org.brzy.calista.results.ResultSet
 
 /**
  * Document Me..
@@ -10,13 +8,15 @@ import org.brzy.calista.results.ResultSet
  * @author Michael Fortin
  * @version $Id: $
  */
-trait Mapping[T<:AnyRef] {
+trait Mapping[T<:AnyRef,K] {
 
-  def newInstance[K: Manifest](key: K): T
+  def newInstance(key: K): T
 
-  def toColumns(instance: T): List[Column]
+  def toColumns(instance: T): List[Column[_,_]]
 
-  def columnNames:Array[String]
+  def family:String
 
-
+  def keyFor(t:T):K
+//
+//  def superColumn[S](t:T):Option[S]
 }

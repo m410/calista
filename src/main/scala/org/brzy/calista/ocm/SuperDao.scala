@@ -13,7 +13,7 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.schema.{SuperFamily, Family}
+import org.brzy.calista.schema.{StandardFamily, SuperFamily, Family}
 import org.brzy.calista.Calista
 
 /**
@@ -39,25 +39,14 @@ trait SuperDao[K, S, T <: AnyRef] {
    * Get an instance of the mapped class by it's key.
    */
   def apply(key: K, superColumn: S)(implicit k: Manifest[K], s: Manifest[S]): T = {
-    //    val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
-    val columns = SuperFamily(mapping.family)(key).apply(superColumn).list
-
-    //    val columns = session.list(queryCol)
-    mapping.newInstance(key, Option(superColumn), columns)
+    mapping.newInstance(key)
   }
 
   /**
    * Optionally get an instance of the mapped class by it's key.
    */
   def get(key: K, superColumn: S)(implicit k: Manifest[K], s: Manifest[S]): Option[T] = {
-    //    val queryCol = ColumnFamily(mapping.family).superKey(key).superColumn(superColumn)
-    //    val columns = session.list(queryCol)
-    val columns = SuperFamily(mapping.family)(key).apply(superColumn).list
-
-    if (columns.size > 0)
-      Option(mapping.newInstance(key, Option(superColumn), columns))
-    else
-      None
+      Option(mapping.newInstance(key))
   }
 
   //	/**
@@ -98,8 +87,7 @@ trait SuperDao[K, S, T <: AnyRef] {
      * remove the entity
      */
     def remove() {
-      val key = mapping.toKey(p).left.get
-      session.remove(key)
+      SuperFamily(mapping.family)(mapping.keyFor(p))()
     }
   }
 
@@ -111,6 +99,6 @@ trait SuperDao[K, S, T <: AnyRef] {
   /**
    * This needs to be implemented for each instance to define the mapping to the cassandra datastore.
    */
-  def mapping: BeanMapping[T]
+  def mapping: Mapping[T,K]
 
 }

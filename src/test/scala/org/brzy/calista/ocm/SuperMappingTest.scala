@@ -72,12 +72,12 @@ case class SPerson(key: String,
         created: Date)
 
 object SPerson extends SuperDao[String, String, SPerson] {
-  def mapping = new BeanMapping[SPerson](
+  def mapping = new BeanMapping[SPerson,String](
     "SPerson",
     UTF8Serializer,
     Key("key"),
     SuperColumn("superColumn"),
-    Column("name"),
-    Column("count", IntSerializer),
-    Column("created", DateSerializer))
+    ColumnNameValue("name"),
+    ColumnNameValue("count", IntSerializer),
+    ColumnNameValue("created", DateSerializer))
 }

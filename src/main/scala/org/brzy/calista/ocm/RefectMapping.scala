@@ -8,16 +8,16 @@ import org.brzy.calista.results.ResultSet
  * 
  * @author Michael Fortin
  */
-class ReflectMapping[T<:AnyRef:Manifest] protected[ocm] (
+class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
         val columnFamilyName:String,
         val columnNameSerializer: Serializer[_] = UTF8Serializer,
         val superColumnKey: Option[MappingAttribute] = None,
         val primaryKey: Option[MappingAttribute] = None,
         val attributes: Seq[MappingAttribute] = Seq.empty[MappingAttribute])
-  extends Mapping[T]{
+  extends Mapping[T,K] {
 
   def columnNameSerializer(s:Serializer[_]) = {
-    new ReflectMapping[T](
+    new ReflectMapping[T,K](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = s,
       superColumnKey = superColumnKey,
@@ -26,7 +26,7 @@ class ReflectMapping[T<:AnyRef:Manifest] protected[ocm] (
   }
 
   def field(s:MappingAttribute) = {
-    new ReflectMapping[T](
+    new ReflectMapping[T,K](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = superColumnKey,
@@ -35,7 +35,7 @@ class ReflectMapping[T<:AnyRef:Manifest] protected[ocm] (
   }
 
   def key(s:MappingAttribute) = {
-    new ReflectMapping[T](
+    new ReflectMapping[T,K](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = superColumnKey,
@@ -44,7 +44,7 @@ class ReflectMapping[T<:AnyRef:Manifest] protected[ocm] (
   }
 
   def superColumn(s:MappingAttribute) = {
-    new ReflectMapping[T](
+    new ReflectMapping[T,K](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = Option(s),
@@ -52,18 +52,20 @@ class ReflectMapping[T<:AnyRef:Manifest] protected[ocm] (
       attributes = attributes)
   }
 
-  def newInstance[K: Manifest](key: K) = {
+  def newInstance(key: K) = {
 
     null.asInstanceOf[T]
   }
 
   def toColumns(instance: T) = null
 
-  def columnNames = null
+  def family = columnFamilyName
+
+  def keyFor(t: T) = null.asInstanceOf[K]
 }
 
 object ReflectMapping {
-  def apply[T<:AnyRef:Manifest](columnFamilyName:String) = {
-    new ReflectMapping[T]( columnFamilyName)
+  def apply[T<:AnyRef:Manifest,K](columnFamilyName:String) = {
+    new ReflectMapping[T,K]( columnFamilyName)
   }
 }
