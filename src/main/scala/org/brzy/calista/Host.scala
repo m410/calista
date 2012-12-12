@@ -11,26 +11,10 @@
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.brzy.calista.schema
+package org.brzy.calista
 
 /**
- * Document Me..
- *
+ * A Host instance for cassandera to connect too.
  * @author Michael Fortin
  */
-class SuperCounterFamily(val name: String) extends Family {
-
-  def apply[K](key: K) = new SuperCounterKey(key, this)
-
-
-  override def toString = "SuperCounterFamily(" + name + ")"
-
-}
-
-
-/**
- *
- */
-object SuperCounterFamily {
-  def apply(name: String) = new SuperCounterFamily(name)
-}
+case class Host(address: String, port: Int, timeout: Int)

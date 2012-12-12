@@ -145,8 +145,5 @@ class SessionManager(keySpace: String, url: String, port: Int = 9160) {
   }
 }
 
-/**
- * A Host instance for cassandera to connect too.
- */
-case class Host(address: String, port: Int, timeout: Int)
+
 

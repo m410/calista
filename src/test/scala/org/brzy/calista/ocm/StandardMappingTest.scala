@@ -95,6 +95,7 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
 case class Person(key: String, name: String, count: Int, created: Date)
 
 object Person extends StandardDao[String, Person] {
+
 //  def mapping = BeanMapping[Person](
 //    "Person",
 //    UTF8Serializer,
@@ -102,10 +103,7 @@ object Person extends StandardDao[String, Person] {
 //    Column("name"),
 //    Column("count", IntSerializer),
 //    Column("created", DateSerializer))
-  /**
-   * This needs to be implemented for each instance to define the mapping to the
-   * cassandra datastore.
-   */
+
   val mapping = new Mapping[Person,String] {
     val family = "Person"
     def keyFor(t: Person) = t.key
