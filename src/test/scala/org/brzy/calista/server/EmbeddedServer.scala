@@ -13,15 +13,21 @@
  */
 package org.brzy.calista.server
 
-import java.io.{File => JFile}
+
 import org.brzy.fab.file.FileUtils._
-import org.apache.thrift.transport.TSocket
 import org.brzy.fab.file.File
-import org.slf4j.LoggerFactory
-import actors.Actor._
 import org.brzy.calista.{SessionManager, Host}
 import org.brzy.calista.system.{FamilyDefinition, KeyspaceDefinition}
-import org.apache.cassandra.thrift.{CassandraDaemon}
+
+
+import org.apache.thrift.transport.TSocket
+import org.apache.cassandra.thrift.CassandraDaemon
+
+import org.slf4j.LoggerFactory
+import scala.actors.Actor._
+
+import java.io.{File => JFile}
+
 
 /**
  * Run an embbeded cassandra server for testing.  Possibly also use for development.

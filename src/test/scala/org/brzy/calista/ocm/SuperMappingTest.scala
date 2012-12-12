@@ -14,7 +14,7 @@
 package org.brzy.calista.ocm
 
 import org.scalatest.junit.JUnitSuite
-import org.junit.Test
+import org.junit.{Ignore, Test}
 import org.junit.Assert._
 
 import org.brzy.calista.server.EmbeddedTest
@@ -29,7 +29,7 @@ class SuperMappingTest extends JUnitSuite with EmbeddedTest {
   val personSuperColumn = "super_column"
   val personDate = new Date
 
-  @Test def mapEntity() {
+  @Test @Ignore def mapEntity() {
     sessionManager.doWith {
       session =>
         val person = new SPerson(personKey, personSuperColumn, "name", 100, personDate)

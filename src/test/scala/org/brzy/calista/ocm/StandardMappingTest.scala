@@ -30,6 +30,7 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
   val personKeyPartial = "mappingKeyPartial"
   val personDate = new Date
 
+
   @Test def mapEntity() {
     sessionManager.doWith {
       session =>
@@ -47,15 +48,15 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
 
     sessionManager.doWith {
       session =>
-      val person = Person.get(personKey) match {
-        case Some(person) =>
-          assertNotNull(person)
-          assertNotNull(person.key)
-          assertNotNull(person.name)
-          assertNotNull(person.count)
-          assertNotNull(person.created)
-        case _ =>
-          fail("No person by key")
+        Person.get(personKey) match {
+          case Some(person) =>
+            assertNotNull(person)
+            assertNotNull(person.key)
+            assertNotNull(person.name)
+            assertNotNull(person.count)
+            assertNotNull(person.created)
+          case _ =>
+            fail("No person by key")
       }
     }
   }
@@ -63,7 +64,7 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
   @Test def mapPartialEntity() {
     sessionManager.doWith {
       session =>
-        val person = new Person(personKeyPartial, "name", 100, null)
+        val person = new Person(personKeyPartial, "name", 100, new Date)
         person.insert()
     }
 
@@ -72,7 +73,7 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
         val key = StandardFamily("Person")(personKeyPartial)
         val columns = key.list
         assertNotNull(columns)
-        assertEquals(2, columns.size)
+        assertEquals(3, columns.size)
     }
 
     sessionManager.doWith {
@@ -83,7 +84,7 @@ class StandardMappingTest extends JUnitSuite with EmbeddedTest {
             assertNotNull(person.key)
             assertNotNull(person.name)
             assertNotNull(person.count)
-            assertNull(person.created)
+            assertNotNull(person.created)
           case _ =>
             fail("No person by key")
         }
@@ -111,19 +112,20 @@ object Person extends StandardDao[String, Person] {
 
     def newInstance(k: String) = {
       val rows = StandardFamily(family)(k).list.rows
+      rows.foreach(r=>println(r.columnAs[String]))
 
       Person(
         key = k,
         name = rows.find(_.columnAs[String] == "name") match {
-          case r:Row => r.valueAs[String]
+          case Some(r) => r.valueAs[String]
           case _ => null
         },
         count = rows.find(_.columnAs[String] == "count") match {
-          case r:Row => r.valueAs[Int]
+          case Some(r) => r.valueAs[Int]
           case _ => 0
         },
         created = rows.find(_.columnAs[String] == "created") match {
-          case r:Row => new Date(r.valueAs[Long])
+          case Some(r) => new Date(r.valueAs[Long])
           case _ => null
         }
       )
@@ -131,9 +133,9 @@ object Person extends StandardDao[String, Person] {
 
     def toColumns(instance: Person) = {
       List(
-        StandardFamily("Person")(instance.key).column("name",instance.name),
-        StandardFamily("Person")(instance.key).column("count",instance.count),
-        StandardFamily("Person")(instance.key).column("created",instance.created.getTime)
+        StandardFamily(family)(instance.key).column("name",instance.name),
+        StandardFamily(family)(instance.key).column("count",instance.count),
+        StandardFamily(family)(instance.key).column("created",instance.created.getTime)
       )
     }
   }
