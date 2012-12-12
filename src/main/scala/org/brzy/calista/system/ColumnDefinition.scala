@@ -1,7 +1,8 @@
 package org.brzy.calista.system
 
-import org.scalastuff.scalabeans.Enum
 import org.apache.cassandra.thrift.{ColumnDef, IndexType => CIndexType}
+import IndexType._
+
 
 /**
  * Column Definition
@@ -41,10 +42,4 @@ object ColumnDefinition {
       indexType = if (d.getIndex_type == null) None else Option(IndexType.KEYS),
       indexName = Option(d.getIndex_name))
   }
-}
-
-class IndexType private()
-
-object IndexType extends Enum[IndexType] {
-  val KEYS = new IndexType
 }
