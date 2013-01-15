@@ -56,7 +56,7 @@ object Serializers {
     case IntSerializer(s) => IntSerializer.toBytes(s)
     case DateSerializer(s) => DateSerializer.toBytes(s)
     case ByteArraySerializer(s) => ByteArraySerializer.toBytes(s)
-    case _ => throw new NoSerializerException("No Serializer or type: %s".format(t))
+    case _ => throw new NoSerializerException("No Serializer for type: %s".format(t))
   }
 
   def fromBytes[T](t: T, b: ByteBuffer): T = t match {
