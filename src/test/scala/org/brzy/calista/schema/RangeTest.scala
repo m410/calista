@@ -162,7 +162,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
         val slice = SuperFamily("Super2")("skey1").from("a").to("z")
         val results = session.sliceRange(slice)
         assertNotNull(results)
-        results.rows.foreach(r => {
+        results.foreach(r => {
           assertEquals("skey1", r.keyAs[String])
         })
         assertEquals(8, results.size)

@@ -64,7 +64,7 @@
     <profile>
       <id>2.10.0</id>
       <properties>
-        <scala.version>2.10.0-RC3</scala.version>
+        <scala.version>2.10.0</scala.version>
       </properties>
       <dependencies>
         <dependency>
@@ -123,11 +123,6 @@
       <artifactId>logback-classic</artifactId>
       <version>1.0.9</version>
     </dependency>
-    <!--<dependency>-->
-      <!--<groupId>org.scalastuff</groupId>-->
-      <!--<artifactId>scalabeans_2.8.1</artifactId>-->
-      <!--<version>0.2</version>-->
-    <!--</dependency>-->
     <dependency>
       <groupId>org.apache.cassandra</groupId>
       <artifactId>cassandra-all</artifactId>

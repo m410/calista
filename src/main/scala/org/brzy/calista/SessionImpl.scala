@@ -188,12 +188,6 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   /**
-   * get the value of the column.  This assumes the input column does not have a value, this will
-   * return a results.Column with the name and value
-   */
-  def get(column: Column[_, _]): Option[Row] = get(column, defaultConsistency)
-
-  /**
    * Increments a counter column.
    */
   def add(column: Column[_, _], level: Consistency = defaultConsistency) {
@@ -205,6 +199,8 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   /**
+   * get the value of the column.  This assumes the input column does not have a value, this will
+   * return a results.Column with the name and value
    * Read the value of a single column, with the given consistency.
    *
    * @return An Option ColumnOrSuperColumn on success or None
@@ -297,38 +293,22 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   }
 
   /**
-   * List the columns by slice predicate.  This uses the default consistency.
-   */
-  def slice(predicate: SlicePredicate[_]): ResultSet = {
-    slice(predicate, defaultConsistency)
-  }
-
-  /**
    * List all the columns by slice predicate and consistency level.
    */
-  def slice(predicate: SlicePredicate[_], level: Consistency): ResultSet = {
+  def slice(predicate: SlicePredicate[_], level: Consistency): Seq[Row] = {
     val results = client.get_slice(predicate.key.keyBytes, predicate.columnParent, predicate, level)
     val family = predicate.columnParent.family
     val key = predicate.key.keyBytes
-    ResultSet(results.flatMap(sc => {
-      toRows(sc, family, key)
-    }).toList)
+    results.flatMap(sc => { toRows(sc, family, key)}).toSeq
   }
-
-  /**
-   * List all the columns by slice range. This uses the default consistency.
-   */
-  def sliceRange(range: SliceRange): ResultSet = sliceRange(range, defaultConsistency)
 
   /**
    * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange, level: Consistency): ResultSet = {
+  def sliceRange(range: SliceRange, level: Consistency): Seq[Row] = {
     val results = client.get_slice(range.keyBytes, range.columnParent, range, level)
     val family = range.columnParent.family
-    ResultSet(results.flatMap(sc => {
-      toRows(sc, family, range.keyBytes)
-    }).toList)
+    results.flatMap(sc => { toRows(sc, family, range.keyBytes)}).toSeq
   }
 
   /**
@@ -345,7 +325,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
       def hasNext: Boolean = {
         if (partial.size > 0 && index == partial.size) {
           import results.RowType._
-          val lastRow = partial.rows.last
+          val lastRow = partial.last
           val partialLast: ByteBuffer = lastRow.rowType match {
             case Standard => lastRow.column
             case StandardCounter => lastRow.column
@@ -370,7 +350,7 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
 
       def next(): Row = {
         index = index + 1
-        partial.rows(index - 1)
+        partial(index - 1)
       }
     }
   }
@@ -379,45 +359,29 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
   /**
    * Queries the data store by returning the key range inclusively.
    */
-  def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): ResultSet = {
+  def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): Seq[Row] = {
     val columnParent = range.columnParent
     val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte], null))
     val slice = client.get_range_slices(columnParent, predicate, range, level)
     val family = range.columnParent.family
-    val list = slice.toList.flatMap(k => {
-      k.getColumns.toList.flatMap(c => {
+    slice.flatMap(k => {
+      k.getColumns.flatMap(c => {
         val key = ByteBuffer.wrap(k.getKey)
         toRows(c, family, key)
       })
-    })
-    ResultSet(list)
+    }).toSeq
   }
 
-  /**
-   * List all the columns by Key range using the default consistency.
-   */
-  def keyRange[T <: AnyRef](range: KeyRange[T]): ResultSet = {
-    val predicate = range.predicate.getOrElse(new SlicePredicate(Array.empty[Byte], null))
-    val results = client.get_range_slices(range.columnParent, predicate, range, defaultConsistency)
-    val list = results.toList.flatMap(keyslice => {
-      val key = ByteBuffer.wrap(keyslice.getKey)
-      val family = range.columnParent.family
-      keyslice.getColumns.toList.flatMap(c => {
-        toRows(c, family, key)
-      })
-    })
-    ResultSet(list)
-  }
-
-  def query(query: String, compression: String = ""): ResultSet = {
+  def query(query: String, compression: String = ""): Seq[Row] = {
     val result = client.execute_cql_query(ByteBuffer.wrap(query.getBytes), Compression.NONE)
-    // todo finish me
-    //    if (result.rows.size() > 0)
-    //      ResultSet(result.rows.map(r=>toRows()).toList)
-    //    else
-    ResultSet(List.empty[Row])
+    result.getRows.flatMap(cqlRow => fromCqlRow(cqlRow.getColumns, cqlRow.getKey)).toSeq
   }
 
+  def fromCqlRow(columns:java.util.List[CassandraColumn], key:Array[Byte]) = {
+    columns.map(c=>{
+      new Row(RowType.Cql, null, ByteBuffer.wrap(key), null, ByteBuffer.wrap(c.getName), ByteBuffer.wrap(c.getValue), new Date(c.getTimestamp))
+    })
+  }
 
   def addKeySpace(ks: KeyspaceDefinition) {
     log.info("add keyspace: {}", ks)

@@ -42,4 +42,9 @@ object RowType extends Enumeration {
    * have all fields available and the value will be a Long type.
    */
   val SuperCounter = Value("SuperCounter")
+
+  /**
+   * Returned from a Cql query
+   */
+  val Cql = Value("Cql")
 }

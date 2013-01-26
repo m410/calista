@@ -25,7 +25,7 @@ class SessionManagerTest extends JUnitSuite with EmbeddedTest {
 
   @Test
   @Ignore def testSchema() {
-    val mgr = new SessionManager("Test", "127.0.0.1")
+    val mgr = new SessionManager("Test", "127.0.0.1",9161)
     mgr.doWith({
       session =>
         log.info("******************** Before add keyspace")
@@ -86,7 +86,7 @@ class SessionManagerTest extends JUnitSuite with EmbeddedTest {
 
     })
 
-    val sm = new SessionManager("Test", "127.0.0.1")
+    val sm = new SessionManager("Test", "127.0.0.1",9161)
     val schema = sm.keyspaceDefinition
     assertNotNull(schema)
     println(schema)

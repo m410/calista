@@ -26,7 +26,7 @@ import java.util.{UUID, Date}
 trait Serializer[T] {
   val typeManifest: Manifest[T]
 
-  def serializedClass = typeManifest.erasure
+  def serializedClass = typeManifest.runtimeClass
 
   def toBytes(t: T): ByteBuffer
 
