@@ -19,7 +19,6 @@ import schema._
 import schema.ColumnName
 import schema.SlicePredicate
 import schema.SliceRange
-import schema.SuperKey
 import system.{FamilyDefinition, KeyspaceDefinition}
 import java.nio.ByteBuffer
 
@@ -44,12 +43,6 @@ trait Session {
   def closeAndMakeNewSession: Session
 
   /**
-   * get the value of the column.  This assumes the input column does not have a value, this will
-   * return a results.Column with the name and value
-   */
-  def get(column: Column[_, _]): Option[Row]
-
-  /**
    * Increments a counter column.
    */
   def add(column: Column[_, _], level: Consistency = defaultConsistency)
@@ -59,7 +52,7 @@ trait Session {
    *
    * @return An Option ColumnOrSuperColumn on success or None
    */
-  def get(column: Column[_, _], level: Consistency): Option[Row]
+  def get(column: Column[_, _], level: Consistency = defaultConsistency): Option[Row]
 
   /**
    * Set the value on an single Column
@@ -104,24 +97,14 @@ trait Session {
   def count(key: Key, level: Consistency = defaultConsistency): Long
 
   /**
-   * List the columns by slice predicate.  This uses the default consistency.
-   */
-  def slice(predicate: SlicePredicate[_]): ResultSet
-
-  /**
    * List all the columns by slice predicate and consistency level.
    */
-  def slice(predicate: SlicePredicate[_], level: Consistency): ResultSet
-
-  /**
-   * List all the columns by slice range. This uses the default consistency.
-   */
-  def sliceRange(range: SliceRange): ResultSet
+  def slice(predicate: SlicePredicate[_], level: Consistency = defaultConsistency): Seq[Row]
 
   /**
    * List all the columns by slice range and Consistency Level. This uses the default consistency.
    */
-  def sliceRange(range: SliceRange, level: Consistency): ResultSet
+  def sliceRange(range: SliceRange, level: Consistency = defaultConsistency): Seq[Row]
 
   /**
    * Scroll through large slices by grabbing them form the datastore in chunks.  This will
@@ -134,14 +117,9 @@ trait Session {
   /**
    * Queries the data store by returning the key range inclusively.
    */
-  def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): ResultSet
+  def keyRange(range: KeyRange[_], level: Consistency = defaultConsistency): Seq[Row]
 
-  /**
-   * List all the columns by Key range using the default consistency.
-   */
-  def keyRange[T <: AnyRef](range: KeyRange[T]): ResultSet
-
-  def query(query: String, compression: String = ""): ResultSet
+  def query(query: String, compression: String = ""): Seq[Row]
 
   def addKeySpace(ks: KeyspaceDefinition)
 
@@ -164,4 +142,5 @@ trait Session {
 
   def describeVersion: String
 
+  def describeRing(keyspace: String)
 }

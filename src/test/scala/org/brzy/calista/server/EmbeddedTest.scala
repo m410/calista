@@ -23,7 +23,7 @@ import org.brzy.calista.{Session, SessionManager, SessionImpl}
 trait EmbeddedTest {
   val server = EmbeddedServer
 
-  val sessionManager = new SessionManager("Test", "localhost")
+  val sessionManager = new SessionManager("Test", "localhost",9161)
 
   def doWith(f: (Session) => Unit) {
     val session = sessionManager.createSession

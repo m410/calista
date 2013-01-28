@@ -64,7 +64,7 @@ class Row(
   def valueAs[T: Manifest]: T = as[T](value)
 
   protected[this] def as[T: Manifest](b: ByteBuffer): T =
-    Serializers.fromClassBytes(manifest[T].erasure, b).asInstanceOf[T]
+    Serializers.fromClassBytes(manifest[T].runtimeClass, b).asInstanceOf[T]
 
-  override def toString = new ToStringBuilder(this).append("rowType", rowType.name).toString
+  override def toString = new ToStringBuilder(this).append("rowType", rowType.toString).toString
 }

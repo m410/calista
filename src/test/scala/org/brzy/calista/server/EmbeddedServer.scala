@@ -36,7 +36,7 @@ import java.io.{File => JFile}
  */
 object EmbeddedServer {
   val log = LoggerFactory.getLogger(this.getClass)
-  val hosts = Host("localhost", 9160, 250) :: Nil
+  val hosts = Host("localhost", 9161, 250) :: Nil
   val homeDirectory = File("target/cassandra")
   homeDirectory.trash()
   homeDirectory.mkdirs
@@ -72,7 +72,7 @@ object EmbeddedServer {
     log.debug("Sleep for 8s")
     Thread.sleep(8000)
 
-    val socket = new TSocket("localhost", 9160)
+    val socket = new TSocket("localhost", 9161)
     var opened = false
     while (!opened) {
       try {
@@ -94,7 +94,7 @@ object EmbeddedServer {
   def loadSchema() {
     log.info("Setting up the keyspace...")
 
-    val system = new SessionManager("system", "127.0.0.1")
+    val system = new SessionManager("system", "127.0.0.1", 9161)
 
     log.info("******************** Setup keyspace")
     log.info("******************** Test")
@@ -105,7 +105,7 @@ object EmbeddedServer {
       strategyOptions = Option(Map("replication_factor" -> "1")),
       families = List.empty[FamilyDefinition]))
 
-    val mgr = new SessionManager("Test", "127.0.0.1")
+    val mgr = new SessionManager("Test", "127.0.0.1", 9161)
 
     mgr.doWith({
       session =>

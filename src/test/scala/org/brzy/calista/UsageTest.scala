@@ -16,7 +16,7 @@ package org.brzy.calista
 import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
-import results.ResultSet
+import results.{Row, ResultSet}
 import schema._
 import server.EmbeddedTest
 
@@ -81,7 +81,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertTrue(stdSliceRange2.isInstanceOf[collection.Iterator[_]])
 
         val stdSliceRange3 = key.from("begin").to("end").size(10).results
-        assertTrue(stdSliceRange3.isInstanceOf[ResultSet])
+        assertTrue(stdSliceRange3.isInstanceOf[Seq[Row]])
 
         val stdPredicate = key.predicate(Array("column", "column2", "column3"))
         assertTrue(stdPredicate.isInstanceOf[SlicePredicate[_]])

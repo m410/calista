@@ -109,7 +109,7 @@ object Person extends StandardDao[String, Person] {
     def keyFor(t: Person) = t.key
 
     def newInstance(k: String) = {
-      val rows = StandardFamily(family)(k).list.rows
+      val rows = StandardFamily(family)(k).list
       rows.foreach(r=>println(r.columnAs[String]))
 
       Person(
