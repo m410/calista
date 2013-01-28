@@ -1,6 +1,0 @@
-h1. Calista is an api to work with the Cassandra.
-
-You can find the API here.
-
-M!ke
-
