@@ -36,7 +36,7 @@ class UsageTest extends JUnitSuite with EmbeddedTest {
         assertNotNull(keyRange)
         val results = keyRange.list
         assertNotNull(results)
-        assertEquals(2, results.size)
+        assertEquals(3, results.size)
     }
   }
 

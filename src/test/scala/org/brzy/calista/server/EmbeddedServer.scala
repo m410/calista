@@ -22,6 +22,7 @@ import org.brzy.calista.system.{FamilyDefinition, KeyspaceDefinition}
 
 import org.apache.thrift.transport.TSocket
 import org.apache.cassandra.thrift.CassandraDaemon
+//import org.apache.cassandra.service.CassandraDaemon
 
 import org.slf4j.LoggerFactory
 import scala.actors.Actor._

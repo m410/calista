@@ -34,6 +34,8 @@ import org.apache.cassandra.thrift.{Cassandra, Column => CassandraColumn, Column
 import org.apache.cassandra.thrift.{SliceRange => CassandraSliceRange, SlicePredicate => CassandraSlicePredicate}
 import org.apache.cassandra.thrift.{ColumnOrSuperColumn => CassandraColumnOrSuperColumn, KeyRange => CassandraKeyRange, TokenRange => CassandraTokenRange}
 
+import scala.language.implicitConversions
+
 
 /**
  * A session connection to a cassandra instance.  This is really the heart of the api. It

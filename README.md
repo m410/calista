@@ -183,7 +183,6 @@ Then you can use it like this.
 Known Issues, Missing Features
 
  * No support for authentication.
- * No support for batch mutations.
  * No support for secondary indexes.
  * No support for Hadoop.
  * No support for Cassandra Query Language.
