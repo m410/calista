@@ -19,7 +19,7 @@ import schema._
 import schema.ColumnName
 import schema.SlicePredicate
 import schema.SliceRange
-import system.{FamilyDefinition, KeyspaceDefinition}
+import system.{TokenRange, FamilyDefinition, KeyspaceDefinition}
 import java.nio.ByteBuffer
 
 /**
@@ -142,5 +142,5 @@ trait Session {
 
   def describeVersion: String
 
-  def describeRing(keyspace: String)
+  def describeRing(keyspace: String):List[TokenRange]
 }
