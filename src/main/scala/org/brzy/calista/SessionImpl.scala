@@ -228,7 +228,6 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
    * Set the value on an single Column
    */
   def insert(column: Column[_, _], level: Consistency = defaultConsistency) {
-    log.debug("################# insert: {}", column)
     client.insert(keyFor(column), column.columnParent, column, level)
   }
 
@@ -341,7 +340,6 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
           if (partialLast.compareTo(sliceLast) != 0) {
             partial = {
               val sliceCopy = initSliceRange.copy(start = partialLast.array(), finish = sliceLast.array())
-              log.debug("partial sliceCopy: {}", sliceCopy)
               sliceRange(sliceCopy)
             }
             index = 1 // skip the first, because the slice is inclusive
@@ -425,17 +423,27 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
     client.system_drop_column_family(family)
   }
 
-  def describeKeySpace(name: String) = KeyspaceDefinition(client.describe_keyspace(name))
+  def describeKeySpace(name: String) = {
+    KeyspaceDefinition(client.describe_keyspace(name))
+  }
 
-  def describeKeySpaces = client.describe_keyspaces().map(ksDef => {
-    KeyspaceDefinition(ksDef)
-  }).toList
+  def describeKeySpaces = {
+    client.describe_keyspaces().map(ksDef => {
+      KeyspaceDefinition(ksDef)
+    }).toList
+  }
 
-  def describeClusterName = client.describe_cluster_name()
+  def describeClusterName = {
+    client.describe_cluster_name()
+  }
 
-  def describeVersion = client.describe_version()
+  def describeVersion = {
+    client.describe_version()
+  }
 
-  def describeRing(keyspace: String) = client.describe_ring(keyspace).map(t => TokenRange(t))
+  def describeRing(keyspace: String) = {
+    client.describe_ring(keyspace).map(t => TokenRange(t)).toList
+  }
 
 
 }

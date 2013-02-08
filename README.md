@@ -68,21 +68,21 @@ Calista can interact with any column type with only slightly different syntax.
 
 ### Standard Column
 
-    import org.brzy.calista.dsl.{StandardColumn=>C}
+    import org.brzy.calista.schema.{StandardColumn=>C}
     val result = C(“family”)(“key”)(“columnName”).valueAs[String]
     C(“family”)(“key”)(“columnName”).set(“newValue”)
     C(“family”)(“key”)(“columnName”).delete
 
 ### Super Column
 
-    import org.brzy.calista.dsl.{SuperColumn=>C}
+    import org.brzy.calista.schema.{SuperColumn=>C}
     val result = C(“family”)(“key”,”supKey”)(“columnName”).valueAs[String]
     C(“family”)(“key”,”supKey”)(“columnName”).set(“newValue”)
     C(“family”)(“key”,”supKey”)(“columnName”).delete
 
 ### Counter Column
 
-    import org.brzy.calista.dsl.{CounterColumn=>C}
+    import org.brzy.calista.schema.{CounterColumn=>C}
     val result = C(“family”)(“key”)(“columnName”).count
     C(“family”)(“key”)(“columnName”).add(1)
     C(“family”)(“key”)(“columnName”).delete
