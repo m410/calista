@@ -16,7 +16,7 @@ class FamilyDefinitionSpec extends WordSpec with ShouldMatchers with EmbeddedTes
         famDef.name should be equals("Standard")
       }
     }
-    "be able to create new families" in {
+    "be able to create new families" ignore {
       sessionManager.doWith { s=>
         val famDef = new FamilyDefinition(
           keyspace = "Test",
