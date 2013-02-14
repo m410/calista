@@ -16,6 +16,8 @@ package org.brzy.calista.ocm
 import org.brzy.calista.schema.{StandardFamily, Family}
 import org.brzy.calista.Calista
 
+import scala.language.implicitConversions
+
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
  * the basic functionality need to access the data store.
