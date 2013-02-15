@@ -23,16 +23,16 @@ import scala.reflect.runtime.universe.TypeTag
  * @author Michael Fortin
  */
 @deprecated("use reflection mapping","0.7.0")
-class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
+class ReflectMapping[K, T<:AnyRef:Manifest] protected[ocm] (
         val columnFamilyName:String,
         val columnNameSerializer: Serializer[_] = UTF8Serializer,
         val superColumnKey: Option[MappingAttribute] = None,
         val primaryKey: Option[MappingAttribute] = None,
         val attributes: Seq[MappingAttribute] = Seq.empty[MappingAttribute])
-  extends StandardMapping[T,K] {
+  extends StandardMapping[K,T] {
 
   def columnNameSerializer(s:Serializer[_]) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = s,
       superColumnKey = superColumnKey,
@@ -41,7 +41,7 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
   }
 
   def field(s:MappingAttribute) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = superColumnKey,
@@ -50,7 +50,7 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
   }
 
   def key(s:MappingAttribute) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = superColumnKey,
@@ -59,7 +59,7 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
   }
 
   def superColumn(s:MappingAttribute) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = Option(s),
@@ -82,6 +82,6 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
 @deprecated("use reflection mapping","0.7.0")
 object ReflectMapping {
   def apply[T<:AnyRef:Manifest,K](columnFamilyName:String) = {
-    new ReflectMapping[T,K]( columnFamilyName)
+    new ReflectMapping[K,T]( columnFamilyName)
   }
 }

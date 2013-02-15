@@ -90,6 +90,6 @@ trait StandardDao[K, T <: AnyRef] {
    * This needs to be implemented for each instance to define the mapping to the
    * cassandra datastore.
    */
-  def mapping: StandardMapping[T,K]
+  def mapping: StandardMapping[K,T]
 
 }

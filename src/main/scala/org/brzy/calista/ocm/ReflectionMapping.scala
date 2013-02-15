@@ -10,11 +10,11 @@ import scala.reflect.runtime.universe._
  * 
  * @author Michael Fortin
  */
-class ReflectionMapping[T<:AnyRef:ClassTag,K:ClassTag](
+class ReflectionMapping[K:ClassTag, T<:AnyRef:ClassTag](
         val family:String,
         val keyCol:ColDef[_],
         val columns:Seq[ColDef[_]]
-    ) extends StandardMapping[T,K]{
+    ) extends StandardMapping[K,T]{
 
   def newInstance(key: K) = {
     val rows = StandardFamily(family)(key).list
@@ -40,7 +40,7 @@ class ReflectionMapping[T<:AnyRef:ClassTag,K:ClassTag](
     }).toList
   }
 
-  def keyFor(t: T) = {
+  def keyFor(t: T):K = {
     null.asInstanceOf[K]
   }
 }

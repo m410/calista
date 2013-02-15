@@ -21,7 +21,7 @@ import scala.reflect.runtime.universe._
  * 
  * @author Michael Fortin
  */
-trait StandardMapping[T<:AnyRef,K] {
+trait StandardMapping[K, T<:AnyRef] {
 
   def newInstance(key: K): T
 
