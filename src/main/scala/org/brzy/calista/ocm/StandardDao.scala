@@ -16,6 +16,8 @@ package org.brzy.calista.ocm
 import org.brzy.calista.schema.{StandardFamily, Family}
 import org.brzy.calista.Calista
 
+import scala.reflect.runtime.universe.TypeTag
+
 import scala.language.implicitConversions
 
 /**
@@ -61,7 +63,7 @@ trait StandardDao[K, T <: AnyRef] {
    * This holds implicit function on the entity.  The functions can be called directly on the entity
    * eg `entity.insert` etc.
    */
-  class CrudOps(p: T) {
+  class CrudOps(p: T)(implicit t:TypeTag[T]) {
 
     /**
      * insert the entity
@@ -82,12 +84,12 @@ trait StandardDao[K, T <: AnyRef] {
   /**
    * Apply the operations to the entity.
    */
-  implicit def applyCrudOps(p: T): CrudOps = new CrudOps(p)
+  implicit def applyCrudOps(p: T)(implicit t:TypeTag[T]): CrudOps = new CrudOps(p)
 
   /**
    * This needs to be implemented for each instance to define the mapping to the
    * cassandra datastore.
    */
-  def mapping: Mapping[T,K]
+  def mapping: StandardMapping[T,K]
 
 }

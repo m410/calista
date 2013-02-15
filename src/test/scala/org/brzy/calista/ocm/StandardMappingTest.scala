@@ -104,7 +104,7 @@ object Person extends StandardDao[String, Person] {
 //    Column("count", IntSerializer),
 //    Column("created", DateSerializer))
 
-  val mapping = new Mapping[Person,String] {
+  val mapping = new StandardMapping[Person,String] {
     val family = "Person"
     def keyFor(t: Person) = t.key
 

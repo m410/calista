@@ -14,17 +14,18 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.schema._
+import scala.reflect.runtime.universe._
 
 /**
  * Document Me..
  * 
  * @author Michael Fortin
  */
-trait Mapping[T<:AnyRef,K] {
+trait StandardMapping[T<:AnyRef,K] {
 
   def newInstance(key: K): T
 
-  def toColumns(instance: T): List[Column[_,_]]
+  def toColumns(instance: T)(implicit t:TypeTag[T]): List[Column[_,_]]
 
   def family:String
 
