@@ -1,7 +1,8 @@
 # Calista is an api to work with the Cassandra.
 
 This works with Cassandra version 0.8. I initially developed this against 0.8.2 but have since
- used with 1.0.6 without issue.
+used with 1.1.9 without issue. The basic column and row api, should be backward compatible, but
+accessing the column definition will not, and the same applies to cql.
 
 Calista is a Scala based client library for working with a Cassandra datastore and is
 designed to be more like working with collections than working with SQL. Calista is built
@@ -47,7 +48,7 @@ I'll start off with a small example and explain it after.
       result.rows.foreach(c=>{
         val name = c.nameAs[String]
         val value = c.valueAs[String]
-        println( name + "=" +value)
+        println( s"$name=$value")
       })
     }
 
