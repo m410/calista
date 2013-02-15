@@ -23,16 +23,14 @@ class BooleanSerializerTest extends JUnitSuite {
     val t = true
     t match {
       case BooleanSerializer(x) =>
-        val b = x.asInstanceOf[Boolean]
-        assertTrue(b)
+        assertTrue(x)
       case _ => fail()
     }
 
     val f = false
     f match {
       case BooleanSerializer(x) =>
-        val b = x.asInstanceOf[Boolean]
-        assertTrue(!b)
+        assertTrue(!x)
       case _ => fail()
     }
 

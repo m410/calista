@@ -14,23 +14,25 @@
 package org.brzy.calista.ocm
 
 import org.brzy.calista.serializer.{UTF8Serializer,  Serializer}
-import org.brzy.calista.results.ResultSet
+import scala.reflect.runtime.universe.TypeTag
+
 
 /**
  * Document Me..
  * 
  * @author Michael Fortin
  */
-class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
+@deprecated("use reflection mapping","0.7.0")
+class ReflectMapping[K, T<:AnyRef:Manifest] protected[ocm] (
         val columnFamilyName:String,
         val columnNameSerializer: Serializer[_] = UTF8Serializer,
         val superColumnKey: Option[MappingAttribute] = None,
         val primaryKey: Option[MappingAttribute] = None,
         val attributes: Seq[MappingAttribute] = Seq.empty[MappingAttribute])
-  extends Mapping[T,K] {
+  extends StandardMapping[K,T] {
 
   def columnNameSerializer(s:Serializer[_]) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = s,
       superColumnKey = superColumnKey,
@@ -39,7 +41,7 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
   }
 
   def field(s:MappingAttribute) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = superColumnKey,
@@ -48,7 +50,7 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
   }
 
   def key(s:MappingAttribute) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = superColumnKey,
@@ -57,7 +59,7 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
   }
 
   def superColumn(s:MappingAttribute) = {
-    new ReflectMapping[T,K](
+    new ReflectMapping[K,T](
       columnFamilyName = columnFamilyName,
       columnNameSerializer = columnNameSerializer,
       superColumnKey = Option(s),
@@ -70,15 +72,16 @@ class ReflectMapping[T<:AnyRef:Manifest,K] protected[ocm] (
     null.asInstanceOf[T]
   }
 
-  def toColumns(instance: T) = null
+  def toColumns(instance: T)(implicit t:TypeTag[T]) = null
 
   def family = columnFamilyName
 
   def keyFor(t: T) = null.asInstanceOf[K]
 }
 
+@deprecated("use reflection mapping","0.7.0")
 object ReflectMapping {
   def apply[T<:AnyRef:Manifest,K](columnFamilyName:String) = {
-    new ReflectMapping[T,K]( columnFamilyName)
+    new ReflectMapping[K,T]( columnFamilyName)
   }
 }

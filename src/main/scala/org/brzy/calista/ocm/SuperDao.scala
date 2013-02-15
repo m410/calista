@@ -16,6 +16,9 @@ package org.brzy.calista.ocm
 import org.brzy.calista.schema.{StandardFamily, SuperFamily, Family}
 import org.brzy.calista.Calista
 
+import scala.language.implicitConversions
+import scala.reflect.runtime.universe.TypeTag
+
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
  * the basic functionality need to access the data store.
@@ -72,7 +75,7 @@ trait SuperDao[K, S, T <: AnyRef] {
    * This holds implicit function on the entity.  The functions can be called directly on the entity
    * eg `entity.insert` etc.
    */
-  class CrudOps(p: T) {
+  class CrudOps(p: T)(implicit t:TypeTag[T]) {
 
     /**
      * insert the entity
@@ -94,11 +97,11 @@ trait SuperDao[K, S, T <: AnyRef] {
   /**
    * Apply the operations to the entity.
    */
-  implicit def applyCrudOps(p: T): CrudOps = new CrudOps(p)
+  implicit def applyCrudOps(p: T)(implicit t:TypeTag[T]): CrudOps = new CrudOps(p)
 
   /**
    * This needs to be implemented for each instance to define the mapping to the cassandra datastore.
    */
-  def mapping: Mapping[T,K]
+  def mapping: StandardMapping[K,T]
 
 }

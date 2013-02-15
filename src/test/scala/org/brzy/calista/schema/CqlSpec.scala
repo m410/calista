@@ -9,7 +9,7 @@ class CqlSpec extends WordSpec with ShouldMatchers with EmbeddedTest{
   "Cql" should {
     "be able to select rows" ignore {
       sessionManager.doWith { s=>
-        val rows = Cql.query("select * from Standard where key='none'")
+        val rows = Cql.query("select * from create_column_family where key='none'")
         assert(rows.size == 0)
       }
     }

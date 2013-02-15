@@ -20,6 +20,7 @@ import org.brzy.calista.serializer.UTF8Serializer
  *
  * @author Michael Fortin
  */
+@deprecated("use reflection mapping","0.7.0")
 sealed abstract class MappingAttribute {
   def name: String
 
@@ -31,6 +32,7 @@ sealed abstract class MappingAttribute {
  *
  * @param serializer How to read and write the datatype to the database.
  */
+@deprecated("use reflection mapping","0.7.0")
 case class Key(name: String, serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 /**
@@ -38,6 +40,7 @@ case class Key(name: String, serializer: Serializer[_] = UTF8Serializer) extends
  *
  * @param serializer How to read and write the datatype to the database.
  */
+@deprecated("use reflection mapping","0.7.0")
 case class SuperColumn(name: String, serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 /**
@@ -45,6 +48,7 @@ case class SuperColumn(name: String, serializer: Serializer[_] = UTF8Serializer)
  *
  * @param serializer How to read and write the datatype to the database.
  */
+@deprecated("use reflection mapping","0.7.0")
 case class ColumnNameValue(name: String, serializer: Serializer[_] = UTF8Serializer) extends MappingAttribute
 
 

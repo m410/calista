@@ -19,10 +19,9 @@ import org.junit.Assert._
 
 import org.brzy.calista.server.EmbeddedTest
 import org.brzy.calista.schema.StandardFamily
-import org.brzy.calista.results.Row
 
 import java.util.Date
-
+import scala.reflect.runtime.universe.TypeTag
 
 
 class StandardMappingTest extends JUnitSuite with EmbeddedTest {
@@ -96,15 +95,8 @@ case class Person(key: String, name: String, count: Int, created: Date)
 
 object Person extends StandardDao[String, Person] {
 
-//  def mapping = BeanMapping[Person](
-//    "Person",
-//    UTF8Serializer,
-//    Key("key"),
-//    Column("name"),
-//    Column("count", IntSerializer),
-//    Column("created", DateSerializer))
 
-  val mapping = new Mapping[Person,String] {
+  val mapping = new StandardMapping[String,Person] {
     val family = "Person"
     def keyFor(t: Person) = t.key
 
@@ -129,7 +121,7 @@ object Person extends StandardDao[String, Person] {
       )
     }
 
-    def toColumns(instance: Person) = {
+    def toColumns(instance: Person)(implicit t:TypeTag[Person]) = {
       List(
         StandardFamily(family)(instance.key).column("name",instance.name),
         StandardFamily(family)(instance.key).column("count",instance.count),
