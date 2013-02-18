@@ -57,11 +57,11 @@ class SliceRange protected[schema](
     new SliceRange(key, startBytes, start, finishColBytes, Option(finishCol), reverseList, max)
   }
 
-  def reverse = {
-    new SliceRange(key, startBytes, start, finishBytes, finish, true, max)
+  def reverse(go:Boolean) = {
+    new SliceRange(key, startBytes, start, finishBytes, finish, go, max)
   }
 
-  def size(maxResults: Int) = {
+  def limit(maxResults: Int) = {
     new SliceRange(key, startBytes, start, finishBytes, finish, reverseList, maxResults)
   }
 

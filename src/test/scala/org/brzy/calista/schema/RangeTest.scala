@@ -81,7 +81,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     }
     sessionManager.doWith {
       session =>
-        val range = StandardFamily("StandardInt")("1").from(0L).to(100L).size(32)
+        val range = StandardFamily("StandardInt")("1").from(0L).to(100L).limit(32)
         var count = 0
         val iterator = range.iterator
 
@@ -106,7 +106,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     }
     sessionManager.doWith {
       session =>
-        val range = StandardFamily("StandardLong")(1L).from(0L).size(32)
+        val range = StandardFamily("StandardLong")(1L).from(0L).limit(32)
         var count = 0
         val iterator = range.iterator
 
