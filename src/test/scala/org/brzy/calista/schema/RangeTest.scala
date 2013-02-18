@@ -37,7 +37,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
 
     sessionManager.doWith {
       session =>
-        val predicate = StandardFamily("Standard")("key-range").from("column4").to("column2").reverse
+        val predicate = StandardFamily("Standard")("key-range").from("column4").to("column2").reverse(true)
         val result = predicate.results
         assertNotNull(result)
         assertEquals(3, result.size)
@@ -56,7 +56,7 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
     }
     sessionManager.doWith {
       session =>
-        val range = StandardFamily("Standard")("key-range1").from("").reverse.size(32)
+        val range = StandardFamily("Standard")("key-range1").from("").reverse(true).limit(32)
         var count = 0
         val iterator = range.iterator
 

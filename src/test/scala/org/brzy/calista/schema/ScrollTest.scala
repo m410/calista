@@ -59,7 +59,7 @@ class ScrollTest extends JUnitSuite with EmbeddedTest {
 
     sessionManager.doWith {
       session =>
-        val sliceRange = StandardFamily("Standard")("key-range-0").from("column8").to("column2").reverse.size(3)
+        val sliceRange = StandardFamily("Standard")("key-range-0").from("column8").to("column2").reverse(true).limit(3)
         val iterator = sliceRange.iterator
         var count = 0
 
