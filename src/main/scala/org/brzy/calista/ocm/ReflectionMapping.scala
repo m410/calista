@@ -4,6 +4,7 @@ import reflect.ClassTag
 import org.brzy.calista.schema.{Column, StandardFamily}
 import org.brzy.beanwrap.Builder
 import scala.reflect.runtime.universe._
+import org.slf4j.LoggerFactory
 
 /**
  * Document Me..
@@ -16,16 +17,24 @@ class ReflectionMapping[K:ClassTag, T<:AnyRef:ClassTag](
         val columns:Seq[ColDef[_]]
     ) extends StandardMapping[K,T]{
 
+  private[this] val log = LoggerFactory.getLogger(getClass)
+
   def newInstance(key: K) = {
     val rows = StandardFamily(family)(key).list
     val builder = rows.foldLeft(Builder[T]())((builder,row)=>{
       val columnName = row.columnAs[String]
-      val value = columns.find(_.name == columnName).get.serializer.fromBytes(row.value)
-      builder.set(columnName->value)
+      columns.find(_.name == columnName)  match {
+        case Some(column) =>
+          val value = column.serializer.fromBytes(row.value)
+          builder.set(columnName->value)
+        case None =>
+          log.warn("Unknown Column mapping: {}", columnName)
+//          throw new UnknownColumnNameException(columnName)
+          builder
+      }
     })
 
     builder.set(keyCol.name -> keyCol.serializer.fromBytes(rows.head.key))
-
     builder.make
   }
 
