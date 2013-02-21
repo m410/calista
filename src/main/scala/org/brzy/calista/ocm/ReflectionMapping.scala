@@ -34,8 +34,7 @@ class ReflectionMapping[K:ClassTag, T<:AnyRef:ClassTag](
       }
     })
 
-    builder.set(keyCol.name -> keyCol.serializer.fromBytes(rows.head.key))
-    builder.make
+    builder.set(keyCol.name -> keyCol.serializer.fromBytes(rows.head.key)).make
   }
 
   def toColumns(instance: T)(implicit t:TypeTag[T]) = {
