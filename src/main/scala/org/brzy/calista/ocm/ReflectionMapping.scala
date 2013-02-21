@@ -1,9 +1,10 @@
 package org.brzy.calista.ocm
 
-import reflect.ClassTag
 import org.brzy.calista.schema.{Column, StandardFamily}
 import org.brzy.beanwrap.Builder
 import scala.reflect.runtime.universe._
+import reflect._
+
 import org.slf4j.LoggerFactory
 
 /**
@@ -28,8 +29,7 @@ class ReflectionMapping[K:ClassTag, T<:AnyRef:ClassTag](
           val value = column.serializer.fromBytes(row.value)
           builder.set(columnName->value)
         case None =>
-          log.warn("Unknown Column mapping: {}", columnName)
-//          throw new UnknownColumnNameException(columnName)
+          log.warn("Unknown Column mapping: {} on {}", columnName, classTag[T].runtimeClass )
           builder
       }
     })
