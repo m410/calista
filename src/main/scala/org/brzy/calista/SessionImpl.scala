@@ -266,6 +266,10 @@ class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsiste
         remove(s.keyBytes, ColumnPath(s.family.name, null, null), new Date().getTime, defaultConsistency)
       case s: CounterKey[_] =>
         client.remove_counter(s.keyBytes, ColumnPath(s.family.name, null, null), defaultConsistency)
+      case s: SuperColumn[_] =>
+        remove(s.keyBytes, ColumnPath(s.family.name, null, null), new Date().getTime, defaultConsistency)
+      case s: SuperCounterColumn[_] =>
+        client.remove_counter(s.keyBytes, ColumnPath(s.family.name, null, null), defaultConsistency)
       case s: SuperCounterKey[_] =>
         client.remove_counter(s.keyBytes, ColumnPath(s.family.name, null, null), defaultConsistency)
     }

@@ -29,7 +29,7 @@ class ReflectionMapping[K:ClassTag, T<:AnyRef:ClassTag](
           val value = column.serializer.fromBytes(row.value)
           builder.set(columnName->value)
         case None =>
-          log.warn("Unknown Column mapping: {} on {}", columnName, classTag[T].runtimeClass )
+          log.warn("Unknown Column mapping: {} on {}", Array(columnName, classTag[T].runtimeClass.toString):_* )
           builder
       }
     })
