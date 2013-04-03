@@ -22,19 +22,25 @@ class ReflectionMapping[K:ClassTag, T<:AnyRef:ClassTag](
 
   def newInstance(key: K) = {
     val rows = StandardFamily(family)(key).list
-    val builder = rows.foldLeft(Builder[T]())((builder,row)=>{
-      val columnName = row.columnAs[String]
-      columns.find(_.name == columnName)  match {
-        case Some(column) =>
-          val value = column.serializer.fromBytes(row.value)
-          builder.set(columnName->value)
-        case None =>
-          log.warn("Unknown Column mapping: {} on {}", Array(columnName, classTag[T].runtimeClass.toString):_* )
-          builder
-      }
-    })
 
-    builder.set(keyCol.name -> keyCol.serializer.fromBytes(rows.head.key)).make
+    if (rows.isEmpty) {
+      null.asInstanceOf[T]
+    }
+    else {
+      val builder = rows.foldLeft(Builder[T]())((builder,row)=>{
+        val columnName = row.columnAs[String]
+        columns.find(_.name == columnName)  match {
+          case Some(column) =>
+            val value = column.serializer.fromBytes(row.value)
+            builder.set(columnName->value)
+          case None =>
+            log.warn("Unknown Column mapping: {} on {}", Array(columnName, classTag[T].runtimeClass.toString):_* )
+            builder
+        }
+      })
+
+      builder.set(keyCol.name -> keyCol.serializer.fromBytes(rows.head.key)).make
+    }
   }
 
   def toColumns(instance: T)(implicit t:TypeTag[T]) = {
