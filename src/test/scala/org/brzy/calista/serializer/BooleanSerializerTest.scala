@@ -19,34 +19,33 @@ import org.junit.Assert._
 
 
 class BooleanSerializerTest extends JUnitSuite {
-	@Test def testBooleanUnapply() {
-		val t = true
-		t match {
-			case BooleanSerializer(x) => 
-				val b = x.asInstanceOf[Boolean]
-				assertTrue(b)
-			case _ => fail()
-		}
-		
-		val f = false
-		f match {
-			case BooleanSerializer(x) => 
-				val b = x.asInstanceOf[Boolean]
-				assertTrue(!b)
-			case _ => fail()
-		}
-		
+  @Test def testBooleanUnapply() {
+    val t = true
+    t match {
+      case BooleanSerializer(x) =>
+        assertTrue(x)
+      case _ => fail()
+    }
+
+    val f = false
+    f match {
+      case BooleanSerializer(x) =>
+        assertTrue(!x)
+      case _ => fail()
+    }
+
   }
+
   @Test def testBooleanType() {
-		val t = false
+    val t = false
     def buf = BooleanSerializer.toBytes(t)
-    assertEquals(1,buf.array.length)
+    assertEquals(1, buf.array.length)
   }
 
   @Test def testTypes() {
-		val t = true
+    val t = true
     def buf = Serializers.toBytes(t)
-    assertEquals(1,buf.array.length)
+    assertEquals(1, buf.array.length)
     val bool = buf.array()(0) == 1.asInstanceOf[Byte]
     assertTrue(bool)
   }

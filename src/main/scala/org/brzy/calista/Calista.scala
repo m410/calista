@@ -13,11 +13,12 @@ package org.brzy.calista
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
+
 import util.DynamicVariable
 
 /**
  * A Thread Local variable used to access the SessionImpl instance.
- * 
+ *
  * @author Michael Fortin
  */
 object Calista extends DynamicVariable[Session](null)

@@ -18,7 +18,7 @@ import java.nio.ByteBuffer
 /**
  * Used to query the datastore, directly maps to the thrift column parent. Users should not 
  * need to manipulate this class directly.
- * 
+ *
  * @author Michael Fortin
  */
-case class ColumnParent protected[schema] (family:String,superColumn:ByteBuffer)
+case class ColumnParent protected[schema](family: String, superColumn: ByteBuffer)

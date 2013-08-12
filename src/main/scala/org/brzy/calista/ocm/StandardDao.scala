@@ -13,8 +13,12 @@
  */
 package org.brzy.calista.ocm
 
-import org.brzy.calista.schema.{ColumnFamily}
+import org.brzy.calista.schema.{StandardFamily, Family}
 import org.brzy.calista.Calista
+
+import scala.reflect.runtime.universe.TypeTag
+
+import scala.language.implicitConversions
 
 /**
  * Data Access Object.  Companion objects of persistable classes need to extend this.  It adds
@@ -23,11 +27,11 @@ import org.brzy.calista.Calista
  * {{{
  * case class Entity(id:Long, name:String) extends KeyedEntity[Long]
  * object Entity extends Dao[Entity] { ...}
- * 
+ *
  * SessionManager.doWith {session =>
  *   val entity = Entity(1,"bob")
- *	 entity.insert
- *	}
+ * 	 entity.insert
+ * 	}
  * }}}
  *
  * @author Michael Fortin
@@ -35,79 +39,57 @@ import org.brzy.calista.Calista
 trait StandardDao[K, T <: AnyRef] {
   protected[this] def session = Calista.value
 
-	/**
-	 * Get an instance of the mapped class by it's key.
-	 */
-	def apply(key: K)(implicit t: Manifest[K]): T = {
-    val query = ColumnFamily(mapping.family).standardKey(key)
-    val columns = session.list(query)
-    mapping.newInstance(key,None,columns)
-	}
+  /**
+   * Get an instance of the mapped class by it's key.
+   */
+  def apply(key: K)(implicit t: Manifest[K]): T = {
+    mapping.newInstance(key)
+  }
 
-	/**
-	 * Optionally get an instance of the mapped class by it's key.
-	 */
+  /**
+   * Optionally get an instance of the mapped class by it's key.
+   */
   def get(key: K)(implicit t: Manifest[K]): Option[T] = {
-    val query = ColumnFamily(mapping.family).standardKey(key)
-    val columns = session.list(query)
+    val columns = StandardFamily(mapping.family)(key).list
 
     if (columns.size > 0)
-      Option(mapping.newInstance(key, None, columns))
+      Option(mapping.newInstance(key))
     else
       None
   }
 
-//	/**
-//	 * List instances of this type by providing a start key and an end key. Note that this may not return
-//	 * the order that you would expect, depending on the partitioner you are using.
-//	 *
-//	 * @param start The first key to return.
-//	 * @param end The last key to return
-//	 * @param count The maximum number of results to return.
-//	 */
-//  def list(start: K, end: K, count: Int = 100):List[T] = {
-//    val names = mapping.attributes.filter(_.isInstanceOf[Column]).map(_.asInstanceOf[Column].name).toList
-//    val range = ColumnFamily(mapping.family).keyRange((start, end, names, count))
-//
-//    session.keyRange(range).toKeyMap[K].map(ks => {
-//      val keySerializer = mapping.attributes.find(_.isInstanceOf[Key]).get.serializer
-//      val resultSet = ResultSet(ks._2)
-//      mapping.newInstance(keySerializer.fromBytes(ks._1), None, resultSet)
-//    })
-//  }
 
-	/**
-	 *	This holds implicit function on the entity.  The functions can be called directly on the entity
-	 *  eg `entity.insert` etc.
-	 */
-  class CrudOps(p: T) {
- 
-		/**
-		 * insert the entity
-		 */
-    def insert() {
-      val columns = mapping.toColumns(p)
-      columns.foreach(c => session.insert(c))
+  /**
+   * This holds implicit function on the entity.  The functions can be called directly on the entity
+   * eg `entity.insert` etc.
+   */
+  class CrudOps(p: T)(implicit t:TypeTag[T]) {
+
+    /**
+     * insert the entity
+     */
+    def insert() = {
+      mapping.toColumns(p).foreach(c => session.insert(c))
+      p
     }
 
-		/**
-		 * remove the entity
-		 */
+    /**
+     * remove the entity
+     */
     def remove() {
-      val key = mapping.toKey(p).right.get
-      session.remove(key)
+      StandardFamily(mapping.family)(mapping.keyFor(p)).remove()
     }
   }
 
-	/**
-	 * Apply the operations to the entity.
-	 */
-  implicit def applyCrudOps(p: T): CrudOps = new CrudOps(p)
+  /**
+   * Apply the operations to the entity.
+   */
+  implicit def applyCrudOps(p: T)(implicit t:TypeTag[T]): CrudOps = new CrudOps(p)
 
-	/**
-	 * This needs to be implemented for each instance to define the mapping to the
+  /**
+   * This needs to be implemented for each instance to define the mapping to the
    * cassandra datastore.
-	 */
-  def mapping: Mapping[T]
+   */
+  def mapping: StandardMapping[K,T]
 
 }

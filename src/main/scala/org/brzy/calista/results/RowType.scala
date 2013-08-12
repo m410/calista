@@ -13,40 +13,38 @@
  */
 package org.brzy.calista.results
 
-import org.scalastuff.scalabeans.Enum
-import org.apache.commons.lang.builder.ToStringBuilder
 
 /**
- * Marks each return row in the resultSet as the type of row it is in the data store.
- * 
- * @author Michael Fortin
+ * The different Column family types.
  */
-class RowType private (val name:String) {
-  override def toString = new ToStringBuilder(this).append(name).toString
-}
-
-object RowType extends Enum[RowType] {
+object RowType extends Enumeration {
+  type RowType = Value
 
   /**
    * Standard Column Family.  For rows of this type, the superColumn will be null.
    */
-  val Standard = new RowType("Standard")
+  val Standard = Value("Standard")
 
   /**
    * Standard Column Family with a CounterColumnType default validation class.  For rows of this
    * type, the superColumn will be null, the timestamp will be null and the value will always be
    * a long type.
    */
-  val StandardCounter = new RowType("StandardCounter")
+  val StandardCounter = Value("StandardCounter")
 
   /**
    * Super Column Family. Rows of this type will have all fields available.
    */
-  val Super = new RowType("Super")
+  val Super = Value("Super")
 
   /**
    * Super Column Family with a CounterColumnType default validation class. Rows of this type will
    * have all fields available and the value will be a Long type.
    */
-  val SuperCounter = new RowType("SuperCounter")
+  val SuperCounter = Value("SuperCounter")
+
+  /**
+   * Returned from a Cql query
+   */
+  val Cql = Value("Cql")
 }

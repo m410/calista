@@ -1,6 +1,6 @@
 package org.brzy.calista.system
 
-import org.apache.cassandra.thrift.{TokenRange=>CassandraTokenRange}
+import org.apache.cassandra.thrift.{TokenRange => CassandraTokenRange}
 import collection.JavaConversions._
 
 /**
@@ -15,12 +15,12 @@ import collection.JavaConversions._
  * @author Michael Fortin
  */
 case class TokenRange(
-    startToken:String,
-    endToken:String,
-    endpoints:List[String])
+        startToken: String,
+        endToken: String,
+        endpoints: List[String])
 
 object TokenRange {
-  def apply(tr:CassandraTokenRange) = {
+  def apply(tr: CassandraTokenRange) = {
     new TokenRange(
       startToken = tr.getStart_token,
       endToken = tr.getEnd_token,

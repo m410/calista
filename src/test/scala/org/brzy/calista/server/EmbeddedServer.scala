@@ -13,15 +13,22 @@
  */
 package org.brzy.calista.server
 
-import java.io.{File => JFile}
+
 import org.brzy.fab.file.FileUtils._
-import org.apache.thrift.transport.TSocket
 import org.brzy.fab.file.File
-import org.slf4j.LoggerFactory
-import actors.Actor._
 import org.brzy.calista.{SessionManager, Host}
 import org.brzy.calista.system.{FamilyDefinition, KeyspaceDefinition}
-import org.apache.cassandra.thrift.{CassandraDaemon}
+
+
+import org.apache.thrift.transport.TSocket
+import org.apache.cassandra.thrift.CassandraDaemon
+//import org.apache.cassandra.service.CassandraDaemon
+
+import org.slf4j.LoggerFactory
+import scala.actors.Actor._
+
+import java.io.{File => JFile}
+
 
 /**
  * Run an embbeded cassandra server for testing.  Possibly also use for development.
@@ -30,7 +37,7 @@ import org.apache.cassandra.thrift.{CassandraDaemon}
  */
 object EmbeddedServer {
   val log = LoggerFactory.getLogger(this.getClass)
-  val hosts = Host("localhost", 9160, 250) :: Nil
+  val hosts = Host("localhost", 9161, 250) :: Nil
   val homeDirectory = File("target/cassandra")
   homeDirectory.trash()
   homeDirectory.mkdirs
@@ -47,7 +54,7 @@ object EmbeddedServer {
   logSource copyTo homeDirectory
 
   System.setProperty("storage-config", homeDirectory.getCanonicalPath)
-  log.debug("created data file and log location directories")
+  log.debug("##################### created data file and log location directories")
 
   val daemon = actor {
     val daemon = new CassandraDaemon
@@ -56,26 +63,27 @@ object EmbeddedServer {
   }.start()
 
   pause()
+
+  // uncomment to create schema and families
   loadSchema()
 
   def pause() {
     // try to make sockets until the server opens up - there has to be a better
     // way - just not sure what it is.
-    log.debug("Sleep for 4s")
-    Thread.sleep(4000)
+    log.debug("Sleep for 8s")
+    Thread.sleep(8000)
 
-    val socket = new TSocket("localhost", 9160)
+    val socket = new TSocket("localhost", 9161)
     var opened = false
     while (!opened) {
       try {
         socket.open()
         opened = true
-        log.debug("I was able to make a connection")
+        log.debug("******************** I was able to make a connection")
       }
       catch {
         case e: Throwable => log.error("******************** Not started", e)
-        opened = true
-        // sys.exit(1)
+        opened = false
       }
       finally {
         socket.close()
@@ -87,16 +95,23 @@ object EmbeddedServer {
   def loadSchema() {
     log.info("Setting up the keyspace...")
 
-    val mgr = new SessionManager("Test", "127.0.0.1")
+    val system = new SessionManager("system", "127.0.0.1", 9161)
+
+    log.info("******************** Setup keyspace")
+    log.info("******************** Test")
+    system.createSession.addKeySpace(KeyspaceDefinition(
+      name = "Test",
+      //      strategyClass = "org.apache.cassandra.locator.NetworkTopologyStrategy",
+      strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
+      strategyOptions = Option(Map("replication_factor" -> "1")),
+      families = List.empty[FamilyDefinition]))
+
+    val mgr = new SessionManager("Test", "127.0.0.1", 9161)
+
     mgr.doWith({
       session =>
         try {
-          log.info("******************** Before add keyspace")
-          log.info("******************** Test")
-          session.addKeyspace(KeyspaceDefinition(
-            name = "Test",
-            strategyClass = "org.apache.cassandra.locator.SimpleStrategy",
-            families = List.empty[FamilyDefinition]))
+          log.info("******************** In Session")
           log.info("******************** Standard")
           session.addColumnFamily(new FamilyDefinition(
             keyspace = "Test",

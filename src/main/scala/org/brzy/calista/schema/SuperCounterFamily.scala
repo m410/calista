@@ -1,5 +1,3 @@
-package org.brzy.calista.dsl
-
 /*
  * Copyright 2010 Michael Fortin <mike@brzy.org>
  *
@@ -13,11 +11,26 @@ package org.brzy.calista.dsl
  * CONDITIONS OF ANY KIND, either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-import java.lang.RuntimeException
+package org.brzy.calista.schema
 
 /**
- * Thrown by the DslNode trait for unimplemented methods.
- * 
+ * Document Me..
+ *
  * @author Michael Fortin
  */
-class InvalidNodeUseException(msg:String) extends RuntimeException(msg)
+class SuperCounterFamily(val name: String) extends Family {
+
+  def apply[K](key: K) = new SuperCounterKey(key, this)
+
+
+  override def toString = "SuperCounterFamily(" + name + ")"
+
+}
+
+
+/**
+ *
+ */
+object SuperCounterFamily {
+  def apply(name: String) = new SuperCounterFamily(name)
+}

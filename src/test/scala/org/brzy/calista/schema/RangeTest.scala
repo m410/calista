@@ -18,7 +18,6 @@ import org.scalatest.junit.JUnitSuite
 import org.junit.Test
 import org.junit.Assert._
 import org.brzy.calista.server.EmbeddedTest
-import org.brzy.calista.dsl.Conversions
 import java.util.Date
 
 
@@ -26,137 +25,147 @@ class RangeTest extends JUnitSuite with EmbeddedTest {
 
   // key ranges are not implemented anymore
   @Test def testPredicateOnStandard() {
-    import Conversions._
 
-    sessionManager.doWith { session =>
-      session.insert("Standard"|"key-range"|("column1", "value0"))
-      session.insert("Standard"|"key-range"|("column2", "value1"))
-      session.insert("Standard"|"key-range"|("column3", "value2"))
-      session.insert("Standard"|"key-range"|("column4", "value3"))
-      session.insert("Standard"|"key-range"|("column5", "value4"))
+    sessionManager.doWith {
+      session =>
+        StandardFamily("Standard")("key-range")("column1").set("value0")
+        StandardFamily("Standard")("key-range")("column2").set("value1")
+        StandardFamily("Standard")("key-range")("column3").set("value2")
+        StandardFamily("Standard")("key-range")("column4").set("value3")
+        StandardFamily("Standard")("key-range")("column5").set("value4")
     }
 
-    sessionManager.doWith { session =>
-      val range = {"Standard" | "key-range"}\\("column4","column2",true)
-      val result = range.results
-//      result.rows.foreach(k=>println("##column='%s'".format(k)))
-      assertNotNull(result)
-      assertEquals(3,result.size)
+    sessionManager.doWith {
+      session =>
+        val predicate = StandardFamily("Standard")("key-range").from("column4").to("column2").reverse(true)
+        val result = predicate.results
+        assertNotNull(result)
+        assertEquals(3, result.size)
     }
   }
 
   @Test def testSliceRangeScroll() {
-    sessionManager.doWith { session =>
-      for (i <- 10 to  100) {
-        val columnName = "column-"+i
-        val valueName = "value-"+i
-        val c = ColumnFamily("Standard").standardKey("key-range1").column(columnName, valueName, new Date)
-        session.insert(c)
-      }
+    sessionManager.doWith {
+      session =>
+        for (i <- 10 to 100) {
+          val columnName = "column-" + i
+          val valueName = "value-" + i
+          val c = StandardFamily("Standard")("key-range1").column(columnName, valueName)
+          session.insert(c)
+        }
     }
-    sessionManager.doWith { session =>
-      val range = ColumnFamily("Standard").standardKey("key-range1").sliceRange("","",true,32)
-      var count = 0
-      val iterator = range.iterator
-      
-      while(iterator.hasNext) {
-        val nextRow = iterator.next()
-        count = count + 1
-      }
+    sessionManager.doWith {
+      session =>
+        val range = StandardFamily("Standard")("key-range1").from("").reverse(true).limit(32)
+        var count = 0
+        val iterator = range.iterator
 
-      assertEquals(91,count)
+        while (iterator.hasNext) {
+          val nextRow = iterator.next()
+          count = count + 1
+        }
+
+        assertEquals(91, count)
     }
   }
 
   @Test def testSliceRangeScrollWithLong() {
-    sessionManager.doWith { session =>
-      for (i <- 10 to  100) {
-        val columnName = i.longValue()
-        val valueName = "value-"+i
-        val c = ColumnFamily("StandardInt").standardKey("1").column(columnName, valueName, new Date)
-        session.insert(c)
-      }
+    sessionManager.doWith {
+      session =>
+        for (i <- 10 to 100) {
+          val columnName = i.longValue()
+          val valueName = "value-" + i
+          val c = StandardFamily("StandardInt")("1").column(columnName, valueName)
+          session.insert(c)
+        }
     }
-    sessionManager.doWith { session =>
-      val range = ColumnFamily("StandardInt").standardKey("1").sliceRange(Array.empty[Byte],Array.empty[Byte],true,32)
-      var count = 0
-      val iterator = range.iterator
+    sessionManager.doWith {
+      session =>
+        val range = StandardFamily("StandardInt")("1").from(0L).to(100L).limit(32)
+        var count = 0
+        val iterator = range.iterator
 
-      while(iterator.hasNext) {
-        val nextRow = iterator.next()
-        count = count + 1
-      }
+        while (iterator.hasNext) {
+          iterator.next()
+          count = count + 1
+        }
 
-      assertEquals(91,count)
+        assertEquals(91, count)
     }
   }
 
   @Test def testSliceRangeScrollWithTwoLongs() {
-    sessionManager.doWith { session =>
-      for (i <- 10 to  100) {
-        val columnName = i.longValue()
-        val valueName = "value-"+i
-        val c = ColumnFamily("StandardLong").standardKey(1L).column(columnName, valueName, new Date)
-        session.insert(c)
-      }
+    sessionManager.doWith {
+      session =>
+        for (i <- 10 to 100) {
+          val columnName = i.longValue()
+          val valueName = "value-" + i
+          val c = StandardFamily("StandardLong")(1L).column(columnName, valueName)
+          session.insert(c)
+        }
     }
-    sessionManager.doWith { session =>
-      val range = ColumnFamily("StandardLong").standardKey(1L).sliceRange(Array.empty[Byte],Array.empty[Byte],true,32)
-      var count = 0
-      val iterator = range.iterator
+    sessionManager.doWith {
+      session =>
+        val range = StandardFamily("StandardLong")(1L).from(0L).limit(32)
+        var count = 0
+        val iterator = range.iterator
 
-      while(iterator.hasNext) {
-        val nextRow = iterator.next()
-        count = count + 1
-      }
+        while (iterator.hasNext) {
+          val nextRow = iterator.next()
+          count = count + 1
+        }
 
-      assertEquals(91,count)
+        assertEquals(91, count)
     }
   }
 
   @Test def testSuperSlice() {
-    import Conversions._
-    
-    sessionManager.doWith { session =>
-      {"Super2"||"skey1"|"scol0"|"column0"} << "value0";
-      {"Super2"||"skey1"|"scol0"|"column1"} << "value0";
-      {"Super2"||"skey1"|"scol1"|"column0"} << "value1";
-      {"Super2"||"skey1"|"scol1"|"column1"} << "value1";
-      session.insert("Super2"||"skey1"|"scol2"|("column0", "value2"))
-      session.insert("Super2"||"skey1"|"scol2"|("column1", "value2"))
-      session.insert("Super2"||"skey1"|"scol3"|("column0", "value3"))
-      session.insert("Super2"||"skey1"|"scol3"|("column1", "value3"))
-      session.insert("Super2"||"skey2"|"scol4"|("column0", "value4"))
-      session.insert("Super2"||"skey2"|"scol4"|("column1", "value4"))
+
+    sessionManager.doWith {
+      session =>
+        SuperFamily("Super2")("skey1")("scol0")("column0").set("value0")
+        SuperFamily("Super2")("skey1")("scol0")("column1").set("value0")
+        SuperFamily("Super2")("skey1")("scol1")("column0").set("value1")
+        SuperFamily("Super2")("skey1")("scol1")("column1").set("value1")
+
+        SuperFamily("Super2")("skey1")("scol2")("column0").set("value2")
+        SuperFamily("Super2")("skey1")("scol2")("column1").set("value2")
+        SuperFamily("Super2")("skey1")("scol3")("column0").set("value3")
+        SuperFamily("Super2")("skey1")("scol3")("column1").set("value3")
+        SuperFamily("Super2")("skey2")("scol4")("column0").set("value4")
+        SuperFamily("Super2")("skey2")("scol4")("column1").set("value4")
     }
 
-    sessionManager.doWith { session =>
-      {"Super2"||"skey1"|"scol0"|"none"}.valueAs[String] match {
-        case Some(v) => fail("Should have returned nothing: " + v)
-        case _ =>
-      }
+    sessionManager.doWith {
+      session =>
+        SuperFamily("Super2")("skey1")("scol0")("none").getAs[String] match {
+          case Some(v) => fail("Should have returned nothing: " + v)
+          case _ =>
+        }
 
-      {"Super2"||"skey1"|"scol0"|"column0"}.valueAs[String] match {
-        case Some(v) =>
-          assertEquals("value0",v)
-        case _ => fail("No value returned")
-      }
+        SuperFamily("Super2")("skey1")("scol0")("column0").getAs[String] match {
+          case Some(v) =>
+            assertEquals("value0", v)
+          case _ => fail("No value returned")
+        }
     }
-    sessionManager.doWith { session =>
-      val slice = {"Super2"||"skey1"|"scol0"}\\("a","z")
-      val results = session.sliceRange(slice)
-      assertNotNull(results)
-      assertEquals(2,results.size)
+    sessionManager.doWith {
+      session =>
+        val slice = SuperFamily("Super2")("skey1")("scol0").from("a").to("z")
+        val results = session.sliceRange(slice)
+        assertNotNull(results)
+        assertEquals(2, results.size)
     }
 
-    sessionManager.doWith { session =>
-      val slice = {"Super2"||"skey1"}\\("a","z")
-      val results = session.sliceRange(slice)
-      assertNotNull(results)
-      results.rows.foreach(r=>{
-        assertEquals("skey1",r.keyAs[String])
-      })
-      assertEquals(8,results.size)
+    sessionManager.doWith {
+      session =>
+        val slice = SuperFamily("Super2")("skey1").from("a").to("z")
+        val results = session.sliceRange(slice)
+        assertNotNull(results)
+        results.foreach(r => {
+          assertEquals("skey1", r.keyAs[String])
+        })
+        assertEquals(8, results.size)
     }
   }
 }

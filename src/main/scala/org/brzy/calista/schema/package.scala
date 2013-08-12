@@ -17,7 +17,7 @@ package org.brzy.calsta
  * Holds the structure of the cassandra datamodel.  In most cases the classes in this package
  * map directly to the classes in the Thrift cassandra client api but with a more hierarchical
  * layout.  The classes are for querying not reading results.
- * 
+ *
  * @author Michael Fortin
  */
 package object schema 

@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory
  *
  * @author Michael Fortin
  */
-class SessionManager(keyspace: String, url: String, port: Int = 9160) {
+class SessionManager(keySpace: String, url: String, port: Int = 9160) {
 
   /**
    * the host and port for where this session manager connects.
@@ -50,13 +50,13 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
     sock.open()
 
     try {
-      KeyspaceDefinition(client.describe_keyspace(keyspace))
+      KeyspaceDefinition(client.describe_keyspace(keySpace))
     }
     catch {
-      case e:Exception =>
-        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keyspace,e)
+      case e: Exception =>
+        LoggerFactory.getLogger(getClass).error("No Keyspace: " + keySpace, e)
         KeyspaceDefinition(
-          name = keyspace,
+          name = keySpace,
           strategyClass = "",
           families = List.empty[FamilyDefinition]
         )
@@ -107,12 +107,12 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
   def loadKeyspace(keyspace: KeyspaceDefinition) {
     val session = new SessionImpl(host, null)
     try {
-      session.describeKeyspace(keyspace.name)
-      session.updateKeyspace(keyspace)
+      session.describeKeySpace(keyspace.name)
+      session.updateKeySpace(keyspace)
     }
     catch {
       case e: Exception =>
-        session.addKeyspace(keyspace)
+        session.addKeySpace(keyspace)
     }
   }
 
@@ -131,7 +131,7 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
    *
    * @see SessionImpl
    */
-  def createSession:Session = new SessionImpl(host, keyspaceDefinition)
+  def createSession: Session = new SessionImpl(host, keyspaceDefinition)
 
   /**
    * Manaages the life cycle of a session automatically.
@@ -145,8 +145,5 @@ class SessionManager(keyspace: String, url: String, port: Int = 9160) {
   }
 }
 
-/**
- * A Host instance for cassandera to connect too.
- */
-case class Host(address: String, port: Int, timeout: Int)
+
 

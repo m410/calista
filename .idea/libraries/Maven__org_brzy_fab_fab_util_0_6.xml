@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="Maven: org.brzy.fab:fab-util:0.6">
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/brzy/fab/fab-util/0.6/fab-util-0.6.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/brzy/fab/fab-util/0.6/fab-util-0.6-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/brzy/fab/fab-util/0.6/fab-util-0.6-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

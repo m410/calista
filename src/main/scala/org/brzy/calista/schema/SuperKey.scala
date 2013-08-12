@@ -23,69 +23,40 @@ import org.brzy.calista.results.Row
  *
  * @author Michael Fortin
  */
-case class SuperKey[T: Manifest] protected[schema](key: T, family: ColumnFamily, familyDef: FamilyDefinition)
-        extends Key {
+class SuperKey[K] protected[schema](val key: K, val family: Family) extends Key {
 
   def keyBytes = Serializers.toBytes(key)
 
   def columnPath = ColumnPath(family.name, null, null)
 
-  def |[N: Manifest](sKey: N) = superColumn(sKey)
+  def apply[N](sKey: N) = new SuperColumn(sKey, this)
 
-  def superColumn[N: Manifest](sKey: N) = SuperColumn(sKey, this, familyDef)
 
-  /**
-   * Used by the DSL to create a SliceRange from this super column, using this key as the parent.
-   */
-  def \\[A: Manifest](start: A, end: A, reverse: Boolean = false, count: Int = 100) =
-    sliceRange(start, end, reverse, count)
-
-  def sliceRange[A: Manifest](start: A, end: A, reverse: Boolean, count: Int) =
-    SliceRange(start, end, reverse, count, this)
-
-  /**
-   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-   */
-  def \[A: Manifest](columns: A*) = predicate(columns.toArray)
-
-  def predicate[A: Manifest](columns: Array[A]) = SlicePredicate(columns, this)
-
-  /**
-   * Removed the super column by this name.
-   *
-   * @return false if the row does not exist, and true if
-   * it's removed successfully.
-   */
-  def remove:Boolean = {
-    val session = Calista.value
-    val results = session.sliceRange(this.sliceRange("","",false,2))
-
-    if (results.isEmpty)
-      false
-    else {
-      session.remove(this)
-      true
-    }
+  def list = {
+    Calista.value.sliceRange(new SliceRange(key = this, max = 100))
   }
 
-  def map[B](f:Row => B):Seq[B] = {
+  def map[B](f: Row => B): Seq[B] = {
     var seq = collection.mutable.Seq.empty[B]
-    val predicate = SliceRange("","",false, 100, this)
-    val iterator  = predicate.iterator
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
-      seq :+ f(iterator.next())
+    while (iterator.hasNext)
+      seq = seq :+ f(iterator.next())
 
     seq.toSeq
   }
 
 
-  def foreach(f:Row =>Unit) {
-    val predicate = SliceRange("","",false, 100, this)
-    val iterator  = predicate.iterator
+  def foreach(f: Row => Unit) {
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
+
+  override def toString = family + "(" + key + ")"
+
 }

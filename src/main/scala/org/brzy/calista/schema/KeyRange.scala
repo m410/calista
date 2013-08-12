@@ -13,7 +13,8 @@
  */
 package org.brzy.calista.schema
 
-import org.brzy.calista.serializer.Serializers
+import org.brzy.calista.serializer.Serializers._
+import org.brzy.calista.Calista
 
 /**
  * Used to query the datastore for multiple keys.
@@ -25,27 +26,41 @@ import org.brzy.calista.serializer.Serializers
  * @param predicate Predicate to refine the query.
  * @param columnFamily The parent column family.
  * @param count The max number of result, defaults to 100.
- * 
+ *
  * @author Michael Fortin
  */
-case class KeyRange[T,C] protected[schema] (
-        start:T,
-        finish:T,
-        predicate:SlicePredicate[C],
-        columnFamily:ColumnFamily,
-        count:Int = 100) {
-
-  def startBytes =
-    if(start != null)
-      Serializers.toBytes(start)
-    else
-      null
-
-  def finishBytes =
-    if(finish != null)
-      Serializers.toBytes(finish)
-    else
-      null
+class KeyRange[T] protected[schema](
+        val start: Option[T] = None,
+        val startBytes: Array[Byte] = Array.empty[Byte],
+        val finish: Option[T] = None,
+        val finishBytes: Array[Byte] = Array.empty[Byte],
+        val predicate: Option[SlicePredicate[_]] = None,
+        val columnFamily: Family,
+        val count: Int = 100) {
 
   def columnParent = ColumnParent(columnFamily.name, null)
+
+  def to[K](key: K) = {
+    def keyBytes = toBytes(key).array()
+    new KeyRange(start, startBytes, Option(key), keyBytes, predicate, columnFamily, count)
+  }
+
+  def from[K](key: K) = {
+    def keyBytes = toBytes(key).array()
+    new KeyRange(Option(key), keyBytes, finish, finishBytes, predicate, columnFamily, count)
+  }
+
+  def size(max: Int) = {
+    new KeyRange(start, startBytes, finish, finishBytes, predicate, columnFamily, max)
+  }
+
+  def predicate[N](columnNames: Array[N]) = {
+    val p = Option(new SlicePredicate(columnNames, null))
+    new KeyRange(start, startBytes, finish, finishBytes, p, columnFamily, count)
+  }
+
+
+  def list = {
+    Calista.value.keyRange(this)
+  }
 }

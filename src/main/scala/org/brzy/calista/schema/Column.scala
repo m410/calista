@@ -21,8 +21,6 @@ import org.brzy.calista.Calista
  * Represents a column in the datastore.  This column should only be created by calling one of the
  * methods of the StandardKey or SuperColumn classes.
  *
- * @tparam K The key or name column type
- * @tparam V The value type
  * @param name The name of the column
  * @param value The value of the column
  * @param timestamp The timestamp of the column
@@ -30,37 +28,40 @@ import org.brzy.calista.Calista
  *
  * @author Michael Fortin
  */
-case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, timestamp: Date, parent: Key) {
-	
-	/**
-	 * Return the name converted to bytes.
-	 */
+class Column[N, V] protected[schema](val name: N, val value: V, val timestamp: Date, val parent: Key) {
+
+  /**
+   * Return the name converted to bytes.
+   */
   def nameBytes = Serializers.toBytes(name) // TODO This doesn't allow for custom serializers
 
-	/**
-	 * Return the value converted to bytes.
-	 */
+  /**
+   * Return the value converted to bytes.
+   */
   def valueBytes = Serializers.toBytes(value) // TODO This doesn't allow for custom serializers
 
-	/**
-	 * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
-	 * directly.
-	 */
+  /**
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
   def columnPath = {
     val superCol = parent match {
       case s: SuperColumn[_] => s.nameBytes
+      case s: SuperCounterColumn[_] => s.nameBytes
       case _ => null
     }
     ColumnPath(parent.family.name, superCol, nameBytes)
   }
 
-	/**
-	 * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
-	 * directly.
-	 */
+  /**
+   * Used by the SessionImpl object for querying.  Uses of the column class should not have to use this method
+   * directly.
+   */
   def columnParent: ColumnParent = parent match {
     case s: StandardKey[_] => ColumnParent(s.family.name, null)
+    case s: CounterKey[_] => ColumnParent(s.family.name, null)
     case s: SuperColumn[_] => ColumnParent(s.family.name, s.nameBytes)
+    case s: SuperCounterColumn[_] => ColumnParent(s.family.name, s.nameBytes)
   }
 
   /**
@@ -70,4 +71,6 @@ case class Column[K:Manifest, V:Manifest] protected[schema] (name: K, value: V, 
     val session = Calista.value
     session.get(this)
   }
+
+  override def toString = parent.toString + "(" + name + "," + value + ")"
 }

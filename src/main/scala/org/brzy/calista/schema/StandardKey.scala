@@ -15,91 +15,54 @@ package org.brzy.calista.schema
 
 import java.util.Date
 import org.brzy.calista.serializer.Serializers._
-import org.brzy.calista.system.FamilyDefinition
 import org.brzy.calista.Calista
 import org.brzy.calista.results.Row
+import org.brzy.calista.serializer.Serializers
 
 /**
  * A key can have one of two parents, a super column or a column family.  This is a standard
  * key which has a column family as a parent.
- * 
+ *
  * @author Michael Fortin
  */
-case class StandardKey[T:Manifest] protected[schema] (key:T, family:ColumnFamily, familyDef:FamilyDefinition)
-    extends Key{
+class StandardKey[K] protected[schema](val key: K, val family: Family) extends Key {
 
   def keyBytes = toBytes(key)
 
-  def columnPath = ColumnPath(family.name,null,null)
+  def columnPath = ColumnPath(family.name, null, null)
 
-  def |[N: Manifest](name: N) = column(name)
+  def apply[N](name: N) = new ColumnName(name, this)
 
-  def column[N: Manifest](name: N) = ColumnName(name,this)
 
-  def |#[N: Manifest](name: N) =  counter(name)
-
-  def counter[N: Manifest](name: N) =  CounterColumnName(name,this)
-
-  def |[N:Manifest,V:Manifest](key:N,value:V = null,timestamp:Date = new Date()) =
-    column(key,value,timestamp)
-
-  def column[N:Manifest,V:Manifest](key:N,value:V,timestamp:Date) = Column(key,value,timestamp,this)
-  
-	/**
-	 * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-	 */
-  def \[A:Manifest](columns:A*) = predicate(columns.toArray)
-
-  /**
-   * Used by the DSL to create a SlicePredicate from this key, using this key as the parent.
-   */
-  def predicate[A:Manifest](columns:Array[A]) = SlicePredicate(columns,this)
-  
-	/**
-	 * Used by the DSL to create a SliceRange from this key, using this key as the parent.
-	 */
-  def \\[A:Manifest](start:A,end:A,reverse:Boolean = false,count:Int = 100) =
-      sliceRange(start,end,reverse, count)
-
-  def sliceRange[T:Manifest](start:T,end:T,reverse:Boolean,count:Int) =
-      SliceRange(start,end,reverse, count, this)
-
-  /**
-   * Removed the super column by this name.
-   *
-   * @return false if the row does not exist, and true if
-   * it's removed successfully.
-   */
-  def remove:Boolean = {
-    val session = Calista.value
-    val results = session.sliceRange(this.sliceRange("","",false,2))
-
-    if (results.isEmpty)
-      false
-    else {
-      session.remove(this)
-      true
-    }
+  def column[C: Manifest, V: Manifest](column: C, value: V) = {
+    new Column(column, value, new Date(), this)
   }
 
-  def map[B](f:Row => B):Seq[B] = {
-    var seq = collection.mutable.Seq.empty[B]
-    val predicate = SliceRange("","",false, 100, this)
-    val iterator  = predicate.iterator
 
-    while(iterator.hasNext)
+  def list = {
+    Calista.value.sliceRange(new SliceRange(key = this, max = 100))
+  }
+
+  def map[B](f: Row => B): Seq[B] = {
+    var seq = collection.mutable.Seq.empty[B]
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
+
+    while (iterator.hasNext)
       seq = seq :+ f(iterator.next())
 
     seq.toSeq
   }
 
 
-  def foreach(f:Row =>Unit) {
-    val predicate = SliceRange("","",false, 100, this)
-    val iterator  = predicate.iterator
+  def foreach(f: Row => Unit) {
+    val slice = new SliceRange(key = this, max = 2)
+    val iterator = slice.iterator
 
-    while(iterator.hasNext)
+    while (iterator.hasNext)
       f(iterator.next())
 
   }
+
+  override def toString = family + "(" + key + ")"
 }

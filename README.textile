@@ -1,8 +1,0 @@
-Calista is a Scala based api for working with Cassandra
-
-Documentation is still in the works, it can be found here:
-http://wiki.brzy.org/doku.php?id=calista:home
-
-Thanks for taking a look.
-M!ke
-

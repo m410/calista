@@ -18,65 +18,65 @@ import org.brzy.calista.server.EmbeddedTest
 import org.junit.Test
 import org.junit.Assert._
 import java.util.UUID
-import org.brzy.calista.dsl.Conversions
-import org.brzy.calista.results.Row
 
 class GetSetTest extends JUnitSuite with EmbeddedTest {
 
   @Test def testSetAndGetStandardColumn() {
-    import Conversions._
 
-    sessionManager.doWith { session =>
-      val key = "Standard" | "testKey"
-      session.insert(key | ("column", "value"))
+    sessionManager.doWith {
+      session =>
+        val key = StandardFamily("Standard")("testKey")
+        key("column").set("value")
     }
 
-    sessionManager.doWith { session =>
-      val key = "Standard" | "testKey"
-      val result = session.get(key | ("column",null))
-      assertNotNull(result)
-      assertTrue(result.isDefined)
-      val row = result.get
-      assertNotNull(row.rowType)
-      assertNotNull(row.family)
-      assertNotNull(row.key)
+    sessionManager.doWith {
+      session =>
+        val key = StandardFamily("Standard")("testKey")
+        val result = session.get(key.column("column", null))
+        assertNotNull(result)
+        assertTrue(result.isDefined)
+        val row = result.get
+        assertNotNull(row.rowType)
+        assertNotNull(row.family)
+        assertNotNull(row.key)
 
-      try {
-        assertNull(row.superColumn)
-        fail("Should have thrown an exception on standard column")
-      }
-      catch {
-        case e:Exception => // ignore it
-      }
+        try {
+          assertNull(row.superColumn)
+          fail("Should have thrown an exception on standard column")
+        }
+        catch {
+          case e: Exception => // ignore it
+        }
 
-      assertNotNull(row.column)
-      assertNotNull(row.value)
-      assertNotNull(row.timestamp)
-      assertEquals("value", row.valueAs[String])
-      assertEquals("column", row.columnAs[String])
+        assertNotNull(row.column)
+        assertNotNull(row.value)
+        assertNotNull(row.timestamp)
+        assertEquals("value", row.valueAs[String])
+        assertEquals("column", row.columnAs[String])
     }
   }
 
   // create a single column, save it, and get it out
   @Test def testSetAndGetSuperColumn() {
-    import Conversions._
     val columnName = UUID.randomUUID
 
-    sessionManager.doWith { session =>
-      val superColumn = "Super" || "superKey" | 12345L
-      val column = superColumn | (columnName, "value")
-      session.insert(column)
+    sessionManager.doWith {
+      session =>
+        val superColumn = SuperFamily("Super")("superKey")(12345L)
+        val column = superColumn.column(columnName, "value")
+        session.insert(column)
     }
 
-    sessionManager.doWith { session =>
-      val superColumn = "Super" || "superKey" | 12345L
-			val cName = superColumn | columnName
-      val result = session.get(cName.asColumn)
-      assertNotNull(result)
-      assertTrue(result.isDefined)
-      val column = result.get
-      assertEquals("value", column.valueAs[String])
-      assertEquals(columnName.toString, column.columnAs[UUID].toString)
+    sessionManager.doWith {
+      session =>
+        val superColumn = SuperFamily("Super")("superKey")(12345L)
+        val cName = superColumn(columnName)
+        val result = session.get(cName.asColumn)
+        assertNotNull(result)
+        assertTrue(result.isDefined)
+        val column = result.get
+        assertEquals("value", column.valueAs[String])
+        assertEquals(columnName.toString, column.columnAs[UUID].toString)
     }
   }
 }
