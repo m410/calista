@@ -26,10 +26,11 @@ import scala.language.implicitConversions
  *
  * {{{
  * case class Entity(id:Long, name:String) extends KeyedEntity[Long]
- * object Entity extends Dao[Entity] { ...}
+ * class EntityStore extends StandardDao[Entity] { ...}
  *
  * SessionManager.doWith {session =>
- *   val entity = Entity(1,"bob")
+ *   val entityStore = new EntityStore
+ *   val entity = entityStore(1,"bob")
  * 	 entity.insert
  * 	}
  * }}}

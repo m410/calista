@@ -19,6 +19,10 @@ import util.DynamicVariable
 /**
  * A Thread Local variable used to access the SessionImpl instance.
  *
+ * Note that the Dynamic variable has a null value even thought that's not standard practice
+ * in scala.  The reason is that using an Option will create back reference to the class loader
+ * and prevent an application deployed in a servlet container from releasing it's resources.
+ *
  * @author Michael Fortin
  */
 object Calista extends DynamicVariable[Session](null)

@@ -23,8 +23,11 @@ import system.{TokenRange, FamilyDefinition, KeyspaceDefinition}
 import java.nio.ByteBuffer
 
 /**
- * The session interface for interacting with cassandra.  It's a trait so that it can be mocked
- * for testing.
+ * The session interface for interacting with cassandra.  In most cases direct use and access
+ * to this class is not necessary.
+ *
+ *
+ * For Testing it can be easily mocked.
  *
  * @author Michael Fortin
  */

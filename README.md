@@ -43,7 +43,11 @@ I'll start off with a small example and explain it after.
     val sessionManager = new SessionManager()
 
     sessionManager.doWith { session =>
-      val result = StandardColumn("Standard")("key").from("start").result
+      val result = StandardColumn("FamilyName")("key")
+          .from("columnName")
+          .to("otherColumnName")
+          .limit(20)
+          .reverse.result
 
       result.rows.foreach(c=>{
         val name = c.nameAs[String]
@@ -59,7 +63,7 @@ The doWith function is a helper function on the manager to wrap the call in a se
 automatically close it. You can manage the session yourself by calling
 sessionManager.createSession, then call session.close once finished.
 
-The next line creates a standard slice range.
+The next line creates a standard column family slice range.
 result is a ResultSet object which contains a list or rows. The resultSet has a few helpers to
 list the rows. The row itself hold the byte array returned from cassandra, which has to be
 converted back to the correct data type.
@@ -144,20 +148,20 @@ With a persistent entity defined in this way, you can now use it like this:
 ## Common Design Pattern
 
 It's fairly common to store data across multiple column families for a single entity. An
-example of this is saving a foreign key relationship or for any other lookup other than the by the key.
+example of this is saving a foreign key relationship or for any other lookup other than the by the
+column family key.
 
-case class Demo(key:String,name:String) extends StandardEntity[String]
+    case class Demo(key:String,name:String) extends StandardEntity[String]
 
-    object Demo extends StandardDao[UUID,Demo]{
+    class DemoStore extends StandardDao[UUID,Demo]{
 
-      class DemoCrudOps(d:Demo) extends CrudOps(d) {
+      implicit class DemoCrudOps(d:Demo) extends CrudOps(d) {
         override def insert = {
           val time = System.currentTimeMillis
           StanardColumn("DemoDate")("Date")(time).set(d.key)
           super.insert
         }
       }
-      override implicit def applyCrudOps(p:Demo):CrudOps = new DemoCrudOps(p)
 
       override val mapping = Mapping[Demo](
           "Demo",
@@ -181,11 +185,45 @@ Then you can use it like this.
     val listDemosInRange = Demo.listByDate(before,after)
     listDemosInRange.foreach(_.toString)
 
-Known Issues, Missing Features
+## Cassandra Query Language.
+
+There is basic support for Cassandra query language assuming the Column Family is setup correctly
+in the datastore.
+
+    import org.brzy.calista.schema.Cql
+    //...
+    sessionManager.doWith { s=>
+      val rows = Cql.query("select * from column_family where key='none'")
+    }
+
+## Creating Column Family Definitions
+
+Column Families can be created programatically by creating a Column Family Definition and saving
+it.
+
+    sessionManager.doWith { s=>
+      val famDef = new FamilyDefinition(
+        keyspace = "Test",
+        name = "create_column_family",
+        comparatorType = Option("UTF8Type") ,
+        defaultValidationClass = Option("UTF8Type"),
+        keyValidationClass = Option("UTF8Type"),
+        columnMetadata = Some(List(
+          new ColumnDefinition(
+            name = "c_name".getBytes(Charset.forName("UTF-8")),
+            validationClass = "UTF8Type",
+            indexName = None,
+            indexType = None
+          )
+        )).create
+      )
+    }
+
+
+## Known Issues, Missing Features
 
  * No support for authentication.
  * No support for secondary indexes.
  * No support for Hadoop.
- * No support for Cassandra Query Language.
- * Not able to create Column Families.
+ * Partial support for undefined column value data types.
 

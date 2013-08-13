@@ -54,6 +54,7 @@ import scala.language.{implicitConversions,reflectiveCalls}
  * @author Michael Fortin
  */
 class SessionImpl(host: Host, val ksDef: KeyspaceDefinition, val defaultConsistency: Consistency = Consistency.ONE) extends Session {
+
   private[this] val log = LoggerFactory.getLogger(classOf[SessionImpl])
   private[this] var openSock = false
   private[this] lazy val sock = new TFramedTransport(new TSocket(host.address, host.port, host.timeout))

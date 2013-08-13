@@ -18,6 +18,9 @@ package org.brzy.calsta
  * map directly to the classes in the Thrift cassandra client api but with a more hierarchical
  * layout.  The classes are for querying not reading results.
  *
+ * @todo Add examples of using a column family and the builder pattern used to access the
+ *       store.
+ *
  * @author Michael Fortin
  */
 package object schema 
